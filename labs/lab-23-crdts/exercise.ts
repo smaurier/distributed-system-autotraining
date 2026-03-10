@@ -73,6 +73,49 @@ import {
 //   - Return { converged, finalValue, replicaValues }
 
 // =============================================================================
+// Exercise 7: Split-Brain Partition Scenario
+// =============================================================================
+// TODO: Implement function simulateSplitBrain():
+//   {
+//     counterConverged: boolean;
+//     counterFinalValue: number;
+//     setConverged: boolean;
+//     addWinsSemanticsHold: boolean;
+//     setFinalValues: string[][];
+//   }
+//
+//   Simulate a realistic network partition with 3 replicas (nodeA, nodeB, nodeC)
+//   using both a GCounter and an OR-Set:
+//
+//   Phase 1 — Shared initial state:
+//     - Each node increments the GCounter once (nodeA, nodeB, nodeC)
+//     - Sync all counter replicas so they share the same state
+//     - Add 'shared-item' and 'will-conflict' to setA, then sync all set replicas
+//
+//   Phase 2 — Network partition: {A, B} isolated from {C}:
+//     Partition side {A, B}:
+//       - nodeA increments counter 2 more times, nodeB increments 3 more times
+//       - setA adds 'only-in-AB-partition', setB adds 'from-nodeB'
+//       - A and B sync with each other (counter + set)
+//       - setA adds 'will-conflict' again (new tag — concurrent with C's remove)
+//       - A and B sync sets again
+//     Partition side {C}:
+//       - nodeC increments counter 4 more times
+//       - setC adds 'only-in-C-partition'
+//       - setC removes 'will-conflict' (only removes locally observed tags)
+//       - setC adds 'c-added'
+//       - setC removes 'shared-item'
+//
+//   Phase 3 — Reconnect: full pairwise merge of all replicas (A<->C, B<->C, A<->B)
+//
+//   Phase 4 — Verify:
+//     - counterConverged: all 3 replicas have the same counter value
+//     - counterFinalValue: should be 12 (nodeA:3 + nodeB:4 + nodeC:5)
+//     - setConverged: all 3 replicas have identical sorted set values
+//     - addWinsSemanticsHold: 'will-conflict' is present (A's concurrent add wins over C's remove)
+//     - setFinalValues: sorted values() arrays from all 3 replicas
+
+// =============================================================================
 // Tests
 // =============================================================================
 
@@ -222,6 +265,30 @@ await test('Ex6: multi-replica simulation converges', () => {
   assertEqual(result.finalValue, 10); // 3 + 2 + 5
   assertEqual(result.replicaValues[0], result.replicaValues[1]);
   assertEqual(result.replicaValues[1], result.replicaValues[2]);
+});
+
+// --- Exercise 7 Tests ---
+await test('Ex7: split-brain G-Counter converges after reconnect', () => {
+  const result = simulateSplitBrain();
+  assertEqual(result.counterConverged, true);
+  assertEqual(result.counterFinalValue, 12); // nodeA:3 + nodeB:4 + nodeC:5
+});
+
+await test('Ex7: split-brain OR-Set converges after reconnect', () => {
+  const result = simulateSplitBrain();
+  assertEqual(result.setConverged, true);
+});
+
+await test('Ex7: split-brain OR-Set add-wins semantics hold', () => {
+  const result = simulateSplitBrain();
+  assertEqual(result.addWinsSemanticsHold, true);
+  // 'will-conflict' must be present: A re-added it concurrently with C's remove
+  const finalSet = result.setFinalValues[0];
+  assert(finalSet.includes('will-conflict'), 'will-conflict should survive (add-wins)');
+  assert(finalSet.includes('only-in-AB-partition'), 'AB-partition item should be present');
+  assert(finalSet.includes('only-in-C-partition'), 'C-partition item should be present');
+  assert(finalSet.includes('c-added'), 'c-added should be present');
+  assert(finalSet.includes('from-nodeB'), 'from-nodeB should be present');
 });
 
 summary();

@@ -260,6 +260,123 @@ function simulateMultiReplica(): { converged: boolean; finalValue: number; repli
 }
 
 // =============================================================================
+// Exercise 7: Split-Brain Partition Scenario
+// =============================================================================
+
+function simulateSplitBrain(): {
+  counterConverged: boolean;
+  counterFinalValue: number;
+  setConverged: boolean;
+  addWinsSemanticsHold: boolean;
+  setFinalValues: string[][];
+} {
+  // --- Phase 1: Create 3 replicas that share initial state ---
+  let counterA = new GCounter();
+  let counterB = new GCounter();
+  let counterC = new GCounter();
+
+  let setA = new ORSet<string>();
+  let setB = new ORSet<string>();
+  let setC = new ORSet<string>();
+
+  // Shared initial state: all nodes see the same baseline
+  counterA.increment('nodeA');
+  counterB.increment('nodeB');
+  counterC.increment('nodeC');
+
+  // Sync all replicas so they share the initial state
+  counterA = counterA.merge(counterB).merge(counterC);
+  counterB = counterB.merge(counterA);
+  counterC = counterC.merge(counterA);
+
+  setA.add('shared-item');
+  setA.add('will-conflict');
+  // Sync sets
+  setB = setA.merge(setB);
+  setC = setA.merge(setC);
+  setA = setA.merge(setB); // no-op, just for symmetry
+
+  // --- Phase 2: Network partition — {A, B} isolated from {C} ---
+  // Partition side {A, B}: concurrent writes
+  counterA.increment('nodeA');
+  counterA.increment('nodeA');
+  counterB.increment('nodeB');
+  counterB.increment('nodeB');
+  counterB.increment('nodeB');
+
+  setA.add('only-in-AB-partition');
+  setB.add('from-nodeB');
+  // nodeA and nodeB can still sync with each other during partition
+  counterA = counterA.merge(counterB);
+  counterB = counterB.merge(counterA);
+  setA = setA.merge(setB);
+  setB = setB.merge(setA);
+
+  // Partition side {C}: concurrent writes
+  counterC.increment('nodeC');
+  counterC.increment('nodeC');
+  counterC.increment('nodeC');
+  counterC.increment('nodeC');
+
+  setC.add('only-in-C-partition');
+  // Concurrent add of 'will-conflict' on C side (C already has it from initial sync)
+  // then C removes it — but A/B still have their original tags
+  setC.remove('will-conflict');
+  // C also adds a new item then removes a different one
+  setC.add('c-added');
+  setC.remove('shared-item');
+
+  // Meanwhile, A adds 'will-conflict' again with a NEW tag (concurrent with C's remove)
+  setA.add('will-conflict');
+  // Sync A<->B within partition
+  setA = setA.merge(setB);
+  setB = setB.merge(setA);
+
+  // --- Phase 3: Reconnect — merge all states pairwise ---
+  // Full mesh merge: A<->C, B<->C, A<->B
+  counterA = counterA.merge(counterC);
+  counterC = counterC.merge(counterA);
+  counterB = counterB.merge(counterC);
+  counterC = counterC.merge(counterB);
+  counterA = counterA.merge(counterB);
+  counterB = counterB.merge(counterA);
+
+  setA = setA.merge(setC);
+  setC = setC.merge(setA);
+  setB = setB.merge(setC);
+  setC = setC.merge(setB);
+  setA = setA.merge(setB);
+  setB = setB.merge(setA);
+
+  // --- Phase 4: Assert convergence ---
+  const counterValues = [counterA.value(), counterB.value(), counterC.value()];
+  const counterConverged =
+    counterValues[0] === counterValues[1] && counterValues[1] === counterValues[2];
+  // Expected: A=1+2=3, B=1+3=4, C=1+4=5 -> total = 3+4+5 = 12
+  const counterFinalValue = counterValues[0];
+
+  const sortedVals = (s: ORSet<string>) => s.values().slice().sort();
+  const setValuesA = sortedVals(setA);
+  const setValuesB = sortedVals(setB);
+  const setValuesC = sortedVals(setC);
+  const setConverged =
+    JSON.stringify(setValuesA) === JSON.stringify(setValuesB) &&
+    JSON.stringify(setValuesB) === JSON.stringify(setValuesC);
+
+  // Add-wins: 'will-conflict' was removed by C but re-added by A concurrently
+  // The new tag from A's add was never observed by C's remove, so it must survive
+  const addWinsSemanticsHold = setA.has('will-conflict');
+
+  return {
+    counterConverged,
+    counterFinalValue,
+    setConverged,
+    addWinsSemanticsHold,
+    setFinalValues: [setValuesA, setValuesB, setValuesC],
+  };
+}
+
+// =============================================================================
 // Tests
 // =============================================================================
 
@@ -409,6 +526,30 @@ await test('Ex6: multi-replica simulation converges', () => {
   assertEqual(result.finalValue, 10); // 3 + 2 + 5
   assertEqual(result.replicaValues[0], result.replicaValues[1]);
   assertEqual(result.replicaValues[1], result.replicaValues[2]);
+});
+
+// --- Exercise 7 Tests ---
+await test('Ex7: split-brain G-Counter converges after reconnect', () => {
+  const result = simulateSplitBrain();
+  assertEqual(result.counterConverged, true);
+  assertEqual(result.counterFinalValue, 12); // nodeA:3 + nodeB:4 + nodeC:5
+});
+
+await test('Ex7: split-brain OR-Set converges after reconnect', () => {
+  const result = simulateSplitBrain();
+  assertEqual(result.setConverged, true);
+});
+
+await test('Ex7: split-brain OR-Set add-wins semantics hold', () => {
+  const result = simulateSplitBrain();
+  assertEqual(result.addWinsSemanticsHold, true);
+  // 'will-conflict' must be present: A re-added it concurrently with C's remove
+  const finalSet = result.setFinalValues[0];
+  assert(finalSet.includes('will-conflict'), 'will-conflict should survive (add-wins)');
+  assert(finalSet.includes('only-in-AB-partition'), 'AB-partition item should be present');
+  assert(finalSet.includes('only-in-C-partition'), 'C-partition item should be present');
+  assert(finalSet.includes('c-added'), 'c-added should be present');
+  assert(finalSet.includes('from-nodeB'), 'from-nodeB should be present');
 });
 
 summary();

@@ -224,6 +224,70 @@ Cette page rassemble les livres, papiers, outils et ressources communautaires es
 
 ---
 
+## Trade-off Cheat Sheet — Quel pattern pour quel cas ?
+
+Ce tableau synthetise les decisions d'architecture les plus frequentes. Utilisez-le comme **reflexe de decision**, pas comme regle absolue — chaque systeme a ses contraintes specifiques.
+
+### Consistency : AP vs CP ?
+
+| Use case | Choix | Justification |
+|----------|-------|---------------|
+| Panier e-commerce | **AP** (eventual) | Perdre un ajout au panier est rattrapable, l'indisponibilite fait perdre le client |
+| Paiement / transaction financiere | **CP** (strong) | Un double debit est inacceptable, mieux vaut refuser temporairement |
+| Catalogue produits | **AP** (eventual) | Un prix affiche avec 2s de retard est acceptable |
+| Authentification / session | **CP** (strong) | Un token revoque doit etre refuse immediatement |
+| Compteur de likes / vues | **AP** (CRDT) | La precision exacte n'est pas critique, la disponibilite si |
+| Stock / inventaire | **CP** (strong) | Survendre un produit coute cher (compensation, client mecontent) |
+| Fil d'actualite / feed | **AP** (eventual) | Afficher un post avec quelques secondes de retard est acceptable |
+| Reservation (hotel, vol) | **CP** (strong) | Double reservation = conflit operationnel couteux |
+
+### Communication : Synchrone vs Asynchrone ?
+
+| Use case | Choix | Justification |
+|----------|-------|---------------|
+| Requete utilisateur (lecture) | **Synchrone** (REST/gRPC) | L'utilisateur attend une reponse immediate |
+| Envoi d'email / notification | **Asynchrone** (message queue) | Fire-and-forget, pas besoin de bloquer l'appelant |
+| Orchestration de commande | **Saga asynchrone** | Transactions longues, compensations necessaires |
+| Validation en temps reel | **Synchrone** (gRPC) | Latence critique, reponse < 100ms attendue |
+| Synchronisation inter-services | **Event-driven** | Decouplage fort, chaque service reagit a son rythme |
+| Batch / ETL | **Stream processing** | Volume eleve, traitement continu sans bloquer |
+
+### Resilience : Quel pattern appliquer ?
+
+| Probleme | Pattern | Quand l'utiliser |
+|----------|---------|-----------------|
+| Service externe instable | **Circuit Breaker** | Taux d'erreur > 50% sur fenetre glissante |
+| Pics de charge | **Rate Limiting** (token bucket) | Proteger un service des abus ou de la surcharge |
+| Requete qui peut echouer | **Retry + Exponential Backoff + Jitter** | Erreurs transitoires (503, timeout, reseau) |
+| Requete qui ne DOIT PAS etre rejouee | **Idempotency Key** | Paiements, creations de ressources |
+| Service lent qui bloque tout | **Bulkhead** + **Timeout** | Isolation des pools de connexions |
+| Cascade de pannes | **Circuit Breaker** + **Fallback** (cache, defaut) | Degradation gracieuse plutot que crash total |
+| Retry storms (tout le monde retry en meme temps) | **Retry Budget** | Limiter le nombre total de retries par fenetre |
+
+### Donnees : Quel pattern de persistance ?
+
+| Besoin | Pattern | Exemple |
+|--------|---------|---------|
+| Audit trail complet | **Event Sourcing** | Historique de toutes les modifications d'une commande |
+| Lecture haute performance + ecriture complexe | **CQRS** | Separation read model (denormalise) / write model (normalise) |
+| Garantie de publication d'evenements | **Outbox Pattern** | Ecriture atomique en base + publication asynchrone |
+| Resolution de conflits sans coordination | **CRDTs** | Compteurs distribues, sets partages (collab editing) |
+| Transaction multi-services | **Saga** (orchestration ou choreographie) | Commande = reserve stock + paie + confirme |
+| Coherence forte multi-nœuds | **Consensus (Raft)** | Leader election, config distribuee, distributed lock |
+
+::: warning Rappel fondamental
+Il n'y a pas de solution universelle. Chaque choix est un **compromis** :
+- **AP** = disponible mais donnees potentiellement stale
+- **CP** = coherent mais potentiellement indisponible pendant une partition
+- **Synchrone** = simple mais couplage fort
+- **Asynchrone** = decoupage mais complexite operationnelle
+- **Event Sourcing** = audit parfait mais queries complexes
+
+La bonne question n'est jamais "quel est le meilleur pattern ?" mais "**quel compromis est acceptable pour ce use case precis ?**"
+:::
+
+---
+
 ::: tip Comment utiliser cette page
 Ne lisez pas tout d'un coup. Utilisez cette page comme reference au fil de votre progression :
 1. **Modules 00-04** : lisez les Chapitres 1, 4 et 8 de DDIA + Chapitres 1-3 de Building Microservices
