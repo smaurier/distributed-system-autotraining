@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAP Theorem - Visualisation Interactive</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+  h1{text-align:center;padding:18px;color:#00d4ff;font-size:1.5rem;text-shadow:0 0 12px rgba(0,212,255,.3)}
+  .container{display:flex;flex-wrap:wrap;gap:16px;padding:0 20px 20px;max-width:1400px;margin:0 auto}
+  .panel{background:#16213e;border-radius:12px;padding:16px;border:1px solid #0f3460}
+  .left{flex:1 1 500px;display:flex;flex-direction:column;gap:16px}
+  .right{flex:1 1 380px;display:flex;flex-direction:column;gap:16px}
+  svg#capSvg{width:100%;height:380px;cursor:pointer}
+  .tri-edge{stroke:#0f3460;stroke-width:2;fill:none}
+  .tri-zone{cursor:pointer;transition:all .3s}
+  .tri-zone:hover{filter:brightness(1.3)}
+  .vertex-label{font-size:18px;font-weight:bold;fill:#00d4ff;text-anchor:middle;pointer-events:none}
+  .zone-label{font-size:13px;fill:#e0e0e0;text-anchor:middle;pointer-events:none}
+  .selected-zone{filter:brightness(1.4) drop-shadow(0 0 8px rgba(0,212,255,.5))}
+  .info-card{background:#1a1a2e;border:1px solid #0f3460;border-radius:8px;padding:12px;margin-top:8px}
+  .info-card h3{color:#ffa500;font-size:.95rem;margin-bottom:6px}
+  .info-card p{font-size:.82rem;color:#aaa;line-height:1.5}
+  .info-card .sys{display:inline-block;background:#0f3460;color:#00d4ff;padding:2px 8px;border-radius:4px;font-size:.78rem;margin:2px}
+  .slider-group{margin:12px 0}
+  .slider-group label{display:block;color:#888;font-size:.82rem;margin-bottom:6px}
+  .slider-group input[type=range]{width:100%;accent-color:#00d4ff}
+  .partition-viz{position:relative;height:140px;background:#1a1a2e;border-radius:8px;overflow:hidden;border:1px solid #0f3460}
+  .pv-node{position:absolute;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:bold;transition:all .6s}
+  .pv-line{position:absolute;height:2px;transition:all .6s}
+  .pv-wall{position:absolute;top:0;bottom:0;width:3px;background:#ff4444;left:50%;transform:translateX(-50%);opacity:0;transition:opacity .5s}
+  .pv-wall.show{opacity:1}
+  table.pacelc{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}
+  table.pacelc th,table.pacelc td{padding:8px;border:1px solid #0f3460;text-align:center}
+  table.pacelc th{background:#0f3460;color:#00d4ff}
+  table.pacelc tr.highlight{background:#1e2a4a}
+  .btn{background:#0f3460;color:#00d4ff;border:1px solid #00d4ff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .2s;margin:4px}
+  .btn:hover{background:#00d4ff;color:#1a1a2e}
+  .btn.active{background:#00d4ff;color:#1a1a2e}
+  .choice-btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+</style>
+</head>
+<body>
+<h1>Theoreme CAP &amp; PACELC</h1>
+<div class="container">
+  <div class="left">
+    <div class="panel">
+      <svg id="capSvg"></svg>
+      <div class="choice-btns">
+        <button class="btn" data-pair="CP" onclick="selectPair('CP')">CP</button>
+        <button class="btn" data-pair="AP" onclick="selectPair('AP')">AP</button>
+        <button class="btn" data-pair="CA" onclick="selectPair('CA')">CA (theorique)</button>
+      </div>
+      <div id="pairInfo" class="info-card" style="display:none"></div>
+    </div>
+    <div class="panel">
+      <h3 style="color:#ffa500;font-size:.95rem">Simulation de partition</h3>
+      <div class="slider-group">
+        <label>Probabilite de partition : <span id="partProb">0</span>%</label>
+        <input type="range" min="0" max="100" value="0" id="partSlider" oninput="updatePartition()">
+      </div>
+      <div class="partition-viz" id="partViz"></div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="panel">
+      <h3 style="color:#ffa500;font-size:.95rem;margin-bottom:8px">Extension PACELC</h3>
+      <p style="font-size:.8rem;color:#888;margin-bottom:8px">Si Partition : choisir C ou A. Sinon (Else) : choisir C ou L (Latence).</p>
+      <table class="pacelc" id="pacTable">
+        <thead><tr><th>Systeme</th><th>Si P</th><th>Sinon (E)</th><th>Type</th></tr></thead>
+        <tbody>
+          <tr data-type="PA/EL"><td>Cassandra</td><td>A</td><td>L</td><td>PA/EL</td></tr>
+          <tr data-type="PA/EC"><td>DynamoDB</td><td>A</td><td>C</td><td>PA/EC</td></tr>
+          <tr data-type="PC/EL"><td>PNUTS</td><td>C</td><td>L</td><td>PC/EL</td></tr>
+          <tr data-type="PC/EC"><td>ZooKeeper</td><td>C</td><td>C</td><td>PC/EC</td></tr>
+          <tr data-type="PA/EL"><td>Riak</td><td>A</td><td>L</td><td>PA/EL</td></tr>
+          <tr data-type="PC/EC"><td>etcd</td><td>C</td><td>C</td><td>PC/EC</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel" id="detailPanel">
+      <h3 style="color:#ffa500;font-size:.95rem;margin-bottom:8px">Exemples concrets</h3>
+      <div id="examples">
+        <p style="color:#888;font-size:.82rem">Cliquez sur une combinaison CAP pour voir les exemples.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const SVG_NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('capSvg');
+const W=500,H=380;
+svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+const vC={x:W/2,y:50},vA={x:W/2-180,y:330},vP={x:W/2+180,y:330};
+const pairs={
+  CP:{color:'#6c5ce7',vertices:['C','P'],desc:'Coherence + Tolerance aux partitions. Le systeme refuse de repondre (sacrifie la disponibilite) pour garantir la coherence.',systems:['ZooKeeper','etcd','HBase','MongoDB (mode par defaut)','Redis Sentinel']},
+  AP:{color:'#00b894',vertices:['A','P'],desc:'Disponibilite + Tolerance aux partitions. Le systeme repond toujours, meme avec des donnees potentiellement obsoletes.',systems:['Cassandra','DynamoDB','CouchDB','Riak','DNS']},
+  CA:{color:'#fdcb6e',vertices:['C','A'],desc:'Coherence + Disponibilite. Possible uniquement sans partition reseau (systeme non distribue ou reseau parfait).',systems:['PostgreSQL (mono-noeud)','MySQL (mono-noeud)','SQLite']}
+};
+let currentPair=null;
+
+function drawTriangle(){
+  svg.innerHTML='';
+  // zones
+  const zones=[
+    {id:'CP',path:`M${vC.x},${vC.y} L${(vC.x+vA.x+vP.x)/3},${(vC.y+vA.y+vP.y)/3} L${vP.x},${vP.y} Z`,base:'#6c5ce7'},
+    {id:'AP',path:`M${vA.x},${vA.y} L${(vC.x+vA.x+vP.x)/3},${(vC.y+vA.y+vP.y)/3} L${vP.x},${vP.y} Z`,base:'#00b894'},
+    {id:'CA',path:`M${vC.x},${vC.y} L${(vC.x+vA.x+vP.x)/3},${(vC.y+vA.y+vP.y)/3} L${vA.x},${vA.y} Z`,base:'#fdcb6e'}
+  ];
+  zones.forEach(z=>{
+    const p=document.createElementNS(SVG_NS,'path');
+    p.setAttribute('d',z.path);
+    p.setAttribute('fill',z.base);
+    p.setAttribute('fill-opacity',currentPair===z.id?0.4:0.12);
+    p.classList.add('tri-zone');
+    if(currentPair===z.id) p.classList.add('selected-zone');
+    p.onclick=()=>selectPair(z.id);
+    svg.appendChild(p);
+  });
+  // edges
+  [[vC,vA],[vA,vP],[vP,vC]].forEach(([a,b])=>{
+    const l=document.createElementNS(SVG_NS,'line');
+    l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);l.setAttribute('x2',b.x);l.setAttribute('y2',b.y);
+    l.classList.add('tri-edge');
+    if(currentPair){
+      const pair=pairs[currentPair];
+      const aLabel=a===vC?'C':a===vA?'A':'P';
+      const bLabel=b===vC?'C':b===vA?'A':'P';
+      if(pair.vertices.includes(aLabel)&&pair.vertices.includes(bLabel)){
+        l.setAttribute('stroke',pair.color);l.setAttribute('stroke-width',4);
+      }
+    }
+    svg.appendChild(l);
+  });
+  // zone labels
+  const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+  [{pos:mid(vC,vP),txt:'CP',dy:-10},{pos:mid(vA,vP),txt:'AP',dy:20},{pos:mid(vC,vA),txt:'CA',dy:-10,dx:-15}].forEach(z=>{
+    const t=document.createElementNS(SVG_NS,'text');
+    t.setAttribute('x',z.pos.x+(z.dx||0));t.setAttribute('y',z.pos.y+(z.dy||0));
+    t.classList.add('zone-label');t.textContent=z.txt;
+    svg.appendChild(t);
+  });
+  // vertices
+  [{pos:vC,label:'Coherence (C)'},{pos:vA,label:'Disponibilite (A)'},{pos:vP,label:'Partitions (P)'}].forEach(v=>{
+    const c=document.createElementNS(SVG_NS,'circle');
+    c.setAttribute('cx',v.pos.x);c.setAttribute('cy',v.pos.y);c.setAttribute('r',12);
+    c.setAttribute('fill','#16213e');c.setAttribute('stroke','#00d4ff');c.setAttribute('stroke-width',2);
+    svg.appendChild(c);
+    const t=document.createElementNS(SVG_NS,'text');
+    t.setAttribute('x',v.pos.x);t.setAttribute('y',v.pos===vC?v.pos.y-20:v.pos.y+30);
+    t.classList.add('vertex-label');t.textContent=v.label;
+    svg.appendChild(t);
+  });
+}
+
+function selectPair(id){
+  currentPair=id;
+  drawTriangle();
+  document.querySelectorAll('.choice-btns .btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.pair===id);
+  });
+  const p=pairs[id];
+  const info=document.getElementById('pairInfo');
+  info.style.display='block';
+  info.innerHTML=`<h3>${id}</h3><p>${p.desc}</p><div style="margin-top:8px">${p.systems.map(s=>`<span class="sys">${s}</span>`).join(' ')}</div>`;
+  // highlight PACELC
+  const rows=document.querySelectorAll('#pacTable tbody tr');
+  rows.forEach(r=>{
+    const type=r.dataset.type;
+    const match=(id==='CP'&&type.startsWith('PC'))||(id==='AP'&&type.startsWith('PA'));
+    r.classList.toggle('highlight',match);
+  });
+  updatePartition();
+}
+
+// partition simulation
+function updatePartition(){
+  const prob=+document.getElementById('partSlider').value;
+  document.getElementById('partProb').textContent=prob;
+  const viz=document.getElementById('partViz');
+  const hasPartition=prob>50;
+  viz.innerHTML='';
+  const wall=document.createElement('div');
+  wall.className='pv-wall'+(hasPartition?' show':'');
+  viz.appendChild(wall);
+  const positions=[[25,50],[35,25],[35,75],[75,50],[65,25],[65,75]];
+  positions.forEach((pos,i)=>{
+    const nd=document.createElement('div');
+    nd.className='pv-node';
+    const isLeft=pos[0]<50;
+    let color='#00d4ff';
+    if(hasPartition&&currentPair==='CP'&&!isLeft) color='#ff4444';
+    if(hasPartition&&currentPair==='AP') color='#ffa500';
+    nd.style.cssText=`left:${pos[0]}%;top:${pos[1]}%;background:${color};transform:translate(-50%,-50%)`;
+    nd.textContent=`N${i+1}`;
+    viz.appendChild(nd);
+  });
+  const ex=document.getElementById('examples');
+  if(hasPartition&&currentPair){
+    const txt=currentPair==='CP'?'Les noeuds du cote minoritaire refusent les ecritures pour maintenir la coherence.':
+      currentPair==='AP'?'Tous les noeuds continuent de repondre mais peuvent diverger (eventual consistency).':
+      'Impossible en pratique : sans tolerance aux partitions, le systeme tombe.';
+    ex.innerHTML=`<p style="color:#e0e0e0;font-size:.85rem">${txt}</p>`;
+  }
+}
+
+drawTriangle();
+</script>
+</body>
+</html>

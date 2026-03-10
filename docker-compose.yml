@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: ds-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ds-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: distributed
+      POSTGRES_PASSWORD: distributed
+      POSTGRES_DB: distributed_systems
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U distributed']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: ./demo-app
+      dockerfile: Dockerfile
+    container_name: ds-api-gateway
+    ports:
+      - '3000:3000'
+    environment:
+      SERVICE_NAME: api-gateway
+      PORT: 3000
+      ORDER_SERVICE_URL: http://order-service:3001
+      PAYMENT_SERVICE_URL: http://payment-service:3002
+      INVENTORY_SERVICE_URL: http://inventory-service:3003
+      NOTIFICATION_SERVICE_URL: http://notification-service:3004
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://distributed:distributed@postgres:5432/distributed_systems
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: ./demo-app
+      dockerfile: Dockerfile
+    container_name: ds-order-service
+    ports:
+      - '3001:3001'
+    environment:
+      SERVICE_NAME: order-service
+      PORT: 3001
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://distributed:distributed@postgres:5432/distributed_systems
+      PAYMENT_SERVICE_URL: http://payment-service:3002
+      INVENTORY_SERVICE_URL: http://inventory-service:3003
+      NOTIFICATION_SERVICE_URL: http://notification-service:3004
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  payment-service:
+    build:
+      context: ./demo-app
+      dockerfile: Dockerfile
+    container_name: ds-payment-service
+    ports:
+      - '3002:3002'
+    environment:
+      SERVICE_NAME: payment-service
+      PORT: 3002
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://distributed:distributed@postgres:5432/distributed_systems
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  inventory-service:
+    build:
+      context: ./demo-app
+      dockerfile: Dockerfile
+    container_name: ds-inventory-service
+    ports:
+      - '3003:3003'
+    environment:
+      SERVICE_NAME: inventory-service
+      PORT: 3003
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://distributed:distributed@postgres:5432/distributed_systems
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: ./demo-app
+      dockerfile: Dockerfile
+    container_name: ds-notification-service
+    ports:
+      - '3004:3004'
+    environment:
+      SERVICE_NAME: notification-service
+      PORT: 3004
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://distributed:distributed@postgres:5432/distributed_systems
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+volumes:
+  redis-data:
+  postgres-data:
