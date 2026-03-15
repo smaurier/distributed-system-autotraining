@@ -25,16 +25,16 @@ A la fin de ce module, vous serez capable de :
 
 Avant de commencer ce cours, assurez-vous de maitriser les elements suivants :
 
-### Node.js 20+
+### Node.js 22 LTS
 
 ```bash
 # Verifier votre version
 node --version
-# v20.x.x ou superieur requis
+# v22.x.x ou superieur requis
 
 # Installer via nvm (recommande)
-nvm install 20
-nvm use 20
+nvm install 22
+nvm use 22
 ```
 
 ### TypeScript (bases)
