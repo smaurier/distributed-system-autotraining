@@ -307,37 +307,48 @@ interface MessageBroker {
 
 class PollingOutboxPublisher {
   private running: boolean = false;
-  private pollIntervalMs: number;
+  private delay: number;
+  private readonly minDelay: number;
+  private readonly maxDelay: number;
   private batchSize: number;
   private publishedCount: number = 0;
 
   constructor(
     private db: Database,
     private broker: MessageBroker,
-    options: { pollIntervalMs?: number; batchSize?: number } = {}
+    options: { minDelayMs?: number; maxDelayMs?: number; batchSize?: number } = {}
   ) {
-    this.pollIntervalMs = options.pollIntervalMs ?? 1000;
+    this.minDelay = options.minDelayMs ?? 500;
+    this.maxDelay = options.maxDelayMs ?? 30_000;
+    this.delay = this.minDelay;
     this.batchSize = options.batchSize ?? 100;
   }
 
   async start(): Promise<void> {
     this.running = true;
     console.log(
-      `[PollingPublisher] Started (interval: ${this.pollIntervalMs}ms)`
+      `[PollingPublisher] Started (initial delay: ${this.delay}ms)`
     );
+    this.pollOutbox();
+  }
 
-    while (this.running) {
-      try {
-        const published = await this.pollAndPublish();
-        if (published > 0) {
-          console.log(`[PollingPublisher] Published ${published} messages`);
-        }
-      } catch (error) {
-        console.error(`[PollingPublisher] Error: ${error}`);
+  private async pollOutbox(): Promise<void> {
+    if (!this.running) return;
+
+    try {
+      const published = await this.pollAndPublish();
+      if (published > 0) {
+        console.log(`[PollingPublisher] Published ${published} messages`);
+        this.delay = this.minDelay; // reset on success
+      } else {
+        this.delay = Math.min(this.delay * 2, this.maxDelay); // backoff up to maxDelay
       }
-
-      await new Promise((r) => setTimeout(r, this.pollIntervalMs));
+    } catch (error) {
+      console.error(`[PollingPublisher] Error: ${error}`);
+      this.delay = Math.min(this.delay * 2, this.maxDelay);
     }
+
+    setTimeout(() => this.pollOutbox(), this.delay);
   }
 
   stop(): void {
@@ -396,6 +407,8 @@ class PollingOutboxPublisher {
   }
 }
 ```
+
+> **Alternative : CDC (Change Data Capture)** — Plutot que de poll la table outbox, des outils comme Debezium lisent directement le WAL (Write-Ahead Log) de PostgreSQL et publient les evenements dans Kafka. Zero polling, latence sub-seconde, mais plus d'infrastructure a operer.
 
 ---
 

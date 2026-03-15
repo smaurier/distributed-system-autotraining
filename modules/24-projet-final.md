@@ -669,6 +669,41 @@ class CorrelationContext {
 }
 ```
 
+#### AsyncLocalStorage pour la propagation de contexte
+
+AsyncLocalStorage permet de propager un contexte (requestId, traceId, userId) a travers toute la chaine d'appels asynchrones sans passer explicitement l'objet request. C'est le pattern standard pour le distributed tracing et le logging structure dans les architectures microservices Node.js.
+
+```typescript
+import { AsyncLocalStorage } from 'node:async_hooks';
+
+interface RequestContext {
+  requestId: string;
+  userId?: string;
+  traceId: string;
+}
+
+export const asyncLocalStorage = new AsyncLocalStorage<RequestContext>();
+
+// Middleware Express/Fastify
+app.use((req, res, next) => {
+  const ctx: RequestContext = {
+    requestId: req.headers['x-request-id'] as string ?? randomUUID(),
+    traceId: req.headers['x-trace-id'] as string ?? randomUUID(),
+    userId: req.user?.id,
+  };
+  asyncLocalStorage.run(ctx, next);
+});
+
+// N'importe ou dans le code, sans passer req en parametre
+function getRequestContext(): RequestContext | undefined {
+  return asyncLocalStorage.getStore();
+}
+```
+
+:::tip
+Combinez `AsyncLocalStorage` avec le `CorrelationContext` ci-dessus : le middleware injecte le correlation ID dans l'`AsyncLocalStorage`, et chaque service, logger ou appel HTTP downstream peut le recuperer via `getRequestContext()` sans jamais recevoir l'objet `req` en parametre. C'est la base du structured logging et du distributed tracing dans Node.js.
+:::
+
 ### Exigence 8 : Health Checks
 
 **Module associe** : 09
