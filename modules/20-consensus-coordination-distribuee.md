@@ -8,21 +8,21 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Definir le probleme du consensus et expliquer pourquoi il est fondamental dans les systemes distribues
-- Resumer le resultat d'impossibilite FLP et ses implications pratiques
-- Decrire le protocole Raft en detail : election de leader, replication de log, securite
+- Définir le problème du consensus et expliquer pourquoi il est fondamental dans les systèmes distribues
+- Resumer le résultat d'impossibilite FLP et ses implications pratiques
+- Decrire le protocole Raft en detail : election de leader, replication de log, sécurité
 - Implementer une simulation de l'election de leader Raft en TypeScript
 - Implementer une simulation de la replication de log Raft en TypeScript
-- Expliquer pourquoi les verrous distribues naifs echouent face aux partitions reseau
+- Expliquer pourquoi les verrous distribues naifs echouent face aux partitions réseau
 - Decrire l'algorithme Redlock et ses limites
-- Implementer un mecanisme de fencing tokens en TypeScript
+- Implementer un mécanisme de fencing tokens en TypeScript
 - Identifier les cas d'usage pratiques du consensus : election de leader, configuration, coordination
 
 ---
 
-## Le probleme du consensus
+## Le problème du consensus
 
-Dans un systeme distribue, le **consensus** est le probleme d'amener un ensemble de noeuds a se mettre d'accord sur une valeur unique, meme en presence de pannes.
+Dans un système distribue, le **consensus** est le problème d'amener un ensemble de noeuds a se mettre d'accord sur une valeur unique, même en presence de pannes.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -51,19 +51,19 @@ Dans un systeme distribue, le **consensus** est le probleme d'amener un ensemble
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Pourquoi le consensus est difficile : le resultat FLP
+### Pourquoi le consensus est difficile : le résultat FLP
 
-:::warning Resultat d'impossibilite FLP (1985)
-Fischer, Lynch et Paterson ont prouve qu'il est **impossible** de garantir le consensus dans un systeme asynchrone si meme un seul processus peut tomber en panne. En pratique, cela signifie que tout protocole de consensus doit faire des compromis : utiliser des timeouts, accepter un modele partiellement synchrone, ou renoncer a la terminaison garantie.
+:::warning Résultat d'impossibilite FLP (1985)
+Fischer, Lynch et Paterson ont prouve qu'il est **impossible** de garantir le consensus dans un système asynchrone si même un seul processus peut tomber en panne. En pratique, cela signifie que tout protocole de consensus doit faire des compromis : utiliser des timeouts, accepter un modèle partiellement synchrone, ou renoncer à la terminaison garantie.
 :::
 
-Ce resultat ne rend pas le consensus impossible en pratique. Il signifie que les algorithmes reels (Paxos, Raft, Zab) reposent sur des hypotheses de timing pour progresser, tout en garantissant la securite (agreement + validity) dans tous les cas.
+Ce résultat ne rend pas le consensus impossible en pratique. Il signifie que les algorithmes réels (Paxos, Raft, Zab) reposent sur des hypotheses de timing pour progresser, tout en garantissant la sécurité (agreement + validity) dans tous les cas.
 
 ---
 
 ## Paxos : un bref apercu
 
-Paxos, invente par Leslie Lamport en 1989, est l'algorithme de consensus historique de reference.
+Paxos, invente par Leslie Lamport en 1989, est l'algorithme de consensus historique de référence.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -95,10 +95,10 @@ Raft a ete concu explicitement pour etre **plus comprehensible** que Paxos tout 
 
 ## Le protocole Raft en detail
 
-Raft decompose le consensus en trois sous-problemes independants :
+Raft decompose le consensus en trois sous-problèmes independants :
 1. **Election de leader** — choisir un noeud coordinateur
 2. **Replication de log** — le leader distribue les entrees aux followers
-3. **Securite** — garantir que les logs restent coherents
+3. **Sécurité** — garantir que les logs restent coherents
 
 ### Etats d'un noeud Raft
 
@@ -341,7 +341,7 @@ simulateElection();
 ```
 
 :::tip Timeout aleatoire
-Le timeout d'election est aleatoire (entre 150ms et 300ms) pour reduire les risques de **split vote** : si tous les noeuds avaient le meme timeout, ils demarreraient tous une election en meme temps.
+Le timeout d'election est aleatoire (entre 150ms et 300ms) pour reduire les risques de **split vote** : si tous les noeuds avaient le même timeout, ils demarreraient tous une election en même temps.
 :::
 
 ---
@@ -554,17 +554,17 @@ simulateReplication();
 
 ---
 
-## Securite dans Raft
+## Sécurité dans Raft
 
-Raft garantit deux proprietes de securite essentielles :
+Raft garantit deux propriétés de sécurité essentielles :
 
 ### Election Restriction
 
-Un candidat ne peut etre elu que si son log est **au moins aussi a jour** que celui de la majorite. Cela empeche un noeud avec un log incomplet de devenir leader et d'ecraser des entrees deja commitees.
+Un candidat ne peut etre elu que si son log est **au moins aussi a jour** que celui de la majorite. Cela empeche un noeud avec un log incomplet de devenir leader et d'ecraser des entrees déjà commitees.
 
 ### Log Matching Property
 
-Si deux logs contiennent une entree avec le meme index et le meme terme, alors toutes les entrees precedentes sont identiques. Cette propriete est maintenue par la verification `prevLogIndex` / `prevLogTerm` dans `AppendEntries`.
+Si deux logs contiennent une entree avec le même index et le même terme, alors toutes les entrees precedentes sont identiques. Cette propriété est maintenue par la vérification `prevLogIndex` / `prevLogTerm` dans `AppendEntries`.
 
 ```
 ┌───────────────────────────────────────────────────────┐
@@ -615,12 +615,12 @@ Redlock, propose par Salvatore Sanfilippo (antirez), tente de fournir un verrou 
 4. Sinon, liberer le verrou sur toutes les instances
 
 :::warning Limites de Redlock
-Martin Kleppmann a demontre que Redlock ne protege pas contre les pauses de processus (GC), les retards reseau, ou les sauts d'horloge. Pour une exclusion mutuelle stricte, il faut combiner les verrous avec des **fencing tokens**.
+Martin Kleppmann a demontre que Redlock ne protege pas contre les pauses de processus (GC), les retards réseau, ou les sauts d'horloge. Pour une exclusion mutuelle stricte, il faut combiner les verrous avec des **fencing tokens**.
 :::
 
 ### Fencing tokens
 
-Un **fencing token** est un numero monotoniquement croissant delivre a chaque acquisition de verrou. Le systeme de stockage refuse les operations portant un token inferieur au dernier token vu.
+Un **fencing token** est un numéro monotoniquement croissant delivre à chaque acquisition de verrou. Le système de stockage refuse les operations portant un token inferieur au dernier token vu.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -752,11 +752,11 @@ simulateFencingTokens();
 | **Configuration distribuee** | Raft (etcd, Consul) | Partage de configuration coherente entre microservices |
 | **Verrou distribue** | Redlock + fencing tokens | Empecher le double traitement d'une commande |
 | **Registre de services** | Raft (Consul, ZooKeeper) | Decouverte de services avec coherence forte |
-| **Sequence atomique** | Consensus | Generation d'IDs uniques et ordonnees |
+| **Sequence atomique** | Consensus | Génération d'IDs uniques et ordonnees |
 
 ---
 
-## Resume
+## Résumé
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -790,10 +790,21 @@ simulateFencingTokens();
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| [19 - Testing des systemes distribues](./19-testing-distribue.md) | [21 - Temps & Horloges](./21-temps-ordre-horloges.md) |
+| [19 - Testing des systèmes distribues](./19-testing-distribue.md) | [21 - Temps & Horloges](./21-temps-ordre-horloges.md) |
 
 | Visualisation | Lab | Quiz |
 |:-------------:|:---:|:----:|
 | [Consensus Raft](../visualizations/consensus-raft.html) | [Lab 20](../labs/lab-20-consensus-raft/) | [Quiz 20](../quizzes/quiz-20-consensus.html) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 20 consensus](../screencasts/screencast-20-consensus.md)
+2. **Lab** : [lab-20-consensus-raft](../labs/lab-20-consensus-raft/README)
+3. **Visualisation** : [Consensus Raft](../visualizations/consensus-raft.html)
+4. **Quiz** : [quiz 20 consensus](../quizzes/quiz-20-consensus.html)
+:::

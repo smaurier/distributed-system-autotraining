@@ -8,21 +8,21 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Expliquer pourquoi les retries sont indispensables dans un systeme distribue
-- Implementer 4 strategies de retry : immediat, delai fixe, exponential backoff, backoff + jitter
-- Definir un retry budget pour limiter la charge sur un systeme en difficulte
+- Expliquer pourquoi les retries sont indispensables dans un système distribue
+- Implementer 4 stratégies de retry : immediat, delai fixe, exponential backoff, backoff + jitter
+- Définir un retry budget pour limiter la charge sur un système en difficulte
 - Distinguer les 3 types de timeouts : connect, read, total
 - Implementer des timeouts en TypeScript avec AbortController et Promise.race
-- Definir l'idempotence et expliquer pourquoi elle est cruciale avec les retries
-- Generer, stocker et verifier des idempotency keys
-- Rendre une operation POST idempotente avec des cles d'idempotence
+- Définir l'idempotence et expliquer pourquoi elle est cruciale avec les retries
+- Générer, stocker et vérifier des idempotency keys
+- Rendre une operation POST idempotente avec des clés d'idempotence
 - Comparer les semantiques de livraison : at-most-once, at-least-once, exactly-once
 
 ---
 
 ## 1. Pourquoi les retries sont essentiels
 
-Dans un systeme distribue, les pannes transitoires sont la norme : timeout reseau, surcharge temporaire, redemarrage d'un pod, partition reseau fugace. Sans retries, chaque micro-incident devient une erreur visible pour l'utilisateur.
+Dans un système distribue, les pannes transitoires sont la norme : timeout réseau, surcharge temporaire, redemarrage d'un pod, partition réseau fugace. Sans retries, chaque micro-incident devient une erreur visible pour l'utilisateur.
 
 ```
 SANS RETRIES :                           AVEC RETRIES :
@@ -43,14 +43,14 @@ Client → Service                         Client → Service
 ```
 
 :::warning Ne pas tout reessayer aveuglement
-Seules les erreurs **transitoires** meritent un retry : timeouts, 503, 429, erreurs reseau. Les erreurs permanentes (400, 401, 404, 422) ne seront pas resolues par un retry. Reessayer une erreur 400 est du gaspillage.
+Seules les erreurs **transitoires** meritent un retry : timeouts, 503, 429, erreurs réseau. Les erreurs permanentes (400, 401, 404, 422) ne seront pas resolues par un retry. Reessayer une erreur 400 est du gaspillage.
 :::
 
 ---
 
-## 2. Strategies de retry
+## 2. Stratégies de retry
 
-### 2.1 Les 4 strategies principales
+### 2.1 Les 4 stratégies principales
 
 ```
 1. IMMEDIATE RETRY (dangereux)
@@ -192,14 +192,14 @@ function sleep(ms: number): Promise<void> {
 ```
 
 :::tip Pourquoi le jitter est essentiel
-Sans jitter, quand un service redemarre, tous les clients reessayent exactement au meme moment (1s, 2s, 4s...). C'est le **thundering herd** : le service est immediatement re-surcharge. Le jitter repartit les retries dans le temps.
+Sans jitter, quand un service redemarre, tous les clients reessayent exactement au même moment (1s, 2s, 4s...). C'est le **thundering herd** : le service est immediatement re-surcharge. Le jitter repartit les retries dans le temps.
 :::
 
 ---
 
 ## 3. Retry budgets
 
-Un retry budget limite le nombre total de retries dans un systeme, empechant l'amplification de charge.
+Un retry budget limite le nombre total de retries dans un système, empechant l'amplification de charge.
 
 ```
 SANS RETRY BUDGET :                      AVEC RETRY BUDGET :
@@ -569,7 +569,7 @@ EXACTLY-ONCE (exactement une fois) :
 ```
 
 :::warning Exactly-once est un "mensonge"
-En theorie de la distribution, exactly-once delivery est impossible dans le cas general (Two Generals Problem). En pratique, on obtient l'**effet** d'exactly-once en combinant at-least-once delivery avec des handlers idempotents. C'est suffisant pour la plupart des systemes.
+En théorie de la distribution, exactly-once delivery est impossible dans le cas général (Two Generals Problem). En pratique, on obtient l'**effet** d'exactly-once en combinant at-least-once delivery avec des handlers idempotents. C'est suffisant pour la plupart des systèmes.
 :::
 
 ---
@@ -654,20 +654,30 @@ class ResilientHttpClient {
 
 ---
 
-## Points cles
+## Points clés
 
-1. **Les retries** compensent les pannes transitoires. Sans retries, chaque micro-incident reseau devient une erreur visible.
-2. **Exponential backoff + jitter** est la strategie optimale : elle evite le thundering herd et laisse le temps au service de recuperer.
-3. **Le retry budget** empeche l'amplification de charge : pas plus de 20% de retries par fenetre de temps.
-4. **Les timeouts** doivent etre decroissants a chaque couche (gateway > service A > service B) pour eviter les cascading timeouts.
-5. **L'idempotence** est la condition prealable aux retries : sans idempotence, un retry peut creer des doublons.
-6. **Les idempotency keys** rendent les operations POST idempotentes en stockant la reponse associee a chaque cle unique.
+1. **Les retries** compensent les pannes transitoires. Sans retries, chaque micro-incident réseau devient une erreur visible.
+2. **Exponential backoff + jitter** est la stratégie optimale : elle evite le thundering herd et laisse le temps au service de récupérer.
+3. **Le retry budget** empeche l'amplification de charge : pas plus de 20% de retries par fenêtre de temps.
+4. **Les timeouts** doivent etre decroissants à chaque couche (gateway > service A > service B) pour éviter les cascading timeouts.
+5. **L'idempotence** est la condition prealable aux retries : sans idempotence, un retry peut créer des doublons.
+6. **Les idempotency keys** rendent les operations POST idempotentes en stockant la réponse associee à chaque clé unique.
 7. **Exactly-once** n'existe pas en pratique. On utilise at-least-once + idempotence pour obtenir l'**effet** d'exactly-once.
 
 ---
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [08 - API Gateway & BFF](./08-api-gateway-et-bff.md) | [10 - Coherence & CAP](./10-coherence-et-theoreme-cap.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 09 retries idempotency](../screencasts/screencast-09-retries-idempotency.md)
+2. **Lab** : [lab-09-retries-idempotency](../labs/lab-09-retries-idempotency/README)
+3. **Quiz** : [quiz 09 retries idempotency](../quizzes/quiz-09-retries-idempotency.html)
+:::

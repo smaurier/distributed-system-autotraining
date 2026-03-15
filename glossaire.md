@@ -1,10 +1,10 @@
-# Glossaire Systemes Distribues
+# Glossaire Systèmes Distribues
 
 ## A
 
 ### API Gateway
 
-Point d'entree unique pour un ensemble de microservices. L'API Gateway recoit toutes les requetes clients, les route vers le service approprie, et peut gerer des preoccupations transversales comme l'authentification, le rate limiting et l'agregation de reponses.
+Point d'entree unique pour un ensemble de microservices. L'API Gateway recoit toutes les requêtes clients, les route vers le service approprie, et peut gérer des preoccupations transversales comme l'authentification, le rate limiting et l'agregation de réponses.
 
 ```typescript
 // Exemple simplifie d'un API Gateway avec Express
@@ -22,7 +22,7 @@ app.listen(3000);
 
 ### At-least-once
 
-Garantie de livraison de message ou chaque message est delivre au moins une fois, mais peut etre delivre plusieurs fois en cas de defaillance. Le consommateur doit etre idempotent pour gerer les doublons. C'est la garantie la plus courante dans les systemes distribues car elle offre un bon compromis entre fiabilite et performance.
+Garantie de livraison de message ou chaque message est delivre au moins une fois, mais peut etre delivre plusieurs fois en cas de defaillance. Le consommateur doit etre idempotent pour gérer les doublons. C'est la garantie la plus courante dans les systèmes distribues car elle offre un bon compromis entre fiabilité et performance.
 
 ```typescript
 // Le consommateur doit gerer les doublons
@@ -39,7 +39,7 @@ async function handleMessage(message: Message): Promise<void> {
 
 ### Backoff
 
-Strategie consistant a augmenter progressivement le delai entre les tentatives de retry apres un echec. Evite de surcharger un service deja en difficulte. Souvent combine avec du jitter (variation aleatoire) pour desynchroniser les retries de multiples clients.
+Stratégie consistant a augmenter progressivement le delai entre les tentatives de retry après un echec. Evite de surcharger un service déjà en difficulte. Souvent combine avec du jitter (variation aleatoire) pour desynchroniser les retries de multiples clients.
 
 ```typescript
 function calculateBackoff(attempt: number, baseMs: number = 1000): number {
@@ -49,7 +49,7 @@ function calculateBackoff(attempt: number, baseMs: number = 1000): number {
 
 ### Backpressure
 
-Mecanisme par lequel un consommateur signale a un producteur qu'il ne peut pas traiter les messages aussi vite qu'ils arrivent. Permet d'eviter la saturation memoire et les pertes de donnees. Peut etre implicite (file d'attente pleine) ou explicite (protocole de controle de flux).
+Mécanisme par lequel un consommateur signale à un producteur qu'il ne peut pas traiter les messages aussi vite qu'ils arrivent. Permet d'éviter la saturation mémoire et les pertes de donnees. Peut etre implicite (file d'attente pleine) ou explicite (protocole de controle de flux).
 
 ```typescript
 // Exemple de backpressure avec un stream Node.js
@@ -67,7 +67,7 @@ const throttle = new Transform({
 
 ### BFF (Backend for Frontend)
 
-Variante de l'API Gateway ou chaque type de client (web, mobile, IoT) dispose de son propre backend intermediaire. Chaque BFF est optimise pour les besoins specifiques de son client : format de donnees, agregation, champs retournes.
+Variante de l'API Gateway ou chaque type de client (web, mobile, IoT) dispose de son propre backend intermédiaire. Chaque BFF est optimise pour les besoins spécifiques de son client : format de donnees, agregation, champs retournes.
 
 ```
 [Mobile App] → [Mobile BFF :3010] → [Order Service]
@@ -77,11 +77,11 @@ Variante de l'API Gateway ou chaque type de client (web, mobile, IoT) dispose de
 
 ### Blast Radius
 
-Etendue de l'impact potentiel d'une panne dans un systeme distribue. Concevoir pour un blast radius minimal signifie isoler les composants de sorte qu'une defaillance d'un service n'entraine pas l'effondrement de tout le systeme. Techniques : bulkheads, circuit breakers, deployments progressifs.
+Etendue de l'impact potentiel d'une panne dans un système distribue. Concevoir pour un blast radius minimal signifie isoler les composants de sorte qu'une defaillance d'un service n'entraine pas l'effondrement de tout le système. Techniques : bulkheads, circuit breakers, deployments progressifs.
 
 ### Bulkhead
 
-Pattern de resilience inspire des cloisons etanches d'un navire. Isole les ressources (pools de connexions, threads, instances) de sorte qu'une defaillance dans un compartiment ne se propage pas aux autres. Limite le blast radius d'une panne.
+Pattern de résilience inspire des cloisons etanches d'un navire. Isole les ressources (pools de connexions, threads, instances) de sorte qu'une defaillance dans un compartiment ne se propage pas aux autres. Limite le blast radius d'une panne.
 
 ```typescript
 // Isolation des pools de connexions par service
@@ -92,7 +92,7 @@ const paymentPool = new Pool({ max: 10, connectionString: PAYMENT_DB_URL });
 
 ### Byzantine Fault
 
-Type de defaillance ou un noeud se comporte de maniere arbitraire et potentiellement malveillante : il peut envoyer des messages contradictoires a differents noeuds, mentir sur son etat, ou corrompre des donnees. Les algorithmes tolerants aux fautes byzantines (BFT) necessitent au moins 3f+1 noeuds pour tolerer f noeuds defaillants.
+Type de defaillance ou un noeud se comporte de manière arbitraire et potentiellement malveillante : il peut envoyer des messages contradictoires a différents noeuds, mentir sur son état, ou corrompre des donnees. Les algorithmes tolerants aux fautes byzantines (BFT) necessitent au moins 3f+1 noeuds pour tolerer f noeuds defaillants.
 
 ```
 Noeud A: "La valeur est 42"
@@ -105,7 +105,7 @@ Noeud C: "La valeur est 42"
 
 ### CAP Theorem
 
-Theoreme formule par Eric Brewer (2000) stipulant qu'un systeme distribue ne peut garantir simultanement que deux des trois proprietes suivantes : Consistency (tous les noeuds voient la meme donnee au meme moment), Availability (chaque requete recoit une reponse), Partition tolerance (le systeme continue de fonctionner malgre des partitions reseau). En pratique, les partitions etant inevitables, le choix se fait entre CP et AP.
+Théorème formule par Eric Brewer (2000) stipulant qu'un système distribue ne peut garantir simultanement que deux des trois propriétés suivantes : Consistency (tous les noeuds voient la même donnee au même moment), Availability (chaque requête recoit une réponse), Partition tolerance (le système continue de fonctionner malgre des partitions réseau). En pratique, les partitions etant inevitables, le choix se fait entre CP et AP.
 
 ```
         C (Consistency)
@@ -123,7 +123,7 @@ AP : Cassandra, DynamoDB, CouchDB
 
 ### Cascading Failure
 
-Defaillance en cascade ou la panne d'un composant provoque la surcharge puis la panne des composants dependants, qui a leur tour provoquent d'autres pannes. Scenario typique : un service lent accumule les connexions, epuise le pool du service appelant, qui devient lui-meme lent, et ainsi de suite.
+Defaillance en cascade ou la panne d'un composant provoque la surcharge puis la panne des composants dependants, qui a leur tour provoquent d'autres pannes. Scenario typique : un service lent accumule les connexions, epuise le pool du service appelant, qui devient lui-même lent, et ainsi de suite.
 
 ```
 [Service A] → timeout → [Service B en panne]
@@ -135,7 +135,7 @@ Defaillance en cascade ou la panne d'un composant provoque la surcharge puis la 
 
 ### Causal Consistency
 
-Modele de coherence garantissant que les operations causalement liees sont vues dans le meme ordre par tous les noeuds. Si une operation B depend du resultat de l'operation A, alors tout noeud qui voit B verra aussi A avant B. Les operations concurrentes (sans lien causal) peuvent etre vues dans un ordre different.
+Modèle de coherence garantissant que les operations causalement liees sont vues dans le même ordre par tous les noeuds. Si une operation B depend du résultat de l'operation A, alors tout noeud qui voit B verra aussi A avant B. Les operations concurrentes (sans lien causal) peuvent etre vues dans un ordre différent.
 
 ```typescript
 // Avec causal consistency :
@@ -146,7 +146,7 @@ Modele de coherence garantissant que les operations causalement liees sont vues 
 
 ### CDC (Change Data Capture)
 
-Technique consistant a capturer les changements (INSERT, UPDATE, DELETE) dans une base de donnees et a les propager sous forme d'evenements. Permet de synchroniser des systemes sans couplage direct. Implementations courantes : Debezium (lecture du WAL PostgreSQL), Kafka Connect.
+Technique consistant a capturer les changements (INSERT, UPDATE, DELETE) dans une base de donnees et a les propager sous forme d'événements. Permet de synchroniser des systèmes sans couplage direct. Implementations courantes : Debezium (lecture du WAL PostgreSQL), Kafka Connect.
 
 ```
 [PostgreSQL WAL] → [Debezium] → [Kafka Topic] → [Consumers]
@@ -157,7 +157,7 @@ Technique consistant a capturer les changements (INSERT, UPDATE, DELETE) dans un
 
 ### Choreography
 
-Style d'orchestration distribuee ou chaque service reagit aux evenements publies par les autres services, sans coordinateur central. Chaque service connait ses propres reactions mais ignore le workflow global. Avantage : faible couplage. Inconvenient : difficulte a visualiser et debugger le flux complet.
+Style d'orchestration distribuee ou chaque service reagit aux événements publies par les autres services, sans coordinateur central. Chaque service connait ses propres reactions mais ignore le workflow global. Avantage : faible couplage. Inconvenient : difficulte a visualiser et debugger le flux complet.
 
 ```
 [Order Service] --ordre.cree--> [Event Bus]
@@ -171,7 +171,7 @@ Style d'orchestration distribuee ou chaque service reagit aux evenements publies
 
 ### Circuit Breaker
 
-Pattern de resilience qui protege un service contre les appels repetes a un service defaillant. Trois etats : Closed (appels normaux), Open (appels bloques, reponse d'erreur immediate), Half-Open (quelques appels de test pour verifier la reprise). Inspire des disjoncteurs electriques.
+Pattern de résilience qui protege un service contre les appels repetes à un service defaillant. Trois états : Closed (appels normaux), Open (appels bloques, réponse d'erreur immediate), Half-Open (quelques appels de test pour vérifier la reprise). Inspire des disjoncteurs electriques.
 
 ```typescript
 class CircuitBreaker {
@@ -215,7 +215,7 @@ class CircuitBreaker {
 
 ### Command
 
-Dans le contexte CQRS, une commande represente une intention de modifier l'etat du systeme. Contrairement a une requete (query), une commande produit des effets de bord. Elle est generalement nommee a l'imperatif (CreateOrder, CancelPayment) et peut etre acceptee ou rejetee.
+Dans le contexte CQRS, une commande represente une intention de modifier l'état du système. Contrairement à une requête (query), une commande produit des effets de bord. Elle est généralement nommee a l'imperatif (CreateOrder, CancelPayment) et peut etre acceptee ou rejetee.
 
 ```typescript
 interface CreateOrderCommand {
@@ -233,7 +233,7 @@ interface CreateOrderCommand {
 
 ### Compensating Transaction
 
-Transaction inverse executee pour annuler les effets d'une etape precedente dans une saga. Comme les transactions distribuees ne peuvent pas etre rollback atomiquement, chaque etape doit definir sa compensation. La compensation n'est pas toujours un simple "undo" — elle peut impliquer des remboursements, des notifications, ou des ajustements.
+Transaction inverse executee pour annuler les effets d'une étape précédente dans une saga. Comme les transactions distribuees ne peuvent pas etre rollback atomiquement, chaque étape doit définir sa compensation. La compensation n'est pas toujours un simple "undo" — elle peut impliquer des remboursements, des notifications, ou des ajustements.
 
 ```typescript
 // Etape : reserver le stock
@@ -249,7 +249,7 @@ async function compensateReserveStock(orderId: string): Promise<void> {
 
 ### Consensus
 
-Processus par lequel un ensemble de noeuds distribues se mettent d'accord sur une valeur unique malgre les defaillances. Probleme fondamental des systemes distribues. Algorithmes principaux : Paxos (theorique, difficile a implementer), Raft (concu pour etre comprehensible), ZAB (ZooKeeper).
+Processus par lequel un ensemble de noeuds distribues se mettent d'accord sur une valeur unique malgre les defaillances. Problème fondamental des systèmes distribues. Algorithmes principaux : Paxos (théorique, difficile a implementer), Raft (concu pour etre comprehensible), ZAB (ZooKeeper).
 
 ```
 Proposition → Vote → Decision
@@ -261,7 +261,7 @@ Proposition → Vote → Decision
 
 ### Consistent Hashing
 
-Technique de distribution de donnees entre noeuds ou l'ajout ou la suppression d'un noeud ne necessite de redistribuer qu'une fraction des cles (1/n en moyenne). Les noeuds et les cles sont places sur un anneau de hash. Chaque cle est assignee au premier noeud rencontre en parcourant l'anneau dans le sens horaire.
+Technique de distribution de donnees entre noeuds ou l'ajout ou la suppression d'un noeud ne nécessité de redistribuer qu'une fraction des clés (1/n en moyenne). Les noeuds et les clés sont places sur un anneau de hash. Chaque clé est assignee au premier noeud rencontre en parcourant l'anneau dans le sens horaire.
 
 ```
         Noeud A
@@ -294,7 +294,7 @@ Si Consumer B tombe :
 
 ### Correlation ID
 
-Identifiant unique (generalement un UUID) propage a travers toutes les interactions d'un systeme distribue pour une requete donnee. Permet de tracer et regrouper tous les logs, evenements et appels lies a une meme operation metier, meme a travers plusieurs services.
+Identifiant unique (généralement un UUID) propage a travers toutes les interactions d'un système distribue pour une requête donnee. Permet de tracer et regrouper tous les logs, événements et appels lies à une même operation metier, même a travers plusieurs services.
 
 ```typescript
 import { randomUUID } from 'node:crypto';
@@ -313,7 +313,7 @@ app.use((req, res, next) => {
 
 ### CQRS (Command Query Responsibility Segregation)
 
-Pattern d'architecture qui separe les operations de lecture (queries) des operations d'ecriture (commands) en utilisant des modeles differents. Le modele d'ecriture est optimise pour la validation et la coherence, le modele de lecture pour la performance des requetes. Souvent combine avec l'event sourcing.
+Pattern d'architecture qui separe les operations de lecture (queries) des operations d'écriture (commands) en utilisant des modèles différents. Le modèle d'écriture est optimise pour la validation et la coherence, le modèle de lecture pour la performance des requêtes. Souvent combine avec l'event sourcing.
 
 ```
 [Client] → Command → [Write Model] → Events → [Event Store]
@@ -323,7 +323,7 @@ Pattern d'architecture qui separe les operations de lecture (queries) des operat
 
 ### CRDT (Conflict-free Replicated Data Type)
 
-Structure de donnees qui peut etre repliquee sur plusieurs noeuds et mise a jour independamment et concurremment sans coordination. Les conflits sont resolus automatiquement par les proprietes mathematiques de la structure (commutativite, associativite, idempotence). Deux familles : CvRDT (state-based) et CmRDT (operation-based).
+Structure de donnees qui peut etre repliquee sur plusieurs noeuds et mise a jour independamment et concurremment sans coordination. Les conflits sont resolus automatiquement par les propriétés mathematiques de la structure (commutativite, associativite, idempotence). Deux familles : CvRDT (state-based) et CmRDT (operation-based).
 
 ```typescript
 // G-Counter : un CRDT compteur qui ne fait qu'incrementer
@@ -356,7 +356,7 @@ class GCounter {
 
 ### Dead Letter Queue (DLQ)
 
-File d'attente speciale ou sont places les messages qui n'ont pas pu etre traites apres un nombre maximal de tentatives. Permet d'isoler les messages problematiques sans bloquer le traitement des autres messages. Les messages en DLQ sont ensuite analyses et retraites manuellement ou automatiquement.
+File d'attente speciale ou sont places les messages qui n'ont pas pu etre traites après un nombre maximal de tentatives. Permet d'isoler les messages problematiques sans bloquer le traitement des autres messages. Les messages en DLQ sont ensuite analyses et retraites manuellement ou automatiquement.
 
 ```typescript
 async function processWithDLQ(message: Message, maxRetries: number = 3): Promise<void> {
@@ -376,7 +376,7 @@ async function processWithDLQ(message: Message, maxRetries: number = 3): Promise
 
 ### Domain Event
 
-Evenement representant un fait metier qui s'est produit dans le domaine. Nomme au passe (OrderCreated, PaymentProcessed, StockReserved). Immutable et porteur de toutes les informations necessaires a sa comprehension. Constitue la base de l'event sourcing et de l'architecture event-driven.
+Événement representant un fait metier qui s'est produit dans le domaine. Nomme au passe (OrderCreated, PaymentProcessed, StockReserved). Immutable et porteur de toutes les informations nécessaires a sa comprehension. Constitue la base de l'event sourcing et de l'architecture event-driven.
 
 ```typescript
 interface OrderCreatedEvent {
@@ -397,7 +397,7 @@ interface OrderCreatedEvent {
 
 ### Dual Write Problem
 
-Probleme qui survient lorsqu'un service doit ecrire dans deux systemes (ex: base de donnees et message broker) de maniere atomique. Sans transaction distribuee, l'une des ecritures peut echouer, laissant les systemes dans un etat inconsistant. Solutions : outbox pattern, CDC, event sourcing.
+Problème qui survient lorsqu'un service doit écrire dans deux systèmes (ex: base de donnees et message broker) de manière atomique. Sans transaction distribuee, l'une des ecritures peut echouer, laissant les systèmes dans un état inconsistant. Solutions : outbox pattern, CDC, event sourcing.
 
 ```typescript
 // PROBLEME : dual write non atomique
@@ -420,7 +420,7 @@ async function createOrderSafe(order: Order): Promise<void> {
 
 ### Eventual Consistency
 
-Modele de coherence ou les mises a jour finissent par etre propagees a toutes les repliques, mais ou il peut y avoir un delai pendant lequel differentes repliques retournent des valeurs differentes. Garantit qu'en l'absence de nouvelles ecritures, toutes les repliques convergent vers la meme valeur. Choix privilegie dans les systemes AP.
+Modèle de coherence ou les mises a jour finissent par etre propagees a toutes les repliques, mais ou il peut y avoir un delai pendant lequel différentes repliques retournent des valeurs différentes. Garantit qu'en l'absence de nouvelles ecritures, toutes les repliques convergent vers la même valeur. Choix privilegie dans les systèmes AP.
 
 ```typescript
 // Scenario d'eventual consistency
@@ -436,7 +436,7 @@ const value2 = await replica.get('stock'); // Retourne 100
 
 ### Event Bus
 
-Infrastructure de communication asynchrone permettant aux services de publier et consommer des evenements sans couplage direct. Peut etre implemente avec Redis Pub/Sub, RabbitMQ, Apache Kafka, ou des solutions cloud (AWS EventBridge, Azure Event Grid). Supporte les patterns pub/sub et event streaming.
+Infrastructure de communication asynchrone permettant aux services de publier et consommer des événements sans couplage direct. Peut etre implemente avec Redis Pub/Sub, RabbitMQ, Apache Kafka, ou des solutions cloud (AWS EventBridge, Azure Event Grid). Supporte les patterns pub/sub et event streaming.
 
 ```typescript
 // Event bus simplifie avec Redis
@@ -460,7 +460,7 @@ await subscriber.subscribe('order-events', (message) => {
 
 ### Event Sourcing
 
-Pattern de persistance ou l'etat d'une entite est stocke comme une sequence ordonnee d'evenements plutot que comme un instantane de l'etat courant. L'etat actuel est reconstruit en rejouant tous les evenements depuis le debut (ou depuis un snapshot). Avantages : audit trail complet, capacite de voyage dans le temps, integration naturelle avec CQRS.
+Pattern de persistance ou l'état d'une entite est stocke comme une sequence ordonnee d'événements plutot que comme un instantane de l'état courant. L'état actuel est reconstruit en rejouant tous les événements depuis le debut (où depuis un snapshot). Avantages : audit trail complet, capacité de voyage dans le temps, intégration naturelle avec CQRS.
 
 ```typescript
 // Reconstitution de l'etat depuis les evenements
@@ -489,7 +489,7 @@ function rebuildOrder(events: DomainEvent[]): Order {
 
 ### Event Store
 
-Base de donnees specialisee optimisee pour le stockage et la lecture sequentielle d'evenements. Garantit l'append-only (immutabilite), l'ordonnancement et la lecture par aggregate. Implementations : EventStoreDB, PostgreSQL avec table d'evenements, ou Kafka comme log d'evenements.
+Base de donnees specialisee optimisee pour le stockage et la lecture sequentielle d'événements. Garantit l'append-only (immutabilite), l'ordonnancement et la lecture par aggregate. Implementations : EventStoreDB, PostgreSQL avec table d'événements, ou Kafka comme log d'événements.
 
 ```typescript
 interface EventStore {
@@ -502,11 +502,11 @@ interface EventStore {
 
 ### Exactly-once
 
-Garantie de livraison ideale ou chaque message est delivre et traite exactement une fois. Extremement difficile a atteindre en pratique dans un systeme distribue. Souvent approximee par "at-least-once delivery + idempotent processing", ce qui donne un resultat equivalent du point de vue metier.
+Garantie de livraison ideale ou chaque message est delivre et traite exactement une fois. Extremement difficile a atteindre en pratique dans un système distribue. Souvent approximee par "at-least-once delivery + idempotent processing", ce qui donne un résultat équivalent du point de vue metier.
 
 ### Exponential Backoff
 
-Strategie de backoff ou le delai entre les retries augmente exponentiellement : 1s, 2s, 4s, 8s, 16s... Evite de surcharger un service en difficulte. Generalement plafonne a un delai maximum et combine avec du jitter pour eviter le "thundering herd".
+Stratégie de backoff ou le delai entre les retries augmente exponentiellement : 1s, 2s, 4s, 8s, 16s... Evite de surcharger un service en difficulte. Generalement plafonne à un delai maximum et combine avec du jitter pour éviter le "thundering herd".
 
 ```typescript
 function exponentialBackoff(
@@ -524,7 +524,7 @@ function exponentialBackoff(
 
 ### Fail-fast
 
-Principe de conception ou un service detecte une condition d'erreur le plus tot possible et echoue immediatement plutot que de continuer dans un etat degrade. Permet une detection rapide des problemes et evite l'accumulation de ressources. Le circuit breaker est un mecanisme de fail-fast.
+Principe de conception ou un service détecté une condition d'erreur le plus tot possible et echoue immediatement plutot que de continuer dans un état degrade. Permet une detection rapide des problèmes et evite l'accumulation de ressources. Le circuit breaker est un mécanisme de fail-fast.
 
 ```typescript
 async function callService(url: string, timeoutMs: number = 2000): Promise<Response> {
@@ -541,24 +541,24 @@ async function callService(url: string, timeoutMs: number = 2000): Promise<Respo
 
 ### Fallacy (of Distributed Computing)
 
-Les 8 erreurs classiques (fallacies) identifiees par Peter Deutsch et James Gosling, que les developpeurs font lorsqu'ils travaillent sur des systemes distribues pour la premiere fois :
+Les 8 erreurs classiques (fallacies) identifiees par Peter Deutsch et James Gosling, que les développeurs font lorsqu'ils travaillent sur des systèmes distribues pour la première fois :
 
-1. Le reseau est fiable
+1. Le réseau est fiable
 2. La latence est nulle
 3. La bande passante est infinie
-4. Le reseau est securise
+4. Le réseau est sécurisé
 5. La topologie ne change pas
-6. Il y a un seul administrateur
+6. Il y à un seul administrateur
 7. Le cout de transport est nul
-8. Le reseau est homogene
+8. Le réseau est homogene
 
 ### Fault Tolerance
 
-Capacite d'un systeme a continuer de fonctionner correctement (eventuellement en mode degrade) malgre la defaillance de certains de ses composants. Techniques : replication, retry, circuit breaker, graceful degradation, bulkhead, failover.
+Capacité d'un système a continuer de fonctionner correctement (eventuellement en mode degrade) malgre la defaillance de certains de ses composants. Techniques : replication, retry, circuit breaker, graceful degradation, bulkhead, failover.
 
 ### Fencing Token
 
-Jeton monotoniquement croissant utilise pour proteger contre les operations obsoletes dans un systeme distribue. Lorsqu'un client acquiert un verrou (lock), il recoit un fencing token. Lorsqu'il effectue une operation, le systeme de stockage verifie que le token est le plus recent, rejetant les operations de clients ayant un token plus ancien.
+Jeton monotoniquement croissant utilise pour proteger contre les operations obsoletes dans un système distribue. Lorsqu'un client acquiert un verrou (lock), il recoit un fencing token. Lorsqu'il effectue une operation, le système de stockage vérifié que le token est le plus recent, rejetant les operations de clients ayant un token plus ancien.
 
 ```typescript
 interface FencingToken {
@@ -580,7 +580,7 @@ async function writeWithFencing(key: string, value: string, token: FencingToken)
 
 ### Graceful Degradation
 
-Strategie de resilience ou un service continue de fonctionner en offrant une experience reduite plutot que d'echouer completement. Par exemple, un service de recommandation en panne retourne des recommandations generiques plutot qu'une erreur. Preserve l'experience utilisateur meme en cas de defaillance partielle.
+Stratégie de résilience ou un service continue de fonctionner en offrant une experience reduite plutot que d'echouer complètement. Par exemple, un service de recommandation en panne retourne des recommandations génériques plutot qu'une erreur. Preserve l'experience utilisateur même en cas de defaillance partielle.
 
 ```typescript
 async function getRecommendations(userId: string): Promise<Product[]> {
@@ -596,7 +596,7 @@ async function getRecommendations(userId: string): Promise<Product[]> {
 
 ### Gray Failure
 
-Defaillance subtile et difficile a detecter ou un composant ne tombe pas completement en panne mais fonctionne de maniere degradee : latence accrue, perte intermittente de paquets, reponses corrompues. Plus insidieuse qu'une panne franche car les health checks peuvent passer alors que le service est defaillant.
+Defaillance subtile et difficile a détecter ou un composant ne tombe pas complètement en panne mais fonctionne de manière degradee : latence accrue, perte intermittente de paquets, réponses corrompues. Plus insidieuse qu'une panne franche car les health checks peuvent passer alors que le service est defaillant.
 
 ```
 Health check: "Service OK" (200) ← le service repond
@@ -607,7 +607,7 @@ Realite: latence p99 passee de 50ms a 5000ms ← gray failure
 
 ### gRPC
 
-Framework RPC haute performance developpe par Google utilisant HTTP/2 et Protocol Buffers (protobuf) pour la serialisation. Offre le streaming bidirectionnel, la generation de code client/serveur, et des performances superieures a REST/JSON pour la communication inter-services.
+Framework RPC haute performance développé par Google utilisant HTTP/2 et Protocol Buffers (protobuf) pour la serialisation. Offre le streaming bidirectionnel, la génération de code client/serveur, et des performances superieures a REST/JSON pour la communication inter-services.
 
 ```protobuf
 // order.proto
@@ -627,7 +627,7 @@ message CreateOrderRequest {
 
 ### Half-open
 
-Etat intermediaire du circuit breaker ou un nombre limite de requetes est autorise a passer pour tester si le service en aval a recupere. Si ces requetes reussissent, le circuit revient a l'etat Closed. Si elles echouent, le circuit repasse a l'etat Open pour une nouvelle periode de cooldown.
+État intermédiaire du circuit breaker ou un nombre limite de requêtes est autorise a passer pour tester si le service en aval a récupéré. Si ces requêtes reussissent, le circuit revient a l'état Closed. Si elles echouent, le circuit repasse a l'état Open pour une nouvelle periode de cooldown.
 
 ```
 CLOSED → (seuil d'erreurs atteint) → OPEN
@@ -638,7 +638,7 @@ HALF-OPEN → (requete test echoue) → OPEN
 
 ### Happened-before
 
-Relation d'ordre partiel definie par Leslie Lamport (1978) entre evenements dans un systeme distribue. L'evenement A "happened before" B (note A → B) si : A et B sont sur le meme processus et A est avant B, ou A est l'envoi d'un message et B sa reception. Si ni A → B ni B → A, les evenements sont concurrents.
+Relation d'ordre partiel definie par Leslie Lamport (1978) entre événements dans un système distribue. L'événement A "happened before" B (note A → B) si : A et B sont sur le même processus et A est avant B, ou A est l'envoi d'un message et B sa reception. Si ni A → B ni B → A, les événements sont concurrents.
 
 ```
 Processus P1:  a ----→ b ----→ c
@@ -655,7 +655,7 @@ d || b (concurrents : pas de relation causale)
 
 ### Health Check
 
-Endpoint HTTP expose par un service pour indiquer son etat de sante. Permet aux load balancers, orchestrateurs (Kubernetes) et outils de monitoring de determiner si un service est fonctionnel. Trois types courants : liveness (vivant), readiness (pret), startup (initialise).
+Endpoint HTTP expose par un service pour indiquer son état de sante. Permet aux load balancers, orchestrateurs (Kubernetes) et outils de monitoring de déterminer si un service est fonctionnel. Trois types courants : liveness (vivant), readiness (pret), startup (initialise).
 
 ```typescript
 app.get('/health', (req, res) => {
@@ -676,7 +676,7 @@ app.get('/health/ready', async (req, res) => {
 
 ### Heartbeat
 
-Signal periodique envoye par un noeud pour indiquer aux autres qu'il est vivant. Si un noeud cesse d'envoyer des heartbeats pendant un certain temps (heartbeat timeout), il est considere comme defaillant. Utilise dans les protocoles de consensus (Raft), les clusters de bases de donnees et les systemes de coordination.
+Signal periodique envoye par un noeud pour indiquer aux autres qu'il est vivant. Si un noeud cesse d'envoyer des heartbeats pendant un certain temps (heartbeat timeout), il est considere comme defaillant. Utilise dans les protocoles de consensus (Raft), les clusters de bases de donnees et les systèmes de coordination.
 
 ```typescript
 // Envoi de heartbeat toutes les 500ms
@@ -695,7 +695,7 @@ function checkNode(nodeId: string, lastSeen: number): boolean {
 
 ### HLC (Hybrid Logical Clock)
 
-Horloge combinant une horloge physique (timestamp) et un compteur logique. Offre les avantages des horloges logiques (respect de la causalite) tout en restant proche du temps reel. Utilisee dans CockroachDB, MongoDB et d'autres systemes distribues.
+Horloge combinant une horloge physique (timestamp) et un compteur logique. Offre les avantages des horloges logiques (respect de la causalite) tout en restant proche du temps réel. Utilisee dans CockroachDB, MongoDB et d'autres systèmes distribues.
 
 ```typescript
 interface HLC {
@@ -730,7 +730,7 @@ function merge(local: HLC, remote: HLC): HLC {
 
 ### Idempotency
 
-Propriete d'une operation qui peut etre executee plusieurs fois avec le meme resultat qu'une seule execution. Fondamental dans les systemes distribues ou les retries sont courants. HTTP GET et DELETE sont idempotents par nature. POST ne l'est pas, mais peut etre rendu idempotent avec une idempotency key.
+Propriété d'une operation qui peut etre executee plusieurs fois avec le même résultat qu'une seule exécution. Fondamental dans les systèmes distribues ou les retries sont courants. HTTP GET et DELETE sont idempotents par nature. POST ne l'est pas, mais peut etre rendu idempotent avec une idempotency key.
 
 ```typescript
 // Operation idempotente grace a une cle
@@ -746,7 +746,7 @@ async function processPayment(idempotencyKey: string, amount: number): Promise<P
 
 ### Idempotency Key
 
-Identifiant unique fourni par le client et associe a une operation specifique. Permet au serveur de detecter les requetes en doublon (retries) et de retourner le meme resultat sans reexecuter l'operation. Generalement un UUID passe dans un header HTTP.
+Identifiant unique fourni par le client et associe à une operation spécifique. Permet au serveur de détecter les requêtes en doublon (retries) et de retourner le même résultat sans reexecuter l'operation. Generalement un UUID passe dans un header HTTP.
 
 ```typescript
 // Client
@@ -773,7 +773,7 @@ app.post('/api/payments', async (req, res) => {
 
 ### Inbox Pattern
 
-Pattern complementaire a l'outbox pattern, ou les messages entrants sont d'abord ecrits dans une table "inbox" de la base de donnees du service consommateur dans la meme transaction que leur traitement. Permet de garantir l'exactly-once processing en combinant deduplication et atomicite.
+Pattern complementaire a l'outbox pattern, ou les messages entrants sont d'abord ecrits dans une table "inbox" de la base de donnees du service consommateur dans la même transaction que leur traitement. Permet de garantir l'exactly-once processing en combinant deduplication et atomicite.
 
 ```typescript
 async function handleIncomingEvent(event: DomainEvent): Promise<void> {
@@ -795,7 +795,7 @@ async function handleIncomingEvent(event: DomainEvent): Promise<void> {
 
 ### Jitter
 
-Variation aleatoire ajoutee aux delais de retry pour eviter que de multiples clients ne retentent simultanement (thundering herd problem). Sans jitter, si 1000 clients echouent en meme temps, ils retentent tous exactement au meme moment, recréant le probleme.
+Variation aleatoire ajoutee aux delais de retry pour éviter que de multiples clients ne retentent simultanement (thundering herd problem). Sans jitter, si 1000 clients echouent en même temps, ils retentent tous exactement au même moment, recréant le problème.
 
 ```typescript
 function addJitter(delayMs: number, factor: number = 0.5): number {
@@ -814,7 +814,7 @@ function fullJitter(baseMs: number, attempt: number, maxMs: number = 30000): num
 
 ### Kafka
 
-Plateforme de streaming d'evenements distribuee developpee par LinkedIn (maintenant Apache). Combine les roles de message broker, event store et stream processing platform. Architecture basee sur des topics partitionnes, avec retention durable et consumer groups. Tres utilise pour l'event-driven architecture a grande echelle.
+Plateforme de streaming d'événements distribuee developpee par LinkedIn (maintenant Apache). Combine les roles de message broker, event store et stream processing platform. Architecture basee sur des topics partitionnes, avec retention durable et consumer groups. Très utilise pour l'event-driven architecture a grande echelle.
 
 ```
 Producer → [Topic "orders" ]
@@ -829,7 +829,7 @@ Producer → [Topic "orders" ]
 
 ### Lamport Timestamp
 
-Horloge logique inventee par Leslie Lamport (1978). Chaque processus maintient un compteur. A chaque evenement local, le compteur est incremente. Lors de l'envoi d'un message, le compteur est inclus. A la reception, le compteur est mis a jour au maximum du compteur local et du compteur recu, puis incremente.
+Horloge logique inventee par Leslie Lamport (1978). Chaque processus maintient un compteur. A chaque événement local, le compteur est incremente. Lors de l'envoi d'un message, le compteur est inclus. A la reception, le compteur est mis a jour au maximum du compteur local et du compteur recu, puis incremente.
 
 ```typescript
 class LamportClock {
@@ -856,7 +856,7 @@ class LamportClock {
 
 ### Leader Election
 
-Processus par lequel un ensemble de noeuds distribues choisissent un noeud "leader" responsable de la coordination. Le leader prend les decisions pour le groupe (ecriture, replication). Si le leader tombe, une nouvelle election est declenchee. Implemente dans Raft, ZooKeeper, etcd.
+Processus par lequel un ensemble de noeuds distribues choisissent un noeud "leader" responsable de la coordination. Le leader prend les decisions pour le groupe (écriture, replication). Si le leader tombe, une nouvelle election est declenchee. Implemente dans Raft, ZooKeeper, etcd.
 
 ```
 Election Raft :
@@ -869,7 +869,7 @@ Election Raft :
 
 ### Linearizability
 
-Le modele de coherence le plus strict : chaque operation semble se produire instantanement a un point unique dans le temps entre son invocation et sa reponse. Equivaut a un systeme monothread du point de vue du client. Couteux en performance car il requiert une coordination entre tous les noeuds.
+Le modèle de coherence le plus strict : chaque operation semble se produire instantanement à un point unique dans le temps entre son invocation et sa réponse. Equivaut à un système monothread du point de vue du client. Couteux en performance car il requiert une coordination entre tous les noeuds.
 
 ```
 Client A: write(x, 1) ──────── ok
@@ -884,7 +884,7 @@ Client C:            read(x) ── 0  ← violation : C voit une ancienne valeu
 
 ### Load Shedding
 
-Strategie de protection ou un service rejette deliberement une partie des requetes entrantes lorsqu'il est en surcharge. Preserve la capacite de traiter correctement les requetes acceptees plutot que de degrader les performances pour toutes les requetes. Differentes strategies : aleatoire, par priorite, par client.
+Stratégie de protection ou un service rejette deliberement une partie des requêtes entrantes lorsqu'il est en surcharge. Preserve la capacité de traiter correctement les requêtes acceptees plutot que de degrader les performances pour toutes les requêtes. Differentes stratégies : aleatoire, par priorite, par client.
 
 ```typescript
 const MAX_CONCURRENT = 100;
@@ -907,7 +907,7 @@ app.use((req, res, next) => {
 
 ### Message Broker
 
-Intermediaire qui recoit des messages des producteurs et les distribue aux consommateurs. Decouple les services, permet la communication asynchrone, et offre des garanties de livraison. Implementations courantes : RabbitMQ (AMQP), Apache Kafka (streaming), Redis Streams, AWS SQS.
+Intermédiaire qui recoit des messages des producteurs et les distribue aux consommateurs. Decouple les services, permet la communication asynchrone, et offre des garanties de livraison. Implementations courantes : RabbitMQ (AMQP), Apache Kafka (streaming), Redis Streams, AWS SQS.
 
 ```
 [Producer A] ─→ ┌──────────────┐ ─→ [Consumer X]
@@ -919,7 +919,7 @@ Intermediaire qui recoit des messages des producteurs et les distribue aux conso
 
 ### Microservice
 
-Style d'architecture ou une application est decomposee en petits services autonomes, chacun responsable d'une capacite metier specifique, deploye independamment, communiquant via des APIs ou des messages. Chaque microservice possede ses propres donnees et peut utiliser sa propre stack technologique.
+Style d'architecture ou une application est decomposee en petits services autonomes, chacun responsable d'une capacité metier spécifique, déployé independamment, communiquant via des APIs ou des messages. Chaque microservice possede ses propres donnees et peut utiliser sa propre stack technologique.
 
 ```
 Monolithe:                    Microservices:
@@ -938,7 +938,7 @@ Monolithe:                    Microservices:
 
 ### Network Partition
 
-Situation ou un reseau se scinde en deux sous-reseaux ou plus qui ne peuvent pas communiquer entre eux, alors que les noeuds de chaque sous-reseau fonctionnent normalement. C'est la situation fondamentale qui rend les systemes distribues difficiles et qui motive le theoreme CAP.
+Situation où un réseau se scinde en deux sous-réseaux ou plus qui ne peuvent pas communiquer entre eux, alors que les noeuds de chaque sous-réseau fonctionnent normalement. C'est la situation fondamentale qui rend les systèmes distribues difficiles et qui motive le théorème CAP.
 
 ```
 Avant partition:
@@ -955,7 +955,7 @@ A et B ne peuvent pas communiquer avec C
 
 ### Orchestration
 
-Style de coordination de workflow ou un orchestrateur central (saga orchestrator) dirige l'execution des etapes, appelle les services dans l'ordre, et gere les compensations en cas d'echec. Opposee a la choreographie. Avantage : visibilite claire du workflow. Inconvenient : point central de defaillance.
+Style de coordination de workflow ou un orchestrateur central (saga orchestrator) dirige l'exécution des étapes, appelle les services dans l'ordre, et géré les compensations en cas d'echec. Opposee à la choreographie. Avantage : visibilite claire du workflow. Inconvenient : point central de defaillance.
 
 ```typescript
 class OrderSagaOrchestrator {
@@ -977,7 +977,7 @@ class OrderSagaOrchestrator {
 
 ### Outbox Pattern
 
-Pattern resolvant le dual write problem en ecrivant l'evenement a publier dans une table "outbox" de la meme base de donnees, dans la meme transaction que la modification de donnees. Un processus separe (relay/poller ou CDC) lit la table outbox et publie les evenements vers le message broker.
+Pattern resolvant le dual write problem en ecrivant l'événement a publier dans une table "outbox" de la même base de donnees, dans la même transaction que la modification de donnees. Un processus separe (relay/poller ou CDC) lit la table outbox et publie les événements vers le message broker.
 
 ```typescript
 // Transaction atomique : donnees + outbox
@@ -999,7 +999,7 @@ await db.transaction(async (tx) => {
 
 ### PACELC
 
-Extension du theoreme CAP par Daniel Abadi : en cas de Partition, choisir entre Availability et Consistency (comme CAP), mais Else (en fonctionnement normal) choisir entre Latency et Consistency. PACELC explique pourquoi certains systemes sacrifient la coherence meme sans partition, pour des raisons de performance.
+Extension du théorème CAP par Daniel Abadi : en cas de Partition, choisir entre Availability et Consistency (comme CAP), mais Else (en fonctionnement normal) choisir entre Latency et Consistency. PACELC explique pourquoi certains systèmes sacrifient la coherence même sans partition, pour des raisons de performance.
 
 ```
 En cas de Partition:          En fonctionnement normal (Else):
@@ -1014,7 +1014,7 @@ Exemples:
 
 ### Partial Failure
 
-Situation ou une partie d'un systeme distribue echoue tandis que le reste continue de fonctionner. Contrairement aux systemes monolithiques qui echouent entierement, les systemes distribues doivent gerer le fait que certains composants sont defaillants et d'autres non. C'est le defi fondamental de la programmation distribuee.
+Situation où une partie d'un système distribue echoue tandis que le reste continue de fonctionner. Contrairement aux systèmes monolithiques qui echouent entièrement, les systèmes distribues doivent gérer le fait que certains composants sont defaillants et d'autres non. C'est le defi fondamental de la programmation distribuee.
 
 ```
 [API Gateway] → [Order Service ✓] → [Payment Service ✗] ← timeout
@@ -1027,7 +1027,7 @@ Que faire ? Le paiement a echoue mais le stock est reserve.
 
 ### Partitioning
 
-Technique de distribution des donnees entre plusieurs noeuds (shards) pour gerer des volumes de donnees ou des charges depassant la capacite d'un seul noeud. Strategies courantes : par plage de cles (range), par hash de la cle, par liste. Aussi appele sharding.
+Technique de distribution des donnees entre plusieurs noeuds (shards) pour gérer des volumes de donnees ou des charges depassant la capacité d'un seul noeud. Stratégies courantes : par plage de clés (range), par hash de la clé, par liste. Aussi appele sharding.
 
 ```
 Partitionnement par hash :
@@ -1043,7 +1043,7 @@ Partitionnement par hash :
 
 ### Projection
 
-Dans le contexte CQRS/event sourcing, une projection est une vue materialised construite en traitant un flux d'evenements. Chaque projection est optimisee pour un cas d'utilisation de lecture specifique. Plusieurs projections peuvent coexister, chacune avec son propre modele de donnees.
+Dans le contexte CQRS/event sourcing, une projection est une vue materialised construite en traitant un flux d'événements. Chaque projection est optimisee pour un cas d'utilisation de lecture spécifique. Plusieurs projections peuvent coexister, chacune avec son propre modèle de donnees.
 
 ```typescript
 // Projection : resume des commandes par client
@@ -1074,7 +1074,7 @@ function projectCustomerSummary(events: DomainEvent[]): Map<string, CustomerOrde
 
 ### Protobuf (Protocol Buffers)
 
-Format de serialisation binaire developpe par Google. Plus compact et plus rapide que JSON. Utilise un schema (.proto) pour definir la structure des messages et generer du code client/serveur. Standard de facto pour gRPC et couramment utilise dans la communication inter-services.
+Format de serialisation binaire développé par Google. Plus compact et plus rapide que JSON. Utilise un schema (.proto) pour définir la structure des messages et générer du code client/serveur. Standard de facto pour gRPC et couramment utilise dans la communication inter-services.
 
 ```protobuf
 // order.proto
@@ -1104,7 +1104,7 @@ message OrderItem {
 
 ### Pub/Sub (Publish/Subscribe)
 
-Pattern de messagerie ou les producteurs (publishers) publient des messages sur des topics sans connaitre les consommateurs, et les consommateurs (subscribers) s'abonnent aux topics qui les interessent. Decouplage maximal entre producteurs et consommateurs. Implementations : Redis Pub/Sub, Google Cloud Pub/Sub, SNS.
+Pattern de messagerie ou les producteurs (publishers) publient des messages sur des topics sans connaître les consommateurs, et les consommateurs (subscribers) s'abonnent aux topics qui les interessent. Decouplage maximal entre producteurs et consommateurs. Implementations : Redis Pub/Sub, Google Cloud Pub/Sub, SNS.
 
 ```typescript
 // Publisher (ne connait pas les subscribers)
@@ -1130,7 +1130,7 @@ await redis.subscribe('order-events', (message) => {
 
 ### Quorum
 
-Nombre minimum de noeuds qui doivent accepter une operation pour qu'elle soit consideree comme reussie. Pour un cluster de N noeuds, un quorum d'ecriture W et un quorum de lecture R, la coherence forte est garantie si W + R > N. Permet de tuner le compromis entre coherence et disponibilite.
+Nombre minimum de noeuds qui doivent accepter une operation pour qu'elle soit consideree comme reussie. Pour un cluster de N noeuds, un quorum d'écriture W et un quorum de lecture R, la coherence forte est garantie si W + R > N. Permet de tuner le compromis entre coherence et disponibilité.
 
 ```
 Cluster de 5 noeuds (N=5):
@@ -1148,7 +1148,7 @@ Quorum d'ecriture W=1, Quorum de lecture R=1
 
 ### Raft
 
-Algorithme de consensus concu par Diego Ongaro et John Ousterhout (2014) pour etre plus comprehensible que Paxos. Decompose le consensus en trois sous-problemes : leader election, log replication, safety. Utilise dans etcd, CockroachDB, TiKV, Consul.
+Algorithme de consensus concu par Diego Ongaro et John Ousterhout (2014) pour etre plus comprehensible que Paxos. Decompose le consensus en trois sous-problèmes : leader election, log replication, safety. Utilise dans etcd, CockroachDB, TiKV, Consul.
 
 ```
 Raft : 3 roles
@@ -1164,7 +1164,7 @@ Cycle de vie :
 
 ### Rate Limiting
 
-Technique de controle du debit qui limite le nombre de requetes qu'un client peut effectuer dans une fenetre de temps donnee. Protege les services contre les abus, les DDoS et les pics de charge. Algorithmes courants : fixed window, sliding window, token bucket, leaky bucket.
+Technique de controle du debit qui limite le nombre de requêtes qu'un client peut effectuer dans une fenêtre de temps donnee. Protege les services contre les abus, les DDoS et les pics de charge. Algorithmes courants : fixed window, sliding window, token bucket, leaky bucket.
 
 ```typescript
 // Rate limiter avec token bucket
@@ -1200,7 +1200,7 @@ class TokenBucket {
 
 ### Rebalancing
 
-Processus de redistribution des partitions ou des donnees entre les noeuds d'un cluster lorsque des noeuds sont ajoutes, retires ou tombent en panne. Doit etre effectue de maniere a minimiser le mouvement de donnees et a maintenir la disponibilite pendant la transition.
+Processus de redistribution des partitions ou des donnees entre les noeuds d'un cluster lorsque des noeuds sont ajoutes, retires ou tombent en panne. Doit etre effectue de manière a minimiser le mouvement de donnees et a maintenir la disponibilité pendant la transition.
 
 ```
 Avant (3 noeuds, 6 partitions):
@@ -1217,7 +1217,7 @@ Ajout du Noeud D (rebalancing):
 
 ### Replication
 
-Technique de copie des donnees sur plusieurs noeuds pour garantir la disponibilite et la durabilite. Trois modeles principaux : single-leader (un seul noeud accepte les ecritures), multi-leader (plusieurs noeuds acceptent les ecritures), leaderless (tous les noeuds acceptent les ecritures, quorum).
+Technique de copie des donnees sur plusieurs noeuds pour garantir la disponibilité et la durabilite. Trois modèles principaux : single-leader (un seul noeud accepte les ecritures), multi-leader (plusieurs noeuds acceptent les ecritures), leaderless (tous les noeuds acceptent les ecritures, quorum).
 
 ```
 Single-leader:
@@ -1239,7 +1239,7 @@ Leaderless:
 
 ### Retry Budget
 
-Limite sur le nombre total de retries qu'un service peut effectuer dans une fenetre de temps donnee. Empeche les retries de surcharger un service deja en difficulte. Typiquement exprime en pourcentage du trafic normal (ex: les retries ne doivent pas depasser 20% du trafic total).
+Limite sur le nombre total de retries qu'un service peut effectuer dans une fenêtre de temps donnee. Empeche les retries de surcharger un service déjà en difficulte. Typiquement exprime en pourcentage du trafic normal (ex: les retries ne doivent pas depasser 20% du trafic total).
 
 ```typescript
 class RetryBudget {
@@ -1268,7 +1268,7 @@ class RetryBudget {
 
 ### Saga
 
-Pattern de gestion de transactions distribuees qui decompose une transaction longue en une sequence d'etapes locales, chacune avec sa transaction compensatoire. Si une etape echoue, les compensations des etapes precedentes sont executees dans l'ordre inverse. Deux implementations : orchestration (coordinateur central) et choreographie (evenements).
+Pattern de gestion de transactions distribuees qui decompose une transaction longue en une sequence d'étapes locales, chacune avec sa transaction compensatoire. Si une étape echoue, les compensations des étapes precedentes sont executees dans l'ordre inverse. Deux implementations : orchestration (coordinateur central) et choreographie (événements).
 
 ```
 Saga "CreateOrder":
@@ -1284,7 +1284,7 @@ Si ProcessPayment echoue:
 
 ### Schema Evolution
 
-Capacite a faire evoluer le schema des messages (events, commandes) au fil du temps tout en maintenant la compatibilite avec les producteurs et consommateurs existants. Strategies : backward compatibility (nouveau schema lit ancien format), forward compatibility (ancien schema lit nouveau format), full compatibility (les deux).
+Capacité à faire evoluer le schema des messages (events, commandes) au fil du temps tout en maintenant la compatibilite avec les producteurs et consommateurs existants. Stratégies : backward compatibility (nouveau schema lit ancien format), forward compatibility (ancien schema lit nouveau format), full compatibility (les deux).
 
 ```typescript
 // Version 1
@@ -1313,7 +1313,7 @@ function handleOrderCreated(event: OrderCreatedV1 | OrderCreatedV2): void {
 
 ### Service Discovery
 
-Mecanisme permettant aux services de trouver dynamiquement les adresses reseau des autres services. Evite le hardcoding des URLs. Deux approches : client-side discovery (le client interroge un registre) et server-side discovery (un load balancer interroge le registre). Implementations : Consul, etcd, Kubernetes DNS, Eureka.
+Mécanisme permettant aux services de trouver dynamiquement les adresses réseau des autres services. Evite le hardcoding des URLs. Deux approches : client-side discovery (le client interroge un registre) et server-side discovery (un load balancer interroge le registre). Implementations : Consul, etcd, Kubernetes DNS, Eureka.
 
 ```
 Client-side discovery:
@@ -1328,7 +1328,7 @@ Server-side discovery:
 
 ### Sharding
 
-Synonyme de partitioning horizontal. Division des donnees d'une table en sous-ensembles distribues sur plusieurs serveurs. Chaque shard contient un sous-ensemble des lignes. La cle de sharding determine quel shard recoit chaque enregistrement. Challenge principal : les requetes cross-shard.
+Synonyme de partitioning horizontal. Division des donnees d'une table en sous-ensembles distribues sur plusieurs serveurs. Chaque shard contient un sous-ensemble des lignes. La clé de sharding déterminé quel shard recoit chaque enregistrement. Challenge principal : les requêtes cross-shard.
 
 ```typescript
 // Sharding par hash de la cle utilisateur
@@ -1347,7 +1347,7 @@ await db.query('SELECT * FROM orders WHERE user_id = $1', ['user:alice']);
 
 ### Sliding Window
 
-Algorithme de rate limiting ou la fenetre de temps glisse continuellement plutot que d'etre fixe. Offre un controle plus precis que le fixed window en evitant les pics aux frontieres de fenetre. Implementations : sliding window log (stocke chaque requete) et sliding window counter (approximation avec deux fenetres).
+Algorithme de rate limiting ou la fenêtre de temps glisse continuellement plutot que d'etre fixe. Offre un controle plus précis que le fixed window en evitant les pics aux frontieres de fenêtre. Implementations : sliding window log (stocke chaque requête) et sliding window counter (approximation avec deux fenetres).
 
 ```typescript
 // Sliding window log
@@ -1375,7 +1375,7 @@ class SlidingWindowLog {
 
 ### Snapshot
 
-Instantane de l'etat d'un aggregate a un point donne dans le temps. En event sourcing, les snapshots evitent de devoir rejouer tous les evenements depuis le debut pour reconstituer l'etat. Le snapshot est pris periodiquement (ex: tous les 100 evenements) et les evenements subsequents sont rejoues a partir du snapshot.
+Instantane de l'état d'un aggregate à un point donne dans le temps. En event sourcing, les snapshots evitent de devoir rejouer tous les événements depuis le debut pour reconstituer l'état. Le snapshot est pris periodiquement (ex: tous les 100 événements) et les événements subsequents sont rejoues à partir du snapshot.
 
 ```typescript
 interface Snapshot<T> {
@@ -1409,7 +1409,7 @@ async function getAggregate(id: string): Promise<Order> {
 
 ### Split Brain
 
-Situation ou un cluster se divise en deux sous-groupes qui fonctionnent independamment, chacun croyant etre le cluster principal. Peut conduire a des ecritures conflictuelles et une corruption de donnees. Prevention : quorum (un sous-groupe ne peut operer que s'il a la majorite), fencing tokens, STONITH.
+Situation où un cluster se divise en deux sous-groupes qui fonctionnent independamment, chacun croyant etre le cluster principal. Peut conduire a des ecritures conflictuelles et une corruption de donnees. Prevention : quorum (un sous-groupe ne peut operer que s'il à la majorite), fencing tokens, STONITH.
 
 ```
 Cluster normal:
@@ -1427,7 +1427,7 @@ Sans protection quorum (split brain !):
 
 ### Stream Processing
 
-Traitement continu de flux de donnees en temps reel, par opposition au traitement par lots (batch). Chaque evenement est traite des qu'il arrive. Permet des analyses en temps reel, la detection d'anomalies, et les mises a jour en continu. Frameworks : Kafka Streams, Apache Flink, Apache Spark Streaming.
+Traitement continu de flux de donnees en temps réel, par opposition au traitement par lots (batch). Chaque événement est traite des qu'il arrive. Permet des analyses en temps réel, la detection d'anomalies, et les mises a jour en continu. Frameworks : Kafka Streams, Apache Flink, Apache Spark Streaming.
 
 ```typescript
 // Stream processing simplifie avec Kafka Streams (concept)
@@ -1450,13 +1450,13 @@ orderStream
 
 ### Strong Consistency
 
-Modele de coherence garantissant que toute lecture apres une ecriture retourne la valeur ecrite (ou une valeur plus recente). Equivaut a linearizability. Toutes les repliques semblent se comporter comme une seule copie. Plus couteux en latence et disponibilite que l'eventual consistency.
+Modèle de coherence garantissant que toute lecture après une écriture retourne la valeur ecrite (où une valeur plus recente). Equivaut a linearizability. Toutes les repliques semblent se comporter comme une seule copie. Plus couteux en latence et disponibilité que l'eventual consistency.
 
 ## T
 
 ### Token Bucket
 
-Algorithme de rate limiting ou des jetons sont ajoutes a un seau a un taux constant. Chaque requete consomme un jeton. Si le seau est vide, la requete est rejetee. Le seau a une capacite maximale (burst), ce qui permet d'absorber de courts pics de trafic.
+Algorithme de rate limiting ou des jetons sont ajoutes à un seau à un taux constant. Chaque requête consomme un jeton. Si le seau est vide, la requête est rejetee. Le seau à une capacité maximale (burst), ce qui permet d'absorber de courts pics de trafic.
 
 ```typescript
 class TokenBucket {
@@ -1491,7 +1491,7 @@ class TokenBucket {
 
 ### Two-Phase Commit (2PC)
 
-Protocole de commit distribue qui garantit que tous les participants committent ou rollback une transaction de maniere atomique. Phase 1 (prepare) : le coordinateur demande a chaque participant s'il est pret. Phase 2 (commit/rollback) : si tous disent oui, le coordinateur ordonne le commit ; sinon, rollback. Probleme : bloquant si le coordinateur tombe.
+Protocole de commit distribue qui garantit que tous les participants committent ou rollback une transaction de manière atomique. Phase 1 (prepare) : le coordinateur demandé à chaque participant s'il est pret. Phase 2 (commit/rollback) : si tous disent oui, le coordinateur ordonne le commit ; sinon, rollback. Problème : bloquant si le coordinateur tombe.
 
 ```
 Phase 1 — Prepare:
@@ -1512,7 +1512,7 @@ Si un participant dit "No" en Phase 1:
 
 ### Vector Clock
 
-Extension des horloges de Lamport qui permet de detecter la concurrence entre evenements. Chaque processus maintient un vecteur de compteurs (un par processus). Permet de determiner si deux evenements sont causalement lies ou concurrents. Utilise dans Dynamo, Riak et d'autres systemes leaderless.
+Extension des horloges de Lamport qui permet de détecter la concurrence entre événements. Chaque processus maintient un vecteur de compteurs (un par processus). Permet de déterminer si deux événements sont causalement lies ou concurrents. Utilise dans Dynamo, Riak et d'autres systèmes leaderless.
 
 ```typescript
 class VectorClock {
@@ -1551,7 +1551,7 @@ class VectorClock {
 
 ### Virtual Node
 
-Technique utilisee dans le consistent hashing ou chaque noeud physique est represente par plusieurs noeuds virtuels sur l'anneau de hash. Ameliore la distribution des cles en cas de nombres inegaux de noeuds ou de capacites differentes. Chaque noeud physique peut avoir un nombre de vnodes proportionnel a sa capacite.
+Technique utilisee dans le consistent hashing ou chaque noeud physique est represente par plusieurs noeuds virtuels sur l'anneau de hash. Ameliore la distribution des clés en cas de nombres inegaux de noeuds ou de capacites différentes. Chaque noeud physique peut avoir un nombre de vnodes proportionnel a sa capacité.
 
 ```
 Anneau de hash sans vnodes (distribution inegale):
@@ -1568,7 +1568,7 @@ Anneau de hash avec vnodes (3 vnodes par noeud):
 
 ### Windowing
 
-Technique de stream processing qui regroupe les evenements en fenetres temporelles pour permettre des agregations. Types de fenetres : tumbling (non-chevauchantes, taille fixe), hopping (chevauchantes, taille fixe, pas configurable), sliding (declenchees par les evenements), session (basees sur l'activite).
+Technique de stream processing qui regroupe les événements en fenetres temporelles pour permettre des agregations. Types de fenetres : tumbling (non-chevauchantes, taille fixe), hopping (chevauchantes, taille fixe, pas configurable), sliding (declenchees par les événements), session (basees sur l'activite).
 
 ```
 Tumbling window (5 min):

@@ -1,23 +1,23 @@
-# Screencast 10 — Coherence et Theoreme CAP
+# Screencast 10 — Coherence et Théorème CAP
 
 ## Informations
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/10-coherence-et-theoreme-cap.md`
 - **Lab associe** : Lab 10
-- **Prerequis** : Screencast 09
+- **Prérequis** : Screencast 09
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/10-coherence-et-theoreme-cap.md` ouvert
 - [ ] Navigateur pret pour la visualisation `cap-theorem.html` (si disponible)
 - [ ] Terminal supplementaire pour les demos
 
 ## Script
 
-### [00:00-02:00] Introduction — Le theoreme CAP
+### [00:00-02:00] Introduction — Le théorème CAP
 
-> Jusqu'ici, on a construit des services qui communiquent entre eux. Mais que se passe-t-il quand deux copies d'une meme donnee divergent ? Le theoreme CAP, formule par Eric Brewer en 2000, dit qu'un systeme distribue ne peut garantir simultanement que deux des trois proprietes suivantes : Consistency, Availability, et Partition tolerance.
+> Jusqu'ici, on a construit des services qui communiquent entre eux. Mais que se passe-t-il quand deux copies d'une même donnee divergent ? Le théorème CAP, formule par Eric Brewer en 2000, dit qu'un système distribue ne peut garantir simultanement que deux des trois propriétés suivantes : Consistency, Availability, et Partition tolerance.
 
 **Action** : Ouvrir le module 10 et afficher le triangle CAP.
 
@@ -44,13 +44,13 @@
                                malgre les coupures reseau)
 ```
 
-> En realite, la partition tolerance n'est pas un choix — les partitions reseau se produisent. Le vrai choix est donc entre CP (coherence + partition tolerance) et AP (disponibilite + partition tolerance). C'est le dilemme fondamental.
+> En realite, la partition tolerance n'est pas un choix — les partitions réseau se produisent. Le vrai choix est donc entre CP (coherence + partition tolerance) et AP (disponibilité + partition tolerance). C'est le dilemme fondamental.
 
 ### [02:00-06:00] Strong consistency vs Eventual consistency
 
-> Demontrons la difference avec du code concret.
+> Demontrons la différence avec du code concret.
 
-**Action** : Creer un fichier `consistency-demo.ts`.
+**Action** : Créer un fichier `consistency-demo.ts`.
 
 ```typescript
 // --- Strong Consistency : toutes les repliques sont synchronisees avant de repondre ---
@@ -159,7 +159,7 @@ await eventual.syncReplicas();
 console.log(`Read from replica 2 (after sync): ${eventual.read('user:1:name', 2)}`); // "Alice"
 ```
 
-> Voila le trade-off : la strong consistency est lente (3 ecritures reseau synchrones) mais coherente. L'eventual consistency est rapide (1 ecriture locale) mais peut retourner des donnees obsoletes pendant une fenetre de temps.
+> Voila le trade-off : la strong consistency est lente (3 ecritures réseau synchrones) mais coherente. L'eventual consistency est rapide (1 écriture locale) mais peut retourner des donnees obsoletes pendant une fenêtre de temps.
 
 ### [06:00-09:00] Quorum — Le compromis
 
@@ -242,11 +242,11 @@ class QuorumStore {
 }
 ```
 
-> Avec 5 repliques et un quorum de 3, on tolere 2 pannes. La formule cle : si W + R > N, on a la strong consistency. W = nombre d'ecritures confirmees, R = nombre de lectures, N = nombre total de repliques. Avec W=3 et R=3, tant qu'on a 3 repliques vivantes, le systeme est coherent et disponible.
+> Avec 5 repliques et un quorum de 3, on tolere 2 pannes. La formule clé : si W + R > N, on à la strong consistency. W = nombre d'ecritures confirmees, R = nombre de lectures, N = nombre total de repliques. Avec W=3 et R=3, tant qu'on a 3 repliques vivantes, le système est coherent et disponible.
 
 ### [09:00-12:30] PACELC — Au-dela du CAP
 
-> Le theoreme CAP est utile mais incomplet. Il ne parle que du cas ou il y a une partition. PACELC etend le modele : en cas de Partition, choisir entre A et C. Sinon (Else), choisir entre Latency et Consistency.
+> Le théorème CAP est utile mais incomplet. Il ne parle que du cas où il y à une partition. PACELC etend le modèle : en cas de Partition, choisir entre A et C. Sinon (Else), choisir entre Latency et Consistency.
 
 **Action** : Afficher le tableau PACELC.
 
@@ -303,7 +303,7 @@ for (const d of decisions) {
 
 > Ouvrons la visualisation interactive pour voir concretement ce qui se passe pendant une partition.
 
-**Action** : Ouvrir la visualisation `cap-theorem.html` dans le navigateur (ou montrer le diagramme dans le module).
+**Action** : Ouvrir la visualisation `cap-theorem.html` dans le navigateur (où montrer le diagramme dans le module).
 
 ```typescript
 // Simulation d'une partition reseau
@@ -352,13 +352,13 @@ class PartitionSimulator {
 
 **Action** : Simuler une partition et montrer le comportement CP vs AP.
 
-> En mode CP, le systeme refuse les ecritures pendant la partition pour garder la coherence. En mode AP, il accepte les ecritures des deux cotes — mais les donnees divergent et devront etre reconciliees apres la partition.
+> En mode CP, le système refuse les ecritures pendant la partition pour garder la coherence. En mode AP, il accepte les ecritures des deux cotes — mais les donnees divergent et devront etre reconciliees après la partition.
 
-### [15:30-17:00] Recapitulatif
+### [15:30-17:00] Récapitulatif
 
-> Recapitulons. Le theoreme CAP dit qu'en cas de partition, il faut choisir entre coherence et disponibilite. La strong consistency attend toutes les repliques, l'eventual consistency n'en attend qu'une. Le quorum est un compromis qui attend une majorite. PACELC etend le CAP au cas normal (sans partition). Et le choix depend toujours du contexte metier.
+> Recapitulons. Le théorème CAP dit qu'en cas de partition, il faut choisir entre coherence et disponibilité. La strong consistency attend toutes les repliques, l'eventual consistency n'en attend qu'une. Le quorum est un compromis qui attend une majorite. PACELC etend le CAP au cas normal (sans partition). Et le choix depend toujours du contexte metier.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -373,12 +373,12 @@ PROCHAINE ETAPE :
 → Screencast 11 : Replication et partitionnement
 ```
 
-> Au prochain screencast, on va implementer la replication leader-follower et le consistent hashing. Ce sont les mecanismes concrets qui implementent les choix CAP. A bientot !
+> Au prochain screencast, on va implementer la replication leader-follower et le consistent hashing. Ce sont les mécanismes concrets qui implementent les choix CAP. A bientot !
 
 ## Points d'attention pour l'enregistrement
 - Le triangle CAP doit etre affiche clairement — c'est un diagramme celebre
 - Bien insister sur le fait que P n'est pas un choix — les partitions arrivent
-- La demo strong vs eventual est le moment cle : montrer la lecture undefined en eventual
+- La demo strong vs eventual est le moment clé : montrer la lecture undefined en eventual
 - Le quorum est un concept mathematique — prendre le temps d'expliquer W+R>N
-- Le tableau PACELC est une reference utile — le laisser a l'ecran quelques secondes
-- Si la visualisation HTML existe, la montrer en interactif — c'est tres parlant
+- Le tableau PACELC est une référence utile — le laisser a l'ecran quelques secondes
+- Si la visualisation HTML existe, la montrer en interactif — c'est très parlant

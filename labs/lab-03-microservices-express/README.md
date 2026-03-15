@@ -1,21 +1,21 @@
 # Lab 03 — Premiers microservices
 
 ## Objectifs
-- Definir une interface de microservice avec routes et health check
-- Implementer un health check avec uptime et verification de dependances
-- Creer un logger structure (JSON) avec timestamp, level, service, message
+- Définir une interface de microservice avec routes et health check
+- Implementer un health check avec uptime et vérification de dépendances
+- Créer un logger structure (JSON) avec timestamp, level, service, message
 - Comprendre et implementer la propagation de correlation IDs
-- Construire un registre de services en memoire (register, discover)
+- Construire un registre de services en mémoire (register, discover)
 - Simuler des appels inter-services avec forwarding de correlation ID
 
 ## Exercices
 Le fichier `exercise.ts` contient 6 exercices :
-1. **Definition de service** — definir une interface de microservice avec name, port, routes, health check
-2. **Health check** — implementer un health check retournant status, uptime et verification de dependances
-3. **Logging structure** — creer un logger structure (JSON avec timestamp, level, service, message)
-4. **Correlation ID** — implementer la generation et propagation de correlation IDs
-5. **Registre de services** — creer un registre en memoire (register, deregister, discover)
-6. **Appel inter-services** — simuler un appel a un autre service avec forwarding de correlation ID
+1. **Definition de service** — définir une interface de microservice avec name, port, routes, health check
+2. **Health check** — implementer un health check retournant status, uptime et vérification de dépendances
+3. **Logging structure** — créer un logger structure (JSON avec timestamp, level, service, message)
+4. **Correlation ID** — implementer la génération et propagation de correlation IDs
+5. **Registre de services** — créer un registre en mémoire (register, deregister, discover)
+6. **Appel inter-services** — simuler un appel à un autre service avec forwarding de correlation ID
 
 ## Instructions
 1. Ouvrez `exercise.ts`

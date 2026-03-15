@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/12-transactions-distribuees-saga.md`
 - **Lab associe** : Lab 12
-- **Prerequis** : Screencast 11
+- **Prérequis** : Screencast 11
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/12-transactions-distribuees-saga.md` ouvert
 - [ ] Navigateur pret pour la visualisation `saga-pattern.html` (si disponible)
 - [ ] Terminal supplementaire pour les demos
@@ -17,9 +17,9 @@
 
 ### [00:00-02:00] Introduction — Pourquoi le 2PC ne suffit pas
 
-> Dans un monolithe, une transaction SQL classique garantit l'atomicite : soit tout reussit, soit tout est annule. En microservices, chaque service a sa propre base de donnees — pas de transaction globale. Le Two-Phase Commit (2PC) existe, mais il a des problemes majeurs : il est lent, il bloque les participants, et un coordinateur en panne peut bloquer tout le systeme.
+> Dans un monolithe, une transaction SQL classique garantit l'atomicite : soit tout reussit, soit tout est annule. En microservices, chaque service a sa propre base de donnees — pas de transaction globale. Le Two-Phase Commit (2PC) existe, mais il a des problèmes majeurs : il est lent, il bloque les participants, et un coordinateur en panne peut bloquer tout le système.
 
-**Action** : Ouvrir le module 12 et afficher le diagramme du 2PC et ses problemes.
+**Action** : Ouvrir le module 12 et afficher le diagramme du 2PC et ses problèmes.
 
 ```
 TWO-PHASE COMMIT (2PC) :
@@ -35,13 +35,13 @@ Coordinateur ──commit───► Service A     3. Verrou sur les ressources
              ──commit───► Service C     4. Point de defaillance unique
 ```
 
-> Le saga pattern est l'alternative pragmatique : au lieu d'une grosse transaction, on execute une sequence de transactions locales, chacune avec une compensation en cas d'echec.
+> Le saga pattern est l'alternative pragmatique : au lieu d'une grosse transaction, on exécuté une sequence de transactions locales, chacune avec une compensation en cas d'echec.
 
 ### [02:00-06:30] Saga par choreographie
 
-> Il y a deux variantes du saga pattern. La choreographie : chaque service ecoute les evenements et reagit. Pas de coordinateur central.
+> Il y a deux variantes du saga pattern. La choreographie : chaque service ecoute les événements et reagit. Pas de coordinateur central.
 
-**Action** : Creer un fichier `saga-choreography.ts`.
+**Action** : Créer un fichier `saga-choreography.ts`.
 
 ```typescript
 type SagaEventType =
@@ -125,7 +125,7 @@ bus.on('OrderCancelled', async (event) => {
 });
 ```
 
-**Action** : Executer le happy path puis le sad path.
+**Action** : Exécuter le happy path puis le sad path.
 
 ```typescript
 console.log('\n=== Happy Path (total: 99 EUR) ===');
@@ -135,11 +135,11 @@ console.log('\n=== Sad Path (total: 999 EUR — declined) ===');
 await createOrder('order-2', 'user-1', 999);
 ```
 
-> Dans le happy path : OrderCreated → PaymentCharged → StockReserved. Dans le sad path : OrderCreated → PaymentRefunded → OrderCancelled → stock release. Chaque service reagit aux evenements sans coordinateur central.
+> Dans le happy path : OrderCreated → PaymentCharged → StockReserved. Dans le sad path : OrderCreated → PaymentRefunded → OrderCancelled → stock release. Chaque service reagit aux événements sans coordinateur central.
 
 ### [06:30-11:00] Saga par orchestration
 
-> La deuxieme variante : l'orchestration. Un coordinateur central (l'orchestrateur) pilote les etapes et gere les compensations.
+> La deuxieme variante : l'orchestration. Un coordinateur central (l'orchestrateur) pilote les étapes et géré les compensations.
 
 **Action** : Implementer l'orchestrateur.
 
@@ -261,7 +261,7 @@ const saga2 = new SagaOrchestrator();
 await saga2.execute({ orderId: 'order-2', total: 999 });
 ```
 
-> L'orchestrateur est plus facile a comprendre et a debugger que la choreographie. On voit clairement l'ordre des etapes et les compensations. Mais c'est un point de couplage central — si l'orchestrateur crashe, la saga est bloquee.
+> L'orchestrateur est plus facile à comprendre et a debugger que la choreographie. On voit clairement l'ordre des étapes et les compensations. Mais c'est un point de couplage central — si l'orchestrateur crashe, la saga est bloquee.
 
 ### [11:00-14:00] Compensating transactions — Les subtilites
 
@@ -300,7 +300,7 @@ for (const s of strategies) {
 }
 ```
 
-> En pratique, les sagas doivent aussi gerer les compensations qui echouent. Si le refund echoue, il faut un mecanisme de retry avec alerting. C'est pourquoi en production, les orchestrateurs de saga sont souvent combines avec des queues persistantes.
+> En pratique, les sagas doivent aussi gérer les compensations qui echouent. Si le refund echoue, il faut un mécanisme de retry avec alerting. C'est pourquoi en production, les orchestrateurs de saga sont souvent combines avec des queues persistantes.
 
 ### [14:00-16:00] Choreographie vs Orchestration — Quand choisir quoi
 
@@ -321,11 +321,11 @@ Cas d'usage    | 2-4 services, flux       | 4+ services, flux complexes,
                |   simples                |   compensations complexes
 ```
 
-### [16:00-17:30] Recapitulatif
+### [16:00-17:30] Récapitulatif
 
-> Recapitulons. Le 2PC est lent et fragile — a eviter en microservices. Le saga pattern decompose une transaction distribuee en etapes locales avec compensations. La choreographie est decouplante mais difficile a debugger. L'orchestration est centralisee mais lisible. Et les compensating transactions doivent etre pensees des le design.
+> Recapitulons. Le 2PC est lent et fragile — a éviter en microservices. Le saga pattern decompose une transaction distribuee en étapes locales avec compensations. La choreographie est decouplante mais difficile a debugger. L'orchestration est centralisee mais lisible. Et les compensating transactions doivent etre pensees des le design.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -339,12 +339,12 @@ PROCHAINE ETAPE :
 → Screencast 13 : CQRS & Event Sourcing
 ```
 
-> Au prochain screencast, on va decouvrir CQRS et l'event sourcing — deux patterns qui changent radicalement la facon de penser les donnees en distribue. A bientot !
+> Au prochain screencast, on va découvrir CQRS et l'event sourcing — deux patterns qui changent radicalement la façon de penser les donnees en distribue. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Le diagramme du 2PC et ses problemes doit etre montre clairement en intro
-- Executer le happy path ET le sad path de la choreographie — les deux sont importants
+- Le diagramme du 2PC et ses problèmes doit etre montre clairement en intro
+- Exécuter le happy path ET le sad path de la choreographie — les deux sont importants
 - L'orchestrateur est plus visuel : les logs montrent clairement l'ordre et les compensations
 - Bien insister sur les compensations qui ne sont pas de simples "undo"
-- Le tableau choreographie vs orchestration est un aide-memoire precieux — le laisser visible
+- Le tableau choreographie vs orchestration est un aide-mémoire precieux — le laisser visible
 - Si la visualisation saga existe, la montrer pour le workflow complet

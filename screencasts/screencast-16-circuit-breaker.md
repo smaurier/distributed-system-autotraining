@@ -4,11 +4,11 @@
 - **Duree estimee** : 18-20 min
 - **Module** : `modules/16-circuit-breaker.md`
 - **Lab associe** : Lab 16
-- **Prerequis** : Screencast 15
+- **Prérequis** : Screencast 15
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `labs/lab-16-circuit-breaker/` pret
 - [ ] Aucun processus sur les ports 3000-3005
 - [ ] Visualisation circuit-breaker prete (si disponible dans `visualizations/`)
@@ -17,15 +17,15 @@
 
 ### [00:00-02:00] Introduction — Le disjoncteur logiciel
 
-> Au screencast precedent, on a vu comment les pannes en cascade peuvent detruire un systeme entier en quelques secondes. Le circuit breaker est la protection numero un contre ce scenario. Il fonctionne exactement comme un disjoncteur electrique : quand trop d'erreurs se produisent, il "ouvre le circuit" et empeche les requetes d'atteindre un service defaillant.
+> Au screencast précédent, on a vu comment les pannes en cascade peuvent detruire un système entier en quelques secondes. Le circuit breaker est la protection numéro un contre ce scenario. Il fonctionne exactement comme un disjoncteur electrique : quand trop d'erreurs se produisent, il "ouvre le circuit" et empeche les requêtes d'atteindre un service defaillant.
 
-**Action** : Afficher le diagramme de la machine a etats du module 16 (Closed, Open, Half-Open).
+**Action** : Afficher le diagramme de la machine a états du module 16 (Closed, Open, Half-Open).
 
-> La machine a etats a trois positions. Closed : tout fonctionne normalement, les requetes passent. Open : le service est considere en panne, les requetes echouent immediatement. Half-Open : on laisse passer quelques requetes de test pour verifier si le service est revenu.
+> La machine a états a trois positions. Closed : tout fonctionne normalement, les requêtes passent. Open : le service est considere en panne, les requêtes echouent immediatement. Half-Open : on laisse passer quelques requêtes de test pour vérifier si le service est revenu.
 
-### [02:00-08:00] Construire la machine a etats du circuit breaker
+### [02:00-08:00] Construire la machine a états du circuit breaker
 
-**Action** : Creer un fichier `circuit-breaker.ts`.
+**Action** : Créer un fichier `circuit-breaker.ts`.
 
 ```typescript
 type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
@@ -120,7 +120,7 @@ class CircuitBreaker {
 }
 ```
 
-**Action** : Tester la machine a etats avec un service qui echoue puis revient.
+**Action** : Tester la machine a états avec un service qui echoue puis revient.
 
 ```typescript
 const breaker = new CircuitBreaker('payment-api', {
@@ -150,11 +150,11 @@ for (let i = 1; i <= 10; i++) {
 }
 ```
 
-> Observez les transitions : CLOSED apres 3 echecs, il passe OPEN. Ensuite il attend le recoveryTimeout, passe en HALF_OPEN, teste quelques requetes, et si elles reussissent, revient en CLOSED.
+> Observez les transitions : CLOSED après 3 echecs, il passe OPEN. Ensuite il attend le recoveryTimeout, passe en HALF_OPEN, teste quelques requêtes, et si elles reussissent, revient en CLOSED.
 
 ### [08:00-12:00] Bulkhead — Isoler les ressources
 
-> Le bulkhead est inspire de la construction navale : les cloisons etanches empechent un trou dans la coque de couler tout le navire. En logiciel, on isole les pools de connexions par dependance pour qu'un service lent ne consomme pas toutes les ressources.
+> Le bulkhead est inspire de la construction navale : les cloisons etanches empechent un trou dans la coque de couler tout le navire. En logiciel, on isole les pools de connexions par dépendance pour qu'un service lent ne consomme pas toutes les ressources.
 
 **Action** : Implementer un bulkhead a base de semaphore.
 
@@ -199,15 +199,15 @@ const inventoryBulkhead = new Bulkhead('inventory', 10);
 const notificationBulkhead = new Bulkhead('notification', 3);
 ```
 
-**Action** : Lancer 20 requetes simultanees et montrer que le bulkhead limite la concurrence.
+**Action** : Lancer 20 requêtes simultanees et montrer que le bulkhead limite la concurrence.
 
-> Si le payment-service ralentit et utilise ses 5 slots, les requetes vers inventory-service et notification-service continuent normalement. Sans bulkhead, le payment-service lent aurait consomme tous les threads du pool global.
+> Si le payment-service ralentit et utilise ses 5 slots, les requêtes vers inventory-service et notification-service continuent normalement. Sans bulkhead, le payment-service lent aurait consomme tous les threads du pool global.
 
 ### [12:00-15:30] Backpressure — Signaler la surcharge
 
-> La backpressure est le mecanisme par lequel un systeme surcharge signale a ses clients qu'il faut ralentir. Au lieu de tout accepter et s'ecrouler, le systeme dit "je suis plein, reviens plus tard".
+> La backpressure est le mécanisme par lequel un système surcharge signale a ses clients qu'il faut ralentir. Au lieu de tout accepter et s'ecrouler, le système dit "je suis plein, reviens plus tard".
 
-**Action** : Implementer une bounded queue avec strategies de backpressure.
+**Action** : Implementer une bounded queue avec stratégies de backpressure.
 
 ```typescript
 type BackpressureStrategy = 'buffer' | 'drop-newest' | 'drop-oldest' | 'signal';
@@ -259,13 +259,13 @@ class BoundedQueue<T> {
 }
 ```
 
-**Action** : Demontrer chaque strategie avec un producteur rapide et un consommateur lent.
+**Action** : Demontrer chaque stratégie avec un producteur rapide et un consommateur lent.
 
-> La strategie "signal" est la plus propre — elle correspond au HTTP 429 (Too Many Requests) ou au mecanisme de flow control de HTTP/2 et gRPC.
+> La stratégie "signal" est la plus propre — elle correspond au HTTP 429 (Too Many Requests) ou au mécanisme de flow control de HTTP/2 et gRPC.
 
 ### [15:30-18:00] Combiner les trois — Defense en profondeur
 
-> En production, on combine les trois patterns. Le circuit breaker protege contre les services en panne. Le bulkhead isole les ressources par dependance. Et la backpressure protege chaque service individuellement contre la surcharge.
+> En production, on combine les trois patterns. Le circuit breaker protege contre les services en panne. Le bulkhead isole les ressources par dépendance. Et la backpressure protege chaque service individuellement contre la surcharge.
 
 **Action** : Montrer la combinaison des trois.
 
@@ -294,9 +294,9 @@ const client = new ResilientClient(
 );
 ```
 
-**Action** : Ouvrir la visualisation du circuit breaker (si disponible) et montrer les transitions en temps reel.
+**Action** : Ouvrir la visualisation du circuit breaker (si disponible) et montrer les transitions en temps réel.
 
-### [18:00-19:30] Recapitulatif et lien avec le Lab 16
+### [18:00-19:30] Récapitulatif et lien avec le Lab 16
 
 > Trois patterns, trois niveaux de protection. Le circuit breaker empeche d'appeler un service mort. Le bulkhead empeche un service lent de tout bloquer. La backpressure empeche la surcharge. Ensemble, ils forment une defense en profondeur contre les pannes en cascade.
 
@@ -305,9 +305,9 @@ const client = new ResilientClient(
 > Dans le lab, vous allez construire ces trois composants de zero et les tester avec des simulations de pannes. Mettez la video en pause et lancez-vous !
 
 ## Points d'attention pour l'enregistrement
-- La machine a etats du circuit breaker est le coeur : prendre le temps de bien montrer chaque transition
-- Utiliser des console.log colores (ou prefixes clairs) pour distinguer les etats
-- Pour le bulkhead, lancer les requetes en parallele (Promise.all) pour bien voir la limitation
+- La machine a états du circuit breaker est le coeur : prendre le temps de bien montrer chaque transition
+- Utiliser des console.log colores (où prefixes clairs) pour distinguer les états
+- Pour le bulkhead, lancer les requêtes en parallele (Promise.all) pour bien voir la limitation
 - La demo backpressure doit etre visuelle : montrer la queue qui se remplit et les messages rejetes
 - Si la visualisation circuit-breaker existe, l'afficher en plein ecran pour le wow effect
-- Verifier les timings : le recoveryTimeout de 2s doit etre visible sans attente trop longue
+- Vérifier les timings : le recoveryTimeout de 2s doit etre visible sans attente trop longue

@@ -1,14 +1,14 @@
-# Screencast 02 — Communication reseau fondamentale
+# Screencast 02 — Communication réseau fondamentale
 
 ## Informations
 - **Duree estimee** : 12-15 min
 - **Module** : `modules/02-communication-reseau-fondamentale.md`
 - **Lab associe** : Lab 02
-- **Prerequis** : Screencast 01
+- **Prérequis** : Screencast 01
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/02-communication-reseau-fondamentale.md` ouvert
 - [ ] Deux terminaux disponibles (un pour le serveur, un pour le client)
 
@@ -16,7 +16,7 @@
 
 ### [00:00-01:30] Introduction
 
-> Dans ce screencast, nous allons descendre au niveau de la communication reseau. Comprendre TCP, la latence et les timeouts est fondamental pour diagnostiquer les problemes en production. Meme si vous utilisez HTTP — qui repose sur TCP — savoir ce qui se passe en dessous vous donne un avantage enorme pour le debugging.
+> Dans ce screencast, nous allons descendre au niveau de la communication réseau. Comprendre TCP, la latence et les timeouts est fondamental pour diagnostiquer les problèmes en production. Même si vous utilisez HTTP — qui repose sur TCP — savoir ce qui se passe en dessous vous donne un avantage enorme pour le debugging.
 
 **Action** : Ouvrir le module 02 et afficher le diagramme du 3-way handshake
 
@@ -34,13 +34,13 @@
      │ ═══════ CONNEXION ETABLIE ═══════ │
 ```
 
-> Chaque connexion TCP commence par ce triple echange. Ca parait anodin, mais quand vous ouvrez des centaines de connexions par seconde, ces handshakes representent un cout significatif. C'est pour ca que le connection pooling existe.
+> Chaque connexion TCP commence par ce triple echange. Ça parait anodin, mais quand vous ouvrez des centaines de connexions par seconde, ces handshakes representent un cout significatif. C'est pour ça que le connection pooling existe.
 
 ### [01:30-04:00] Simulation du serveur TCP
 
-> Construisons un serveur et un client TCP en TypeScript pour voir comment ca fonctionne concretement.
+> Construisons un serveur et un client TCP en TypeScript pour voir comment ça fonctionne concretement.
 
-**Action** : Creer le fichier `demo-tcp-server.ts` et taper le code
+**Action** : Créer le fichier `demo-tcp-server.ts` et taper le code
 
 ```typescript
 import * as net from 'node:net';
@@ -79,9 +79,9 @@ npx tsx demo-tcp-server.ts
 
 ### [04:00-06:00] Client TCP avec timeout
 
-> Maintenant, creons un client TCP avec gestion de timeout. C'est une competence essentielle : toujours mettre un timeout sur les connexions reseau.
+> Maintenant, creons un client TCP avec gestion de timeout. C'est une compétence essentielle : toujours mettre un timeout sur les connexions réseau.
 
-**Action** : Creer le fichier `demo-tcp-client.ts` dans le second terminal
+**Action** : Créer le fichier `demo-tcp-client.ts` dans le second terminal
 
 ```typescript
 import * as net from 'node:net';
@@ -131,19 +131,19 @@ async function main() {
 main();
 ```
 
-**Action** : Executer le client et montrer l'echange dans les deux terminaux
+**Action** : Exécuter le client et montrer l'echange dans les deux terminaux
 
 ```bash
 npx tsx demo-tcp-client.ts
 ```
 
-> Regardez les deux terminaux : le serveur affiche la connexion et le message recu, le client affiche la reponse. C'est la base de toute communication reseau.
+> Regardez les deux terminaux : le serveur affiche la connexion et le message recu, le client affiche la réponse. C'est la base de toute communication réseau.
 
 ### [06:00-08:30] Mesurer la latence
 
-> Maintenant, mesurons la latence. En systemes distribues, la latence est composee de plusieurs elements : resolution DNS, handshake TCP, handshake TLS, temps de traitement, et transfert de la reponse.
+> Maintenant, mesurons la latence. En systèmes distribues, la latence est composee de plusieurs éléments : résolution DNS, handshake TCP, handshake TLS, temps de traitement, et transfert de la réponse.
 
-**Action** : Creer `demo-latency.ts` et taper le code
+**Action** : Créer `demo-latency.ts` et taper le code
 
 ```typescript
 interface LatencyMeasurement {
@@ -194,13 +194,13 @@ async function benchmark(url: string, iterations: number = 10) {
 }
 ```
 
-> Remarquez la variabilite : la premiere requete est toujours plus lente a cause du handshake TCP/TLS et de la resolution DNS. Les requetes suivantes beneficient du keep-alive et du cache DNS. C'est exactement pourquoi le connection pooling est si important.
+> Remarquez la variabilite : la première requête est toujours plus lente a cause du handshake TCP/TLS et de la résolution DNS. Les requêtes suivantes beneficient du keep-alive et du cache DNS. C'est exactement pourquoi le connection pooling est si important.
 
 ### [08:30-10:30] Implementer des timeouts robustes
 
-> Les timeouts sont la defense numero un contre les pannes en cascade. Sans timeout, un service lent bloque tous les appelants qui le contactent.
+> Les timeouts sont la defense numéro un contre les pannes en cascade. Sans timeout, un service lent bloque tous les appelants qui le contactent.
 
-**Action** : Montrer le diagramme du module puis ecrire le code
+**Action** : Montrer le diagramme du module puis écrire le code
 
 ```
 Sans timeout :                    Avec timeout :
@@ -240,11 +240,11 @@ async function fetchWithTimeout(
 }
 ```
 
-> Trois types de timeouts a connaitre : connect timeout — le temps max pour etablir la connexion, typiquement 1 a 5 secondes. Read timeout — le temps max entre deux paquets, 5 a 30 secondes. Et request timeout — le temps total pour l'ensemble, 10 a 60 secondes. En regle generale : un timeout trop long est presque pire que pas de timeout.
+> Trois types de timeouts à connaître : connect timeout — le temps max pour etablir la connexion, typiquement 1 a 5 secondes. Read timeout — le temps max entre deux paquets, 5 a 30 secondes. Et request timeout — le temps total pour l'ensemble, 10 a 60 secondes. En regle générale : un timeout trop long est presque pire que pas de timeout.
 
 ### [10:30-13:00] Connection pooling
 
-> Dernier concept : le connection pooling. Creer une connexion TCP/TLS a chaque requete est couteux. Le pooling reutilise les connexions existantes.
+> Dernier concept : le connection pooling. Créer une connexion TCP/TLS à chaque requête est couteux. Le pooling reutilise les connexions existantes.
 
 **Action** : Montrer le diagramme de comparaison puis coder le pool
 
@@ -306,13 +306,13 @@ class ConnectionPool<T> {
 }
 ```
 
-> Ce pool generique fonctionne avec n'importe quel type de connexion. En pratique, Node.js gere deja un pool via `http.Agent` avec l'option `keepAlive: true`. Mais comprendre le mecanisme sous-jacent est essentiel pour le tuning en production.
+> Ce pool générique fonctionne avec n'importe quel type de connexion. En pratique, Node.js géré déjà un pool via `http.Agent` avec l'option `keepAlive: true`. Mais comprendre le mécanisme sous-jacent est essentiel pour le tuning en production.
 
-### [13:00-14:30] Recapitulatif et transition
+### [13:00-14:30] Récapitulatif et transition
 
-> Recapitulons les points cles de ce module.
+> Recapitulons les points clés de ce module.
 
-**Action** : Afficher le recapitulatif
+**Action** : Afficher le récapitulatif
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -328,8 +328,8 @@ CE QU'IL FAUT RETENIR :
 
 ## Points d'attention pour l'enregistrement
 - Avoir deux terminaux bien visibles pour la demo TCP serveur/client
-- Lancer le serveur TCP AVANT le client pour eviter les erreurs de connexion
+- Lancer le serveur TCP AVANT le client pour éviter les erreurs de connexion
 - Prendre le temps de commenter le pattern async/await + AbortController pour le timeout
-- Montrer la variabilite de la latence en executant le benchmark plusieurs fois
-- Bien expliquer la difference entre les 3 types de timeouts
-- Nettoyer les fichiers demo a la fin (ou les laisser comme reference)
+- Montrer la variabilite de la latence en exécutant le benchmark plusieurs fois
+- Bien expliquer la différence entre les 3 types de timeouts
+- Nettoyer les fichiers demo à la fin (où les laisser comme référence)

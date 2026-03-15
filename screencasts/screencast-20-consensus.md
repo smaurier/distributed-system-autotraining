@@ -4,20 +4,20 @@
 - **Duree estimee** : 18-20 min
 - **Module** : `modules/20-consensus-coordination-distribuee.md`
 - **Lab associe** : Lab 20
-- **Prerequis** : Screencast 19
+- **Prérequis** : Screencast 19
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/20-consensus-coordination-distribuee.md` ouvert
 - [ ] Navigateur pret pour la visualisation `consensus-raft.html` (si disponible)
 - [ ] Terminal supplementaire pour les demos
 
 ## Script
 
-### [00:00-02:00] Introduction — Le probleme du consensus
+### [00:00-02:00] Introduction — Le problème du consensus
 
-> Comment plusieurs noeuds se mettent-ils d'accord sur une valeur unique quand des pannes peuvent survenir a tout moment ? C'est le probleme du consensus. Il est au coeur de toutes les bases de donnees distribuees, des systemes de configuration comme etcd/ZooKeeper, et de la replication leader-follower. L'algorithme Raft, publie en 2014, est devenu le standard de facto grace a sa comprehensibilite.
+> Comment plusieurs noeuds se mettent-ils d'accord sur une valeur unique quand des pannes peuvent survenir a tout moment ? C'est le problème du consensus. Il est au coeur de toutes les bases de donnees distribuees, des systèmes de configuration comme etcd/ZooKeeper, et de la replication leader-follower. L'algorithme Raft, publie en 2014, est devenu le standard de facto grâce à sa comprehensibilite.
 
 **Action** : Ouvrir le module 20 et afficher le diagramme des roles Raft.
 
@@ -36,13 +36,13 @@ RAFT : 3 ROLES
                                                                   ▼       ▼
 ```
 
-> Raft decompose le consensus en trois sous-problemes : l'election du leader, la replication du log, et la securite (garantie que les entries commitees ne sont jamais perdues).
+> Raft decompose le consensus en trois sous-problèmes : l'election du leader, la replication du log, et la sécurité (garantie que les entries commitees ne sont jamais perdues).
 
 ### [02:00-07:00] Implementer l'election Raft
 
-> Commencons par l'election. Quand un follower ne recoit plus de heartbeat du leader, il devient candidat et demande les votes des autres noeuds.
+> Commencons par l'election. Quand un follower ne recoit plus de heartbeat du leader, il devient candidat et demandé les votes des autres noeuds.
 
-**Action** : Creer un fichier `raft-consensus.ts`.
+**Action** : Créer un fichier `raft-consensus.ts`.
 
 ```typescript
 type RaftRole = 'follower' | 'candidate' | 'leader';
@@ -322,9 +322,9 @@ for (const node of nodes) {
 }
 ```
 
-### [12:00-15:00] Fencing tokens — Eviter le split brain
+### [12:00-15:00] Fencing tokens — Éviter le split brain
 
-> Un probleme subtil : si un ancien leader ne sait pas qu'il a ete remplace, il peut continuer a ecrire. Les fencing tokens empechent ca.
+> Un problème subtil : si un ancien leader ne sait pas qu'il a ete remplace, il peut continuer à écrire. Les fencing tokens empechent ça.
 
 **Action** : Implementer les fencing tokens.
 
@@ -367,13 +367,13 @@ resource.write('key', 'value-from-B', 2);  // OK
 resource.write('key', 'stale-from-A', 1);  // REJETE — token perime
 ```
 
-> Le fencing token est generalement le term du leader Raft. Quand un nouveau leader est elu avec un term superieur, toutes les ecritures de l'ancien leader sont automatiquement rejetees. C'est la garantie contre le split brain.
+> Le fencing token est généralement le term du leader Raft. Quand un nouveau leader est elu avec un term superieur, toutes les ecritures de l'ancien leader sont automatiquement rejetees. C'est la garantie contre le split brain.
 
 ### [15:00-17:30] Visualisation Raft interactive
 
-> Ouvrons la visualisation interactive de Raft pour voir les elections et la replication en temps reel.
+> Ouvrons la visualisation interactive de Raft pour voir les elections et la replication en temps réel.
 
-**Action** : Ouvrir la visualisation `consensus-raft.html` dans le navigateur (ou montrer le diagramme du module).
+**Action** : Ouvrir la visualisation `consensus-raft.html` dans le navigateur (où montrer le diagramme du module).
 
 ```
 TIMELINE D'UN CLUSTER RAFT (5 noeuds) :
@@ -394,11 +394,11 @@ Le systeme tolere 2 pannes sur 5 noeuds.
 
 > La regle fondamentale : un cluster de N noeuds tolere (N-1)/2 pannes. 3 noeuds tolerent 1 panne. 5 noeuds tolerent 2 pannes. 7 noeuds tolerent 3 pannes. C'est pourquoi etcd et ZooKeeper utilisent typiquement 3 ou 5 noeuds.
 
-### [17:30-19:30] Recapitulatif
+### [17:30-19:30] Récapitulatif
 
-> Recapitulons. Raft decompose le consensus en election, replication, et securite. L'election utilise un timeout aleatoire et un systeme de terms. La replication utilise un log append-only avec commit par majorite. Les fencing tokens empechent les anciens leaders d'ecrire. Et un cluster de N noeuds tolere (N-1)/2 pannes.
+> Recapitulons. Raft decompose le consensus en election, replication, et sécurité. L'election utilise un timeout aleatoire et un système de terms. La replication utilise un log append-only avec commit par majorite. Les fencing tokens empechent les anciens leaders d'écrire. Et un cluster de N noeuds tolere (N-1)/2 pannes.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -412,12 +412,12 @@ PROCHAINE ETAPE :
 → Screencast 21 : Temps, ordre et horloges logiques
 ```
 
-> Au prochain screencast, on va explorer comment ordonner les evenements dans un systeme distribue ou il n'y a pas d'horloge globale. Lamport clocks, vector clocks, et hybrid logical clocks. A bientot !
+> Au prochain screencast, on va explorer comment ordonner les événements dans un système distribue ou il n'y a pas d'horloge globale. Lamport clocks, vector clocks, et hybrid logical clocks. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- L'election Raft est le moment cle — montrer les votes etape par etape
+- L'election Raft est le moment clé — montrer les votes étape par étape
 - Le log replication avec le commit par majorite doit etre bien illustre
 - Le fencing token est un concept subtil — bien expliquer le scenario du split brain
-- La visualisation interactive (si disponible) est tres efficace pour comprendre les timelines
+- La visualisation interactive (si disponible) est très efficace pour comprendre les timelines
 - La formule (N-1)/2 doit etre mentionnee clairement
 - Prendre un rythme calme — c'est un des screencasts les plus denses du cours

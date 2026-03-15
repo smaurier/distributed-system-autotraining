@@ -1,6 +1,6 @@
 # Module 14 : Outbox Pattern & Reliable Messaging
 
-> **Difficulty** : 4/5 | **Duration estimee** : 3h30 | **Prerequis** : Modules 1-13
+> **Difficulty** : 4/5 | **Duration estimee** : 3h30 | **Prérequis** : Modules 1-13
 
 ---
 
@@ -8,7 +8,7 @@
 
 A la fin de ce module, vous serez capable de :
 
-1. Identifier le probleme du dual write et ses consequences
+1. Identifier le problème du dual write et ses consequences
 2. Implementer le pattern Outbox pour des ecritures fiables
 3. Comprendre le CDC (Change Data Capture) et son role dans le pattern Outbox
 4. Implementer un polling publisher comme alternative simple au CDC
@@ -18,9 +18,9 @@ A la fin de ce module, vous serez capable de :
 
 ---
 
-## 1. Le probleme du Dual Write
+## 1. Le problème du Dual Write
 
-Dans une architecture microservices, un service doit souvent **ecrire dans sa base de donnees** ET **publier un message/evenement** sur un broker (Kafka, RabbitMQ, etc.). Ce sont deux systemes distincts : il n'y a pas de transaction distribuee entre eux.
+Dans une architecture microservices, un service doit souvent **écrire dans sa base de donnees** ET **publier un message/événement** sur un broker (Kafka, RabbitMQ, etc.). Ce sont deux systèmes distincts : il n'y a pas de transaction distribuee entre eux.
 
 ```
   Le dual write problem :
@@ -45,7 +45,7 @@ Dans une architecture microservices, un service doit souvent **ecrire dans sa ba
 ```
 
 :::warning
-Le dual write est un probleme **fondamental**. Aucun retry, aucun try/catch ne le resout. Meme avec un try/catch autour des deux operations, un crash du processus entre les deux ecritures laisse le systeme dans un etat inconsistant. Il faut un pattern specifique.
+Le dual write est un problème **fondamental**. Aucun retry, aucun try/catch ne le resout. Même avec un try/catch autour des deux operations, un crash du processus entre les deux ecritures laisse le système dans un état inconsistant. Il faut un pattern spécifique.
 :::
 
 ### 1.1 Les scenarios d'echec
@@ -95,7 +95,7 @@ interface Order {
 
 ## 2. Le pattern Outbox
 
-L'idee : au lieu de publier directement sur le broker, ecrire le message dans une **table outbox** dans la meme base de donnees, dans la **meme transaction** que l'ecriture metier. Un processus separe lit la table outbox et publie les messages.
+L'idee : au lieu de publier directement sur le broker, écrire le message dans une **table outbox** dans la même base de donnees, dans la **même transaction** que l'écriture metier. Un processus separe lit la table outbox et publie les messages.
 
 ```
   Pattern Outbox :
@@ -275,7 +275,7 @@ class OrderServiceWithOutbox {
 ```
 
 :::tip
-La cle du pattern Outbox est que les deux ecritures (donnee metier + message outbox) sont dans la **meme transaction ACID**. Si la transaction echoue, les deux sont annulees. Si elle reussit, les deux sont persistees. Plus de dual write.
+La clé du pattern Outbox est que les deux ecritures (donnee metier + message outbox) sont dans la **même transaction ACID**. Si la transaction echoue, les deux sont annulees. Si elle reussit, les deux sont persistees. Plus de dual write.
 :::
 
 ---
@@ -408,13 +408,13 @@ class PollingOutboxPublisher {
 }
 ```
 
-> **Alternative : CDC (Change Data Capture)** — Plutot que de poll la table outbox, des outils comme Debezium lisent directement le WAL (Write-Ahead Log) de PostgreSQL et publient les evenements dans Kafka. Zero polling, latence sub-seconde, mais plus d'infrastructure a operer.
+> **Alternative : CDC (Change Data Capture)** — Plutot que de poll la table outbox, des outils comme Debezium lisent directement le WAL (Write-Ahead Log) de PostgreSQL et publient les événements dans Kafka. Zero polling, latence sub-seconde, mais plus d'infrastructure a operer.
 
 ---
 
 ## 4. CDC (Change Data Capture)
 
-Le CDC est une alternative au polling : au lieu de lire periodiquement la table, on **ecoute le journal de transactions** (WAL/binlog) de la base de donnees pour detecter les nouvelles ecritures dans la table outbox.
+Le CDC est une alternative au polling : au lieu de lire periodiquement la table, on **ecoute le journal de transactions** (WAL/binlog) de la base de donnees pour détecter les nouvelles ecritures dans la table outbox.
 
 ```
   CDC (ex: Debezium) :
@@ -537,14 +537,14 @@ class CDCOutboxPublisher {
 ```
 
 :::tip
-Pour commencer, le **polling** est souvent suffisant et beaucoup plus simple a mettre en place. Migrez vers le **CDC** quand la latence du polling devient un probleme ou quand la charge des requetes de polling impacte la base de donnees.
+Pour commencer, le **polling** est souvent suffisant et beaucoup plus simple a mettre en place. Migrez vers le **CDC** quand la latence du polling devient un problème ou quand la charge des requêtes de polling impacte la base de donnees.
 :::
 
 ---
 
 ## 5. Le pattern Inbox
 
-Le pattern Inbox est le complement cote **consommateur** du pattern Outbox. Il resout le probleme des **messages dupliques** (at-least-once delivery).
+Le pattern Inbox est le complement cote **consommateur** du pattern Outbox. Il resout le problème des **messages dupliques** (at-least-once delivery).
 
 ```
   Pourquoi des doublons ?
@@ -697,7 +697,7 @@ class IdempotentConsumer {
 
 ## 6. Idempotent Consumers
 
-Au-dela du pattern Inbox, certaines operations doivent etre **naturellement idempotentes** : les appliquer une ou plusieurs fois produit le meme resultat.
+Au-dela du pattern Inbox, certaines operations doivent etre **naturellement idempotentes** : les appliquer une ou plusieurs fois produit le même résultat.
 
 ```
   Operations idempotentes :
@@ -797,7 +797,7 @@ class IdempotencyStrategies {
 ```
 
 :::warning
-L'idempotence est une propriete **essentielle** dans les systemes distribues. Concevez toutes vos operations de consommation de messages pour etre idempotentes. Si une operation n'est pas naturellement idempotente (comme un increment), utilisez le pattern Inbox ou une cle d'idempotence pour la rendre idempotente.
+L'idempotence est une propriété **essentielle** dans les systèmes distribues. Concevez toutes vos operations de consommation de messages pour etre idempotentes. Si une operation n'est pas naturellement idempotente (comme un increment), utilisez le pattern Inbox ou une clé d'idempotence pour la rendre idempotente.
 :::
 
 ---
@@ -1071,14 +1071,14 @@ class OutboxCleaner {
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
-| Concept | Cle a retenir |
+| Concept | Cle à retenir |
 |---------|---------------|
-| Dual Write | Ecrire dans DB + broker n'est PAS atomique => inconsistance |
-| Outbox Pattern | Ecrire le message dans la DB (meme transaction), publier ensuite |
+| Dual Write | Écrire dans DB + broker n'est PAS atomique => inconsistance |
+| Outbox Pattern | Écrire le message dans la DB (même transaction), publier ensuite |
 | Polling Publisher | Simple, interroge periodiquement la table outbox |
-| CDC | Temps reel via le WAL, zero charge sur la DB, plus complexe |
+| CDC | Temps réel via le WAL, zero charge sur la DB, plus complexe |
 | Inbox Pattern | Deduplication cote consommateur via table inbox |
 | Idempotent Consumer | Concevoir les operations pour etre naturellement idempotentes |
 | Outbox + Inbox | Garantie de bout en bout : pas de perte, pas de doublon traite |
@@ -1090,4 +1090,15 @@ class OutboxCleaner {
 - [Lab 14 : Implementer le pipeline Outbox + Inbox complet](../labs/lab-14-outbox-pattern/)
 - [Quiz 14 : Testez vos connaissances](../quizzes/quiz-14-outbox-pattern.html)
 - [Module suivant : Failure Modes](./15-failure-modes.md)
-- [Module precedent : CQRS & Event Sourcing](./13-cqrs-event-sourcing.md)
+- [Module précédent : CQRS & Event Sourcing](./13-cqrs-event-sourcing.md)
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 14 outbox pattern](../screencasts/screencast-14-outbox-pattern.md)
+2. **Lab** : [lab-14-outbox-pattern](../labs/lab-14-outbox-pattern/README)
+3. **Visualisation** : [Saga Orchestration](../visualizations/saga-orchestration.html)
+4. **Quiz** : [quiz 14 outbox pattern](../quizzes/quiz-14-outbox-pattern.html)
+:::

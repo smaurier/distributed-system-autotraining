@@ -8,24 +8,24 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Expliquer le fonctionnement du circuit breaker comme machine a etats (Closed, Open, Half-Open)
-- Implementer un circuit breaker complet en TypeScript avec seuils de detection et de recuperation
-- Appliquer le pattern bulkhead pour isoler les ressources par dependance
+- Expliquer le fonctionnement du circuit breaker comme machine a états (Closed, Open, Half-Open)
+- Implementer un circuit breaker complet en TypeScript avec seuils de detection et de récupération
+- Appliquer le pattern bulkhead pour isoler les ressources par dépendance
 - Implementer un bulkhead a base de semaphore limitant la concurrence
-- Definir ce qu'est la backpressure et pourquoi elle est necessaire
-- Implementer une bounded queue avec strategies de backpressure (buffer, drop, signal)
-- Concevoir une degradation gracieuse avec des reponses par defaut et feature flags
-- Combiner circuit breaker, bulkhead et timeout pour une resilience en profondeur
+- Définir ce qu'est la backpressure et pourquoi elle est nécessaire
+- Implementer une bounded queue avec stratégies de backpressure (buffer, drop, signal)
+- Concevoir une degradation gracieuse avec des réponses par defaut et feature flags
+- Combiner circuit breaker, bulkhead et timeout pour une résilience en profondeur
 
 ---
 
 ## Circuit Breaker : le disjoncteur logiciel
 
 :::tip Analogie
-Le circuit breaker logiciel fonctionne comme un disjoncteur electrique : quand trop d'erreurs se produisent, il "ouvre le circuit" pour empecher d'envoyer des requetes a un service defaillant, evitant ainsi de surcharger un systeme deja en difficulte.
+Le circuit breaker logiciel fonctionne comme un disjoncteur electrique : quand trop d'erreurs se produisent, il "ouvre le circuit" pour empecher d'envoyer des requêtes à un service defaillant, evitant ainsi de surcharger un système déjà en difficulte.
 :::
 
-### Machine a etats
+### Machine a états
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -317,7 +317,7 @@ monitor.register('inventory-service', inventoryBreaker);
 ## Bulkhead : isolation des ressources
 
 :::tip Analogie
-Le bulkhead (cloison etanche) est inspire des cloisons dans les coques de navire : si une section est inondee, les cloisons empechent l'eau de se repandre dans les autres compartiments. De la meme facon, on isole les pools de ressources par dependance.
+Le bulkhead (cloison etanche) est inspire des cloisons dans les coques de navire : si une section est inondee, les cloisons empechent l'eau de se repandre dans les autres compartiments. De la même façon, on isole les pools de ressources par dépendance.
 :::
 
 ```
@@ -511,9 +511,9 @@ class ResilientService {
 
 ---
 
-## Backpressure : gerer la surcharge
+## Backpressure : gérer la surcharge
 
-La backpressure est un mecanisme de controle de flux qui permet a un consommateur lent de signaler au producteur de ralentir.
+La backpressure est un mécanisme de controle de flux qui permet à un consommateur lent de signaler au producteur de ralentir.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -707,7 +707,7 @@ async function backpressureDemo(): Promise<void> {
 
 ## Degradation gracieuse
 
-Quand un service est en panne, au lieu de retourner une erreur, on peut retourner une reponse degradee mais utile.
+Quand un service est en panne, au lieu de retourner une erreur, on peut retourner une réponse degradee mais utile.
 
 ```typescript
 interface ProductInfo {
@@ -847,8 +847,8 @@ class GracefulDegradationService {
 ```
 
 :::warning Regles de degradation
-- **Definir a l'avance** quelles fonctionnalites sont critiques vs non critiques
-- **Tester la degradation** regulierement — ne pas attendre une vraie panne pour decouvrir les bugs du mode degrade
+- **Définir a l'avance** quelles fonctionnalites sont critiques vs non critiques
+- **Tester la degradation** regulierement — ne pas attendre une vraie panne pour découvrir les bugs du mode degrade
 - **Monitorer les degradations** — une degradation prolongee est un signal d'alerte
 - **Communiquer avec l'utilisateur** — afficher un message du type "certaines fonctionnalites sont temporairement indisponibles"
 :::
@@ -991,25 +991,31 @@ const client = new ResilientClient({
 
 ---
 
-## Resume
+## Résumé
 
-| Pattern | Objectif | Mecanisme |
+| Pattern | Objectif | Mécanisme |
 |---------|----------|-----------|
-| **Circuit Breaker** | Eviter d'appeler un service en panne | Machine a etats (Closed/Open/Half-Open) |
-| **Bulkhead** | Isoler les ressources par dependance | Semaphore limitant la concurrence |
-| **Backpressure** | Gerer la surcharge producteur/consommateur | Bounded queue avec strategies |
-| **Degradation gracieuse** | Fournir une reponse utile meme degradee | Fallbacks, cache, feature flags |
+| **Circuit Breaker** | Éviter d'appeler un service en panne | Machine a états (Closed/Open/Half-Open) |
+| **Bulkhead** | Isoler les ressources par dépendance | Semaphore limitant la concurrence |
+| **Backpressure** | Gérer la surcharge producteur/consommateur | Bounded queue avec stratégies |
+| **Degradation gracieuse** | Fournir une réponse utile même degradee | Fallbacks, cache, feature flags |
 | **Defense en profondeur** | Combiner plusieurs patterns | Timeout + Bulkhead + CB + Retry |
 
 ---
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [15 - Failure Modes](./15-failure-modes.md) | [17 - Rate Limiting & Load Shedding](./17-rate-limiting.md) |
 
-**Ressources associees :**
-- [Lab 16 — Circuit Breaker](../labs/lab-16-circuit-breaker/)
-- [Quiz 16 — Circuit Breaker](../quizzes/quiz-16-circuit-breaker.html)
-- [Visualisation — Circuit Breaker](../visualizations/circuit-breaker.html)
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 16 circuit breaker](../screencasts/screencast-16-circuit-breaker.md)
+2. **Lab** : [lab-16-circuit-breaker](../labs/lab-16-circuit-breaker/README)
+3. **Visualisation** : [Circuit Breaker](../visualizations/circuit-breaker.html)
+4. **Quiz** : [quiz 16 circuit breaker](../quizzes/quiz-16-circuit-breaker.html)
+:::

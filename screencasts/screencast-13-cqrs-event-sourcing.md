@@ -4,11 +4,11 @@
 - **Duree estimee** : 18-20 min
 - **Module** : `modules/13-cqrs-event-sourcing.md`
 - **Lab associe** : Lab 13
-- **Prerequis** : Screencast 12
+- **Prérequis** : Screencast 12
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `labs/lab-13-cqrs-event-sourcing/` pret
 - [ ] Aucun processus sur les ports 3000-3002
 - [ ] Diagramme CQRS affiche en split-screen (optionnel)
@@ -17,17 +17,17 @@
 
 ### [00:00-02:00] Introduction — Pourquoi separer lectures et ecritures
 
-> Jusqu'ici, nos services utilisent un modele CRUD unique : le meme schema sert a ecrire et a lire les donnees. Ca fonctionne bien pour des cas simples, mais en distribue, les besoins de lecture (jointures, aggregations, recherche full-text) et d'ecriture (validation, regles metier) sont souvent tres differents. CQRS propose de les separer explicitement.
+> Jusqu'ici, nos services utilisent un modèle CRUD unique : le même schema sert à écrire et a lire les donnees. Ça fonctionne bien pour des cas simples, mais en distribue, les besoins de lecture (jointures, aggregations, recherche full-text) et d'écriture (validation, regles metier) sont souvent très différents. CQRS propose de les separer explicitement.
 
 **Action** : Ouvrir le fichier du module 13 et montrer le diagramme CRUD vs CQRS.
 
-> Avec l'event sourcing, on va aller encore plus loin : au lieu de stocker l'etat courant, on stocke chaque evenement qui a mene a cet etat. C'est comme un journal comptable : on ne modifie jamais une ligne, on ajoute toujours.
+> Avec l'event sourcing, on va aller encore plus loin : au lieu de stocker l'état courant, on stocke chaque événement qui a mene a cet état. C'est comme un journal comptable : on ne modifie jamais une ligne, on ajoute toujours.
 
 ### [02:00-05:30] Construire un Event Store from scratch
 
-> Commencons par l'event store. C'est une structure append-only qui stocke des evenements types et immuables.
+> Commencons par l'event store. C'est une structure append-only qui stocke des événements types et immuables.
 
-**Action** : Creer un nouveau fichier `event-store.ts`.
+**Action** : Créer un nouveau fichier `event-store.ts`.
 
 ```typescript
 // Types d'evenements pour un domaine "Compte bancaire"
@@ -58,7 +58,7 @@ interface MoneyWithdrawn {
 type AccountEvent = AccountCreated | MoneyDeposited | MoneyWithdrawn;
 ```
 
-**Action** : Implementer le store lui-meme.
+**Action** : Implementer le store lui-même.
 
 ```typescript
 class EventStore {
@@ -87,15 +87,15 @@ class EventStore {
 }
 ```
 
-> Remarquez trois choses : chaque evenement a un version incrementale, un timestamp, et un identifiant unique. Le stream est append-only — on n'edite et on ne supprime jamais.
+> Remarquez trois choses : chaque événement à un version incrementale, un timestamp, et un identifiant unique. Le stream est append-only — on n'edite et on ne supprime jamais.
 
-**Action** : Executer un test rapide dans le terminal pour montrer l'ajout d'evenements.
+**Action** : Exécuter un test rapide dans le terminal pour montrer l'ajout d'événements.
 
-### [05:30-09:00] Reconstruire l'etat avec une fonction fold
+### [05:30-09:00] Reconstruire l'état avec une fonction fold
 
-> L'event sourcing stocke l'historique, pas l'etat. Pour obtenir l'etat courant, on "rejoue" les evenements avec une fonction fold — exactement comme un Array.reduce en JavaScript.
+> L'event sourcing stocke l'historique, pas l'état. Pour obtenir l'état courant, on "rejoue" les événements avec une fonction fold — exactement comme un Array.reduce en JavaScript.
 
-**Action** : Implementer la reconstruction d'etat.
+**Action** : Implementer la reconstruction d'état.
 
 ```typescript
 interface AccountState {
@@ -129,15 +129,15 @@ function rebuildAccount(events: DomainEvent[]): AccountState {
 }
 ```
 
-> La beaute de cette approche : l'etat a n'importe quel moment est deterministe. On peut rejouer les memes evenements et obtenir toujours le meme resultat.
+> La beaute de cette approche : l'état a n'importe quel moment est déterministe. On peut rejouer les memes événements et obtenir toujours le même résultat.
 
-**Action** : Ajouter plusieurs evenements, puis appeler `rebuildAccount` pour montrer que l'etat correspond.
+**Action** : Ajouter plusieurs événements, puis appeler `rebuildAccount` pour montrer que l'état correspond.
 
 ### [09:00-12:30] Implementer les projections (Read Models)
 
-> En CQRS, le cote lecture utilise des projections — des vues materialisees construites a partir des evenements. Chaque projection est optimisee pour un besoin de lecture specifique.
+> En CQRS, le cote lecture utilise des projections — des vues materialisees construites à partir des événements. Chaque projection est optimisee pour un besoin de lecture spécifique.
 
-**Action** : Creer une projection pour un tableau de bord.
+**Action** : Créer une projection pour un tableau de bord.
 
 ```typescript
 class AccountSummaryProjection {
@@ -175,15 +175,15 @@ class AccountSummaryProjection {
 }
 ```
 
-> On peut avoir autant de projections qu'on veut : une pour le dashboard, une pour la recherche, une pour les rapports. Si on a besoin d'une nouvelle vue, on cree une nouvelle projection et on rejoue tous les evenements.
+> On peut avoir autant de projections qu'on veut : une pour le dashboard, une pour la recherche, une pour les rapports. Si on a besoin d'une nouvelle vue, on créé une nouvelle projection et on rejoue tous les événements.
 
-**Action** : Creer une deuxieme projection (top depositors) pour illustrer qu'on peut multiplier les read models sans toucher au write model.
+**Action** : Créer une deuxieme projection (top depositors) pour illustrer qu'on peut multiplier les read models sans toucher au write model.
 
 ### [12:30-15:30] Optimisation par snapshots
 
-> Rejouer 10 evenements c'est rapide. Rejouer 10 millions d'evenements a chaque requete, c'est un probleme. La solution : les snapshots.
+> Rejouer 10 événements c'est rapide. Rejouer 10 millions d'événements à chaque requête, c'est un problème. La solution : les snapshots.
 
-**Action** : Implementer le mecanisme de snapshot.
+**Action** : Implementer le mécanisme de snapshot.
 
 ```typescript
 interface Snapshot<T> {
@@ -229,15 +229,15 @@ function rebuildWithSnapshot(
 }
 ```
 
-> Typiquement, on cree un snapshot tous les N evenements — par exemple toutes les 100 ou 1000 ecritures. Au lieu de rejouer 10 000 evenements, on charge le dernier snapshot et on ne rejoue que les 50 evenements suivants.
+> Typiquement, on créé un snapshot tous les N événements — par exemple toutes les 100 ou 1000 ecritures. Au lieu de rejouer 10 000 événements, on charge le dernier snapshot et on ne rejoue que les 50 événements suivants.
 
-**Action** : Montrer la difference de performance avec un `console.time` / `console.timeEnd` avant et apres l'introduction du snapshot.
+**Action** : Montrer la différence de performance avec un `console.time` / `console.timeEnd` avant et après l'introduction du snapshot.
 
 ### [15:30-18:00] Requetes temporelles — Time Travel
 
-> Le dernier super-pouvoir de l'event sourcing : le voyage dans le temps. Puisqu'on stocke tout l'historique, on peut reconstruire l'etat a n'importe quel instant T.
+> Le dernier super-pouvoir de l'event sourcing : le voyage dans le temps. Puisqu'on stocke tout l'historique, on peut reconstruire l'état a n'importe quel instant T.
 
-**Action** : Implementer la requete temporelle.
+**Action** : Implementer la requête temporelle.
 
 ```typescript
 function getStateAtTime(events: DomainEvent[], targetTime: number): AccountState {
@@ -252,26 +252,26 @@ function getStateAtVersion(events: DomainEvent[], targetVersion: number): Accoun
 }
 ```
 
-> Ca permet le debugging en production — "quel etait l'etat du compte juste avant cette transaction suspecte ?". Ca permet aussi l'audit reglementaire et la correction retroactive.
+> Ça permet le debugging en production — "quel etait l'état du compte juste avant cette transaction suspecte ?". Ça permet aussi l'audit reglementaire et la correction retroactive.
 
-**Action** : Montrer l'etat du compte a differents moments dans le temps en appelant `getStateAtVersion` avec les versions 1, 3, et 5.
+**Action** : Montrer l'état du compte a différents moments dans le temps en appelant `getStateAtVersion` avec les versions 1, 3, et 5.
 
-### [18:00-19:30] Recapitulatif et lien avec le Lab 13
+### [18:00-19:30] Récapitulatif et lien avec le Lab 13
 
-> Recapitulons. CQRS separe les modeles de lecture et d'ecriture pour les optimiser independamment. L'event sourcing stocke les faits plutot que l'etat, ce qui donne l'audit complet, les requetes temporelles, et la possibilite d'ajouter de nouvelles projections a posteriori. Les snapshots resolvent le probleme de performance de la reconstruction.
+> Recapitulons. CQRS separe les modèles de lecture et d'écriture pour les optimiser independamment. L'event sourcing stocke les faits plutot que l'état, ce qui donne l'audit complet, les requêtes temporelles, et la possibilite d'ajouter de nouvelles projections a posteriori. Les snapshots resolvent le problème de performance de la reconstruction.
 
-**Action** : Montrer le diagramme recapitulatif complet du module 13.
+**Action** : Montrer le diagramme récapitulatif complet du module 13.
 
-> Le trade-off : la complexite. L'eventual consistency entre le write model et les projections est un defi. On verra au module 14 comment l'outbox pattern resout le probleme de la publication fiable des evenements.
+> Le trade-off : la complexite. L'eventual consistency entre le write model et les projections est un defi. On verra au module 14 comment l'outbox pattern resout le problème de la publication fiable des événements.
 
 **Action** : Ouvrir le README du Lab 13 et montrer les exercices.
 
-> Dans le lab, vous allez implementer tout ca de bout en bout avec des tests. Mettez la video en pause et lancez-vous !
+> Dans le lab, vous allez implementer tout ça de bout en bout avec des tests. Mettez la video en pause et lancez-vous !
 
 ## Points d'attention pour l'enregistrement
 - Typer le code lentement pour l'event store, c'est le concept central
 - Bien insister sur l'immutabilite : append-only, jamais de modification
-- Montrer visuellement le "replay" des evenements avec des console.log
+- Montrer visuellement le "replay" des événements avec des console.log
 - Pour le snapshot, comparer explicitement les temps avec et sans
 - Garder un ton enthousiaste sur le "time travel" — c'est le moment wow
-- Verifier que tous les snippets compilent avant l'enregistrement
+- Vérifier que tous les snippets compilent avant l'enregistrement

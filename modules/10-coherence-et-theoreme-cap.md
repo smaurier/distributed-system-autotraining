@@ -1,6 +1,6 @@
 # Module 10 : Coherence & CAP
 
-> **Difficulty** : 4/5 | **Duration estimee** : 3h30 | **Prerequis** : Modules 1-9
+> **Difficulty** : 4/5 | **Duration estimee** : 3h30 | **Prérequis** : Modules 1-9
 
 ---
 
@@ -8,9 +8,9 @@
 
 A la fin de ce module, vous serez capable de :
 
-1. Distinguer les differents modeles de coherence (strong, sequential, causal, eventual)
-2. Expliquer le theoreme CAP et ses implications concretes
-3. Classifier les systemes distribues en CP ou AP
+1. Distinguer les différents modèles de coherence (strong, sequential, causal, eventual)
+2. Expliquer le théorème CAP et ses implications concretes
+3. Classifier les systèmes distribues en CP ou AP
 4. Appliquer l'extension PACELC pour affiner l'analyse
 5. Implementer des lectures/ecritures par quorum en TypeScript
 6. Choisir le bon niveau de coherence selon le cas d'usage
@@ -19,7 +19,7 @@ A la fin de ce module, vous serez capable de :
 
 ## 1. Modeles de coherence
 
-La coherence definit les **garanties** qu'un systeme distribue offre sur l'ordre et la visibilite des operations. Plus la coherence est forte, plus le systeme est simple a raisonner, mais plus il coute cher en latence et disponibilite.
+La coherence définit les **garanties** qu'un système distribue offre sur l'ordre et la visibilite des operations. Plus la coherence est forte, plus le système est simple a raisonner, mais plus il coute cher en latence et disponibilité.
 
 ```
 Coherence forte (linearizability)
@@ -39,7 +39,7 @@ Aucune garantie
 
 ### 1.1 Strong Consistency (Linearizability)
 
-La linearizability est le modele le plus strict : chaque operation apparait comme si elle s'etait executee **instantanement** a un point precis entre son invocation et sa reponse. Toutes les repliques voient le meme etat au meme moment.
+La linearizability est le modèle le plus strict : chaque operation apparait comme si elle s'etait executee **instantanement** à un point précis entre son invocation et sa réponse. Toutes les repliques voient le même état au même moment.
 
 ```
   Client A          Systeme           Client B
@@ -55,12 +55,12 @@ La linearizability est le modele le plus strict : chaque operation apparait comm
 ```
 
 :::tip
-La linearizability est souvent appelee "strong consistency". C'est le modele que la plupart des developpeurs attendent intuitivement d'une base de donnees.
+La linearizability est souvent appelee "strong consistency". C'est le modèle que la plupart des développeurs attendent intuitivement d'une base de donnees.
 :::
 
 ### 1.2 Sequential Consistency
 
-Toutes les operations de tous les processus sont vues dans le **meme ordre**, mais cet ordre n'a pas besoin de respecter le temps reel. L'ordre des operations d'un meme processus est preserve.
+Toutes les operations de tous les processus sont vues dans le **même ordre**, mais cet ordre n'a pas besoin de respecter le temps réel. L'ordre des operations d'un même processus est preserve.
 
 ### 1.3 Causal Consistency
 
@@ -68,15 +68,15 @@ Si l'operation A **cause** l'operation B (A happened-before B), alors tout proce
 
 ### 1.4 Eventual Consistency
 
-Si aucune nouvelle ecriture n'est effectuee, **toutes les repliques finiront par converger** vers la meme valeur. Aucune garantie sur le delai de convergence.
+Si aucune nouvelle écriture n'est effectuee, **toutes les repliques finiront par converger** vers la même valeur. Aucune garantie sur le delai de convergence.
 
 :::warning
-Eventual consistency ne veut PAS dire "inconsistant". Le systeme finira par converger. Mais pendant la fenetre de convergence, differents clients peuvent lire differentes valeurs.
+Eventual consistency ne veut PAS dire "inconsistant". Le système finira par converger. Mais pendant la fenêtre de convergence, différents clients peuvent lire différentes valeurs.
 :::
 
 ---
 
-## 2. Simulation TypeScript des modeles de coherence
+## 2. Simulation TypeScript des modèles de coherence
 
 ```typescript
 // Types de base pour notre simulation
@@ -250,14 +250,14 @@ class CausalConsistencyStore {
 
 ---
 
-## 3. Le theoreme CAP
+## 3. Le théorème CAP
 
 Enonce en 2000 par Eric Brewer et prouve formellement en 2002 par Gilbert et Lynch :
 
-> Un systeme distribue ne peut garantir simultanement que **deux** des trois proprietes suivantes :
-> - **C**onsistency : chaque lecture retourne la derniere ecriture
-> - **A**vailability : chaque requete recoit une reponse (pas d'erreur)
-> - **P**artition tolerance : le systeme continue de fonctionner malgre des pertes de messages reseau
+> Un système distribue ne peut garantir simultanement que **deux** des trois propriétés suivantes :
+> - **C**onsistency : chaque lecture retourne la dernière écriture
+> - **A**vailability : chaque requête recoit une réponse (pas d'erreur)
+> - **P**artition tolerance : le système continue de fonctionner malgre des pertes de messages réseau
 
 ```
               Consistency (C)
@@ -288,12 +288,12 @@ Enonce en 2000 par Eric Brewer et prouve formellement en 2002 par Gilbert et Lyn
 ```
 
 :::warning
-En pratique, les partitions reseau **arrivent**. Elles ne sont pas optionnelles. Le vrai choix est donc entre CP et AP. Un systeme "CA" n'est tout simplement pas distribue.
+En pratique, les partitions réseau **arrivent**. Elles ne sont pas optionnelles. Le vrai choix est donc entre CP et AP. Un système "CA" n'est tout simplement pas distribue.
 :::
 
 ### 3.1 Pourquoi P est obligatoire
 
-Le reseau est **fondamentalement non fiable** dans un systeme distribue :
+Le réseau est **fondamentalement non fiable** dans un système distribue :
 
 - Les cables se debranchent
 - Les switches tombent en panne
@@ -301,12 +301,12 @@ Le reseau est **fondamentalement non fiable** dans un systeme distribue :
 - La latence peut etre si elevee qu'elle est indistinguable d'une partition
 
 :::tip
-Le "theoreme" FLP (Fischer, Lynch, Paterson, 1985) montre qu'il est impossible de garantir le consensus dans un systeme asynchrone avec meme **un seul** processus defaillant. CAP est une consequence pratique de cette impossibilite fondamentale.
+Le "théorème" FLP (Fischer, Lynch, Paterson, 1985) montre qu'il est impossible de garantir le consensus dans un système asynchrone avec même **un seul** processus defaillant. CAP est une consequence pratique de cette impossibilite fondamentale.
 :::
 
-### 3.2 CP : Coherence au prix de la disponibilite
+### 3.2 CP : Coherence au prix de la disponibilité
 
-Un systeme CP, face a une partition, **refuse de repondre** plutot que de retourner une donnee potentiellement obsolete.
+Un système CP, face à une partition, **refuse de repondre** plutot que de retourner une donnee potentiellement obsolete.
 
 ```typescript
 class CPSystem {
@@ -341,9 +341,9 @@ class CPSystem {
 }
 ```
 
-### 3.3 AP : Disponibilite au prix de la coherence
+### 3.3 AP : Disponibilité au prix de la coherence
 
-Un systeme AP repond **toujours**, meme si la reponse peut etre obsolete.
+Un système AP repond **toujours**, même si la réponse peut etre obsolete.
 
 ```typescript
 class APSystem {
@@ -379,9 +379,9 @@ class APSystem {
 
 ---
 
-## 4. PACELC : L'extension du theoreme CAP
+## 4. PACELC : L'extension du théorème CAP
 
-Le theoreme CAP ne decrit que le comportement **pendant une partition**. Mais que se passe-t-il le reste du temps (quand le reseau fonctionne) ? C'est la que PACELC entre en jeu.
+Le théorème CAP ne decrit que le comportement **pendant une partition**. Mais que se passe-t-il le reste du temps (quand le réseau fonctionne) ? C'est la que PACELC entre en jeu.
 
 > **PACELC** : si **P**artition, choisir **A** ou **C** ; sinon (**E**lse), choisir **L**atence ou **C**oherence.
 
@@ -453,7 +453,7 @@ function describeSystem(name: string): string {
 
 ## 5. Quorum Reads/Writes
 
-Le quorum est un mecanisme qui permet d'obtenir differents niveaux de coherence en ajustant le nombre de repliques qui doivent confirmer une operation.
+Le quorum est un mécanisme qui permet d'obtenir différents niveaux de coherence en ajustant le nombre de repliques qui doivent confirmer une operation.
 
 ### 5.1 La regle fondamentale
 
@@ -659,7 +659,7 @@ class QuorumStore {
 
 ## 6. Tunable Consistency
 
-Certains systemes (Cassandra, DynamoDB, Cosmos DB) permettent de choisir le niveau de coherence **par requete**.
+Certains systèmes (Cassandra, DynamoDB, Cosmos DB) permettent de choisir le niveau de coherence **par requête**.
 
 ```typescript
 type ConsistencyLevel = 'ONE' | 'QUORUM' | 'ALL' | 'LOCAL_QUORUM';
@@ -725,7 +725,7 @@ function demonstrateTunableConsistency(): void {
 ```
 
 :::tip
-Il n'y a pas de "meilleur" niveau de coherence. Le bon choix depend du **cout metier** d'une lecture obsolete. Un compte bancaire ne tolere pas une lecture stale. Un flux de likes sur un reseau social, si.
+Il n'y a pas de "meilleur" niveau de coherence. Le bon choix depend du **cout metier** d'une lecture obsolete. Un compte bancaire ne tolere pas une lecture stale. Un flux de likes sur un réseau social, si.
 :::
 
 ---
@@ -775,16 +775,16 @@ class AdaptiveConsistencySystem {
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
-| Concept | Cle a retenir |
+| Concept | Cle à retenir |
 |---------|---------------|
 | Linearizability | Le plus strict : chaque operation parait instantanee |
 | Eventual consistency | Converge a terme, pas de garantie temporelle |
 | CAP | En distribue, P est impose => choix entre C et A |
-| PACELC | Meme sans partition : choix latence vs coherence |
+| PACELC | Même sans partition : choix latence vs coherence |
 | Quorum W+R > N | Garantit qu'on lit au moins une replique a jour |
-| Tunable consistency | Ajuster W et R par requete selon le besoin metier |
+| Tunable consistency | Ajuster W et R par requête selon le besoin metier |
 
 ---
 
@@ -794,4 +794,15 @@ class AdaptiveConsistencySystem {
 - [Quiz 10 : Testez vos connaissances](../quizzes/quiz-10-coherence-cap.html)
 - [Module suivant : Replication & Partitionnement](./11-replication-et-partitionnement.md)
 - [Visualisation interactive : CAP Theorem](../visualizations/cap-theorem.html)
-- [Module precedent : Retries, Timeouts & Idempotency](./09-retries-timeouts-idempotency.md)
+- [Module précédent : Retries, Timeouts & Idempotency](./09-retries-timeouts-idempotency.md)
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 10 coherence cap](../screencasts/screencast-10-coherence-cap.md)
+2. **Lab** : [lab-10-coherence-cap](../labs/lab-10-coherence-cap/README)
+3. **Visualisation** : [Théorème CAP](../visualizations/cap-theorem.html)
+4. **Quiz** : [quiz 10 coherence cap](../quizzes/quiz-10-coherence-cap.html)
+:::

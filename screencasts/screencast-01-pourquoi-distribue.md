@@ -1,14 +1,14 @@
-# Screencast 01 — Pourquoi les systemes distribues ?
+# Screencast 01 — Pourquoi les systèmes distribues ?
 
 ## Informations
 - **Duree estimee** : 12-15 min
 - **Module** : `modules/01-pourquoi-les-systemes-distribues.md`
 - **Lab associe** : Lab 01
-- **Prerequis** : Screencast 00
+- **Prérequis** : Screencast 00
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/01-pourquoi-les-systemes-distribues.md` ouvert
 - [ ] Navigateur pret pour la visualisation `network-partitions.html`
 
@@ -16,7 +16,7 @@
 
 ### [00:00-01:30] Introduction et contexte historique
 
-> Dans ce screencast, nous allons decouvrir les 8 fallacies des systemes distribues — des hypotheses fausses que les developpeurs font systematiquement. Ces fallacies ont ete identifiees par Peter Deutsch en 1994, puis completees par James Gosling, et elles restent parfaitement d'actualite trente ans plus tard.
+> Dans ce screencast, nous allons découvrir les 8 fallacies des systèmes distribues — des hypotheses fausses que les développeurs font systematiquement. Ces fallacies ont ete identifiees par Peter Deutsch en 1994, puis completees par James Gosling, et elles restent parfaitement d'actualite trente ans plus tard.
 
 **Action** : Afficher le schema des 8 fallacies dans le module
 
@@ -35,11 +35,11 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### [01:30-04:00] Fallacy 1 et 2 — Le reseau est fiable, la latence est nulle
+### [01:30-04:00] Fallacy 1 et 2 — Le réseau est fiable, la latence est nulle
 
-> La premiere fallacy est la plus fondamentale : on code comme si le reseau ne pouvait jamais echouer. Regardons la difference entre du code naif et du code robuste.
+> La première fallacy est la plus fondamentale : on code comme si le réseau ne pouvait jamais echouer. Regardons la différence entre du code naif et du code robuste.
 
-**Action** : Creer un fichier `demo-fallacies.ts` et taper le code
+**Action** : Créer un fichier `demo-fallacies.ts` et taper le code
 
 ```typescript
 // ❌ Code naif — ignore les pannes reseau
@@ -76,7 +76,7 @@ async function getUserRobust(id: string, retries = 3): Promise<unknown> {
 }
 ```
 
-> Remarquez les differences : timeout avec AbortController, retry avec backoff exponentiel, et gestion differenciee des codes d'erreur. Un appel local prend quelques nanosecondes, un appel reseau prend des millisecondes — c'est un facteur d'un million.
+> Remarquez les différences : timeout avec AbortController, retry avec backoff exponentiel, et gestion differenciee des codes d'erreur. Un appel local prend quelques nanosecondes, un appel réseau prend des millisecondes — c'est un facteur d'un million.
 
 **Action** : Afficher le tableau des temps d'acces
 
@@ -91,7 +91,7 @@ const ACCESS_TIMES = {
 };
 ```
 
-### [04:00-06:00] Fallacy 3 et 4 — Bande passante et securite
+### [04:00-06:00] Fallacy 3 et 4 — Bande passante et sécurité
 
 > La troisieme fallacy concerne la bande passante. On a tendance a envoyer toutes les donnees disponibles, sans pagination ni projection.
 
@@ -113,11 +113,11 @@ async function getProductPage(page: number, limit = 20) {
 }
 ```
 
-> Et la quatrieme fallacy : le reseau n'est jamais securise. Chaque communication inter-service est une surface d'attaque. En production, utilisez HTTPS, des tokens de service, et idealement du mTLS.
+> Et la quatrieme fallacy : le réseau n'est jamais sécurisé. Chaque communication inter-service est une surface d'attaque. En production, utilisez HTTPS, des tokens de service, et idealement du mTLS.
 
 ### [06:00-08:30] Fallacies 5 a 8 — Topologie, admin, cout, homogeneite
 
-> Les quatre dernieres fallacies sont souvent negligees mais tout aussi importantes.
+> Les quatre dernières fallacies sont souvent negligees mais tout aussi importantes.
 
 **Action** : Parcourir chaque fallacy dans le module en montrant les exemples de code
 
@@ -138,7 +138,7 @@ async function callService(registry: ServiceRegistry, name: string, path: string
 }
 ```
 
-> La fallacy 7 est souvent sous-estimee : serialiser et deserialiser des donnees a un cout CPU reel. On le mesurera en detail dans le module 4 sur la serialisation.
+> La fallacy 7 est souvent sous-estimee : serialiser et deserialiser des donnees à un cout CPU réel. On le mesurera en detail dans le module 4 sur la serialisation.
 
 ```typescript
 // Fallacy 8 : Le reseau est heterogene en realite
@@ -152,7 +152,7 @@ interface SystemLandscape {
 
 ### [08:30-10:30] Monolithe vs distribue — comparaison en code
 
-> Maintenant comparons concretement un monolithe et un systeme distribue pour la meme operation : creer une commande.
+> Maintenant comparons concretement un monolithe et un système distribue pour la même operation : créer une commande.
 
 **Action** : Ouvrir le module et montrer les deux blocs de code cote a cote (split editor)
 
@@ -200,11 +200,11 @@ class OrderService {
 }
 ```
 
-> Le monolithe est simple, atomique, rapide. Le distribue est complexe, non-atomique, et sujet aux pannes partielles. Alors pourquoi distribuer ? Pour la scalabilite, la tolerance aux pannes, et l'autonomie des equipes. Ce cours va vous apprendre a maitriser cette complexite.
+> Le monolithe est simple, atomique, rapide. Le distribue est complexe, non-atomique, et sujet aux pannes partielles. Alors pourquoi distribuer ? Pour la scalabilité, la tolerance aux pannes, et l'autonomie des équipes. Ce cours va vous apprendre à maîtriser cette complexite.
 
 ### [10:30-12:30] Scaling vertical vs horizontal
 
-> Dernier concept cle de ce module : la difference entre scaling vertical et horizontal.
+> Dernier concept clé de ce module : la différence entre scaling vertical et horizontal.
 
 **Action** : Montrer les diagrammes ASCII du module
 
@@ -219,24 +219,24 @@ Avant      Apres                    Load Balancer
 ❌ Limite physique         ❌ Complexite du code
 ```
 
-> Le scaling vertical a une limite physique et un cout exponentiel. Le scaling horizontal est la raison d'etre des systemes distribues — on ajoute des machines plutot que de grossir une seule machine. Mais ca vient avec toute la complexite qu'on va apprendre a gerer.
+> Le scaling vertical à une limite physique et un cout exponentiel. Le scaling horizontal est la raison d'etre des systèmes distribues — on ajoute des machines plutot que de grossir une seule machine. Mais ça vient avec toute la complexite qu'on va apprendre a gérer.
 
 ### [12:30-14:00] Visualisation et conclusion
 
-> Pour finir, ouvrons la visualisation des partitions reseau qui accompagne ce module.
+> Pour finir, ouvrons la visualisation des partitions réseau qui accompagne ce module.
 
 **Action** : Ouvrir la visualisation `network-partitions.html` dans le navigateur
 
-> Cette visualisation interactive montre ce qui se passe quand le reseau se coupe entre des groupes de noeuds. Vous pouvez simuler des partitions et observer comment les noeuds reagissent. Jouez avec apres le screencast — c'est le meilleur moyen de comprendre intuitivement les partitions reseau.
+> Cette visualisation interactive montre ce qui se passe quand le réseau se coupe entre des groupes de noeuds. Vous pouvez simuler des partitions et observer comment les noeuds reagissent. Jouez avec après le screencast — c'est le meilleur moyen de comprendre intuitivement les partitions réseau.
 
 **Action** : Interagir avec la visualisation, montrer une partition, puis la reparation
 
-> Dans le prochain screencast, nous plongerons dans la communication reseau fondamentale : TCP, latence, timeouts et connection pooling. A bientot !
+> Dans le prochain screencast, nous plongerons dans la communication réseau fondamentale : TCP, latence, timeouts et connection pooling. A bientot !
 
 ## Points d'attention pour l'enregistrement
 - Prendre le temps de lire le code lentement et commenter chaque ligne
-- Bien insister sur le facteur x1,000,000 entre appel local et appel reseau
+- Bien insister sur le facteur x1,000,000 entre appel local et appel réseau
 - Utiliser le split editor de VS Code pour la comparaison monolithe vs distribue
-- Si la visualisation HTML n'est pas encore creee, montrer le diagramme ASCII a la place
+- Si la visualisation HTML n'est pas encore créée, montrer le diagramme ASCII à la place
 - Garder un rythme calme sur les 8 fallacies — ne pas les survoler
-- Preparer un exemple personnel d'incident lie a une fallacy pour rendre le propos concret
+- Preparer un exemple personnel d'incident lie à une fallacy pour rendre le propos concret

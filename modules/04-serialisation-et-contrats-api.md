@@ -8,11 +8,11 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Expliquer pourquoi la serialisation est critique dans les systemes distribues
+- Expliquer pourquoi la serialisation est critique dans les systèmes distribues
 - Identifier les avantages et limites de JSON comme format de serialisation
 - Decrire le fonctionnement de Protocol Buffers et comparer avec JSON
-- Definir des contrats d'API avec Zod et valider les donnees a l'execution
-- Choisir et implementer une strategie de versioning d'API
+- Définir des contrats d'API avec Zod et valider les donnees a l'exécution
+- Choisir et implementer une stratégie de versioning d'API
 - Distinguer les changements cassants des changements non-cassants
 - Concevoir des schemas evolutifs avec compatibilite avant et arriere
 - Implementer des contrats pilotes par le consommateur (consumer-driven contracts)
@@ -21,7 +21,7 @@ A la fin de ce module, vous serez capable de :
 
 ## Pourquoi la serialisation est critique
 
-Dans un systeme distribue, les services communiquent par messages. Ces messages doivent etre **serialises** (convertis en octets) pour traverser le reseau, puis **deserialises** de l'autre cote.
+Dans un système distribue, les services communiquent par messages. Ces messages doivent etre **serialises** (convertis en octets) pour traverser le réseau, puis **deserialises** de l'autre cote.
 
 ```
 ┌────────────┐   serialisation   ┌──────────┐   deserialisation   ┌────────────┐
@@ -104,7 +104,7 @@ const maybeOrder = JSON.parse(untrustedInput);
 
 ### Presentation
 
-Protocol Buffers (protobuf) est un format de serialisation binaire developpe par Google. Il est plus compact et plus rapide que JSON, mais necessite un schema.
+Protocol Buffers (protobuf) est un format de serialisation binaire développé par Google. Il est plus compact et plus rapide que JSON, mais nécessité un schema.
 
 ```protobuf
 // order.proto — Schema Protocol Buffers
@@ -177,7 +177,7 @@ Pour les APIs publiques (REST), JSON reste le standard.
 
 ## Contrats d'API : l'importance des schemas
 
-Un **contrat d'API** definit la forme exacte des requetes et reponses entre services. Sans contrat, les integrations sont fragiles.
+Un **contrat d'API** définit la forme exacte des requêtes et réponses entre services. Sans contrat, les integrations sont fragiles.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -199,11 +199,11 @@ Un **contrat d'API** definit la forme exacte des requetes et reponses entre serv
 
 ---
 
-## Zod : validation a l'execution
+## Zod : validation a l'exécution
 
 Zod est une librairie TypeScript de validation de schemas. Elle garantit que les donnees recues correspondent au contrat attendu.
 
-### Definir des schemas
+### Définir des schemas
 
 ```typescript
 import { z } from 'zod';
@@ -364,7 +364,7 @@ const DateRangeSchema = z.object({
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Strategie 1 : URL path versioning
+### Stratégie 1 : URL path versioning
 
 ```typescript
 import express from 'express';
@@ -403,7 +403,7 @@ app.post('/api/v2/orders', validate(CreateOrderV2), (req, res) => {
 });
 ```
 
-### Strategie 2 : Header versioning
+### Stratégie 2 : Header versioning
 
 ```typescript
 // Version via en-tete Accept
@@ -426,7 +426,7 @@ app.post('/api/orders', (req, res) => {
 // })
 ```
 
-### Strategie 3 : Schema evolution (sans version explicite)
+### Stratégie 3 : Schema evolution (sans version explicite)
 
 ```typescript
 // Le schema accepte les anciens ET les nouveaux champs
@@ -557,7 +557,7 @@ Pour une evolution sans douleur :
 
 ## Consumer-Driven Contracts
 
-Les contrats pilotes par le consommateur (CDC) inversent la logique : c'est le **consommateur** qui definit ce dont il a besoin, et le producteur s'assure de le respecter.
+Les contrats pilotes par le consommateur (CDC) inversent la logique : c'est le **consommateur** qui définit ce dont il a besoin, et le producteur s'assure de le respecter.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -666,7 +666,7 @@ async function fetchUserValidated(userId: string): Promise<z.infer<typeof UserRe
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -688,6 +688,16 @@ async function fetchUserValidated(userId: string): Promise<z.infer<typeof UserRe
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [03 - Premiers microservices TypeScript](./03-premiers-microservices-typescript.md) | [05 - Communication synchrone avancee](./05-communication-synchrone-avancee.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 04 serialisation](../screencasts/screencast-04-serialisation.md)
+2. **Lab** : [lab-04-serialisation-validation](../labs/lab-04-serialisation-validation/README)
+3. **Quiz** : [quiz 04 serialisation](../quizzes/quiz-04-serialisation.html)
+:::

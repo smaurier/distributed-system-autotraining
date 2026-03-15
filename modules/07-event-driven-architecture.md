@@ -9,19 +9,19 @@
 A la fin de ce module, vous serez capable de :
 
 - Distinguer un event d'une command et savoir quand utiliser chacun
-- Classifier les types d'events : domain events, integration events, notification events
+- Classifier les types d'events : domain events, intégration events, notification events
 - Implementer un event bus in-process en TypeScript avec typage fort
-- Appliquer le pattern domain events pour emettre des evenements depuis des aggregats
+- Appliquer le pattern domain events pour emettre des événements depuis des aggregats
 - Choisir entre des handlers synchrones et asynchrones selon le contexte
-- Garantir l'idempotence et gerer l'ordering des evenements
-- Designer des evenements : nommage, payload, versioning
+- Garantir l'idempotence et gérer l'ordering des événements
+- Designer des événements : nommage, payload, versioning
 - Identifier les anti-patterns courants (event chains, event-carried state transfer excessif)
 
 ---
 
 ## 1. Events vs Commands
 
-La distinction entre events et commands est fondamentale en architecture event-driven. Confondre les deux mene a un couplage invisible entre services.
+La distinction entre events et commands est fondamentale en architecture event-driven. Confondre les deux mene à un couplage invisible entre services.
 
 ```
 COMMAND (imperatif) :                    EVENT (fait passe) :
@@ -117,9 +117,9 @@ interface OrderShippedEvent extends DomainEvent {
 }
 ```
 
-### 2.2 Integration Events
+### 2.2 Intégration Events
 
-Les integration events servent a communiquer entre bounded contexts (entre microservices). Ils sont souvent des versions simplifiees des domain events.
+Les intégration events servent a communiquer entre bounded contexts (entre microservices). Ils sont souvent des versions simplifiees des domain events.
 
 ```typescript
 // Integration event : publie sur un bus inter-services
@@ -174,7 +174,7 @@ Notification Event :
 
 ## 3. Event Bus — Implementation in-process
 
-Un event bus decouple les emetteurs des recepteurs au sein d'un meme processus. C'est la brique de base avant de passer a un bus distribue.
+Un event bus decouple les emetteurs des recepteurs au sein d'un même processus. C'est la brique de base avant de passer à un bus distribue.
 
 ```typescript
 // event-bus.ts — Event bus type-safe en TypeScript
@@ -508,7 +508,7 @@ function upcastOrderCreated(event: OrderCreatedV1): OrderCreatedV2 {
 ## 7. Anti-patterns
 
 :::warning Anti-pattern : Event chains
-Des events qui declenchent d'autres events qui declenchent d'autres events... creent un systeme impossible a debugger. Preferez des handlers qui appellent des commands explicitement plutot que des cascades d'events.
+Des events qui declenchent d'autres events qui declenchent d'autres events... creent un système impossible a debugger. Preferez des handlers qui appellent des commands explicitement plutot que des cascades d'events.
 :::
 
 ```
@@ -536,13 +536,13 @@ Le flux est visible et controlable.
 
 ---
 
-## Points cles
+## Points clés
 
-1. **Commands** sont imperatives ("fais ceci") et adressees a un destinataire. **Events** sont declaratifs ("ceci s'est passe") et diffuses a qui veut.
-2. **Domain events** sont riches et internes. **Integration events** sont simplifies pour la communication inter-services. **Notification events** sont des signaux minimaux.
-3. **L'event bus** decouple emetteurs et recepteurs. Il peut etre in-process (meme application) ou distribue (Redis, Kafka).
-4. **Les domain events** sont emis par les aggregats, accumules, puis publies apres la persistance de l'etat.
-5. **L'idempotence** des handlers est cruciale : chaque handler doit gerer le cas ou il recoit le meme event deux fois.
+1. **Commands** sont imperatives ("fais ceci") et adressees à un destinataire. **Events** sont declaratifs ("ceci s'est passe") et diffuses a qui veut.
+2. **Domain events** sont riches et internes. **Intégration events** sont simplifies pour la communication inter-services. **Notification events** sont des signaux minimaux.
+3. **L'event bus** decouple emetteurs et recepteurs. Il peut etre in-process (même application) ou distribue (Redis, Kafka).
+4. **Les domain events** sont emis par les aggregats, accumules, puis publies après la persistance de l'état.
+5. **L'idempotence** des handlers est cruciale : chaque handler doit gérer le cas où il recoit le même event deux fois.
 6. **Le versioning** des events (V1, V2 + upcasters) permet de faire evoluer le schema sans casser les consommateurs existants.
 7. **Les event chains** sont un anti-pattern. Preferez une orchestration explicite (sagas) pour les processus metier complexes.
 
@@ -550,6 +550,16 @@ Le flux est visible et controlable.
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [06 - Message Queues](./06-communication-asynchrone-message-queues.md) | [08 - API Gateway & BFF](./08-api-gateway-et-bff.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 07 event driven](../screencasts/screencast-07-event-driven.md)
+2. **Lab** : [lab-07-event-driven](../labs/lab-07-event-driven/README)
+3. **Quiz** : [quiz 07 event driven](../quizzes/quiz-07-event-driven.html)
+:::

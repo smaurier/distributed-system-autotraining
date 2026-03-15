@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/07-event-driven-architecture.md`
 - **Lab associe** : Lab 07
-- **Prerequis** : Screencast 06
+- **Prérequis** : Screencast 06
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/07-event-driven-architecture.md` ouvert
 - [ ] Terminal supplementaire pour les demos
 - [ ] Aucun processus sur les ports 3001-3003
@@ -17,7 +17,7 @@
 
 ### [00:00-02:00] Introduction — Events vs Commands
 
-> Au screencast precedent, on a construit un message broker. Mais tous les messages ne sont pas egaux. Il y a une distinction fondamentale entre un evenement et une commande. Un evenement dit "quelque chose s'est passe" — `OrderCreated`, `PaymentReceived`. Une commande dit "fais quelque chose" — `CreateOrder`, `ProcessPayment`. Cette distinction change la facon dont on conçoit toute l'architecture.
+> Au screencast précédent, on a construit un message broker. Mais tous les messages ne sont pas egaux. Il y à une distinction fondamentale entre un événement et une commande. Un événement dit "quelque chose s'est passe" — `OrderCreated`, `PaymentReceived`. Une commande dit "fais quelque chose" — `CreateOrder`, `ProcessPayment`. Cette distinction change la façon dont on conçoit toute l'architecture.
 
 **Action** : Ouvrir le module 07 et afficher la comparaison.
 
@@ -33,13 +33,13 @@ EVENEMENTS :                          COMMANDES :
 → Passe compose                       → Imperatif
 ```
 
-> Les evenements creent un couplage faible : le producteur ne connait pas les consommateurs. Les commandes creent un couplage plus fort : on s'adresse a un service specifique. Les deux ont leur place, mais l'event-driven architecture favorise les evenements.
+> Les événements creent un couplage faible : le producteur ne connait pas les consommateurs. Les commandes creent un couplage plus fort : on s'adresse à un service spécifique. Les deux ont leur place, mais l'event-driven architecture favorise les événements.
 
 ### [02:00-06:00] Implementer un Event Bus type
 
-> Construisons un event bus ou chaque evenement a une structure forte et des types TypeScript.
+> Construisons un event bus ou chaque événement à une structure forte et des types TypeScript.
 
-**Action** : Creer un fichier `event-bus.ts`.
+**Action** : Créer un fichier `event-bus.ts`.
 
 ```typescript
 // --- Definir les evenements du domaine ---
@@ -112,11 +112,11 @@ class TypedEventBus {
 }
 ```
 
-> Trois choses importantes. D'abord, les evenements sont des types TypeScript discrimines par le champ `type` — le compilateur verifie l'exhaustivite. Ensuite, la metadata contient un `correlationId` (pour tracer un flux de bout en bout) et un `causationId` (pour savoir quel evenement a declenche celui-ci). Enfin, les handlers sont executes avec `Promise.allSettled` — un handler en echec ne bloque pas les autres.
+> Trois choses importantes. D'abord, les événements sont des types TypeScript discrimines par le champ `type` — le compilateur vérifié l'exhaustivite. Ensuite, la metadata contient un `correlationId` (pour tracer un flux de bout en bout) et un `causationId` (pour savoir quel événement a declenche celui-ci). Enfin, les handlers sont executes avec `Promise.allSettled` — un handler en echec ne bloque pas les autres.
 
 ### [06:00-10:00] Domain events — Modeliser un flux metier
 
-> Utilisons l'event bus pour modeliser le flux complet d'une commande e-commerce : creation, paiement, reservation de stock, et expedition.
+> Utilisons l'event bus pour modeliser le flux complet d'une commande e-commerce : création, paiement, reservation de stock, et expedition.
 
 **Action** : Construire le workflow.
 
@@ -183,7 +183,7 @@ bus.on<ShipmentScheduled>('ShipmentScheduled', async (event) => {
 });
 ```
 
-**Action** : Declencher le flux en emettant un seul evenement.
+**Action** : Declencher le flux en emettant un seul événement.
 
 ```typescript
 // Un seul evenement declenche toute la chaine
@@ -200,11 +200,11 @@ await bus.emit({
 });
 ```
 
-> Regardez la chaine : OrderCreated → PaymentProcessed → InventoryReserved → ShipmentScheduled. Le service de notification ecoute le premier et le dernier. Aucun service ne connait les autres — ils reagissent uniquement aux evenements. C'est le couplage faible par excellence.
+> Regardez la chaine : OrderCreated → PaymentProcessed → InventoryReserved → ShipmentScheduled. Le service de notification ecoute le premier et le dernier. Aucun service ne connait les autres — ils reagissent uniquement aux événements. C'est le couplage faible par excellence.
 
 ### [10:00-13:30] Tracing du flux — correlationId en action
 
-> Le `correlationId` permet de reconstruire tout le flux a partir des logs.
+> Le `correlationId` permet de reconstruire tout le flux à partir des logs.
 
 **Action** : Montrer le tracing.
 
@@ -235,7 +235,7 @@ class EventTracer {
 }
 ```
 
-> En production, ces evenements sont dans un systeme de tracing comme Jaeger ou Zipkin. Le correlationId est propage dans les headers HTTP et les messages queue. On peut reconstruire le parcours complet d'une requete a travers 10 services.
+> En production, ces événements sont dans un système de tracing comme Jaeger ou Zipkin. Le correlationId est propage dans les headers HTTP et les messages queue. On peut reconstruire le parcours complet d'une requête a travers 10 services.
 
 ### [13:30-16:00] Anti-patterns et pieges
 
@@ -272,13 +272,13 @@ const leanEvent = {
 // La chaine doit etre asynchrone et tolerante aux delais
 ```
 
-> Regle d'or : un evenement doit contenir les informations suffisantes pour que le consommateur puisse travailler, mais pas plus. Si un consommateur a besoin de plus, il interroge le service source directement.
+> Regle d'or : un événement doit contenir les informations suffisantes pour que le consommateur puisse travailler, mais pas plus. Si un consommateur a besoin de plus, il interroge le service source directement.
 
-### [16:00-17:30] Recapitulatif
+### [16:00-17:30] Récapitulatif
 
-> Recapitulons. Les evenements disent "quelque chose s'est passe", les commandes disent "fais quelque chose". Un event bus type-safe garantit la coherence a la compilation. Le correlationId et le causationId permettent de tracer les flux. Et les domain events modelisent les processus metier de facon decouplante.
+> Recapitulons. Les événements disent "quelque chose s'est passe", les commandes disent "fais quelque chose". Un event bus type-safe garantit la coherence à la compilation. Le correlationId et le causationId permettent de tracer les flux. Et les domain events modelisent les processus metier de façon decouplante.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -292,12 +292,12 @@ PROCHAINE ETAPE :
 → Screencast 08 : API Gateway et BFF — le point d'entree unique
 ```
 
-> Au prochain screencast, on va construire un API Gateway qui orchestre les appels vers nos microservices. C'est le point d'entree unique de notre systeme. A bientot !
+> Au prochain screencast, on va construire un API Gateway qui orchestre les appels vers nos microservices. C'est le point d'entree unique de notre système. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- La distinction events vs commands est le concept cle — y passer assez de temps
-- Le flux OrderCreated → PaymentProcessed → InventoryReserved → ShipmentScheduled doit etre visualise etape par etape
-- Montrer le correlationId qui relie tous les evenements — c'est un "aha moment"
-- Les anti-patterns sont souvent les erreurs des debutants — les montrer clairement
+- La distinction events vs commands est le concept clé — y passer assez de temps
+- Le flux OrderCreated → PaymentProcessed → InventoryReserved → ShipmentScheduled doit etre visualise étape par étape
+- Montrer le correlationId qui relie tous les événements — c'est un "aha moment"
+- Les anti-patterns sont souvent les erreurs des débutants — les montrer clairement
 - Promise.allSettled est un detail important : un handler en echec ne bloque pas les autres
 - Garder le code lisible — ne pas tout taper d'un coup, construire incrementalement

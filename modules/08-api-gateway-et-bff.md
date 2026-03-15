@@ -10,13 +10,13 @@ A la fin de ce module, vous serez capable de :
 
 - Expliquer le role d'une API Gateway et quand l'introduire dans une architecture
 - Enumerer les responsabilites d'une gateway : routing, auth, rate limiting, aggregation, protocol translation
-- Definir le pattern BFF (Backend for Frontend) et ses avantages
+- Définir le pattern BFF (Backend for Frontend) et ses avantages
 - Implementer une gateway avec Express et TypeScript (routing, reverse proxy)
-- Agreger les reponses de plusieurs services en un seul appel
+- Agreger les réponses de plusieurs services en un seul appel
 - Propager l'authentification a travers la gateway (JWT forwarding, token exchange)
 - Injecter un correlation ID pour le tracing distribue
 - Identifier les anti-patterns : logique metier dans la gateway, couplage excessif
-- Integrer un circuit breaker au niveau de la gateway
+- Intégrer un circuit breaker au niveau de la gateway
 
 ---
 
@@ -24,7 +24,7 @@ A la fin de ce module, vous serez capable de :
 
 ### 1.1 Pourquoi une gateway ?
 
-Sans gateway, chaque client doit connaitre l'adresse de chaque microservice. Avec N services et M types de clients, on a N x M connexions a gerer.
+Sans gateway, chaque client doit connaître l'adresse de chaque microservice. Avec N services et M types de clients, on a N x M connexions a gérer.
 
 ```
 SANS GATEWAY :                           AVEC GATEWAY :
@@ -84,7 +84,7 @@ Problemes sans gateway :                 Avantages avec gateway :
 
 ## 2. BFF — Backend for Frontend
 
-Le pattern BFF (Backend for Frontend) consiste a creer une gateway dediee a chaque type de client. Chaque BFF connait les besoins specifiques de son client.
+Le pattern BFF (Backend for Frontend) consiste a créer une gateway dediee à chaque type de client. Chaque BFF connait les besoins spécifiques de son client.
 
 ```
 GATEWAY UNIQUE :                         PATTERN BFF :
@@ -126,7 +126,7 @@ satisfaire TOUS les clients             └─────────┘    └
 ```
 
 :::tip Quand utiliser le BFF ?
-Utilisez le BFF quand vos clients ont des besoins tres differents (web riche vs mobile leger vs IoT minimal). Si tous les clients consomment les memes donnees, une seule gateway suffit.
+Utilisez le BFF quand vos clients ont des besoins très différents (web riche vs mobile leger vs IoT minimal). Si tous les clients consomment les memes donnees, une seule gateway suffit.
 :::
 
 ---
@@ -515,20 +515,30 @@ CE QUE LA GATEWAY DOIT FAIRE :          CE QUE LA GATEWAY NE DOIT PAS FAIRE :
 
 ---
 
-## Points cles
+## Points clés
 
-1. **L'API Gateway** est le point d'entree unique pour tous les clients. Elle centralise le routing, l'auth, le rate limiting et l'observabilite.
-2. **Le pattern BFF** cree une gateway par type de client (web, mobile, IoT) pour adapter les reponses aux besoins specifiques de chacun.
-3. **L'aggregation** combine les reponses de plusieurs services en un seul appel client, reduisant le nombre de requetes reseau.
-4. **L'auth propagation** (JWT forwarding) permet aux services backend de connaitre l'identite de l'utilisateur sans re-authentifier.
-5. **Le Correlation ID** est injecte par la gateway et propage a tous les services pour tracer une requete de bout en bout.
-6. **Le circuit breaker** au niveau gateway protege le systeme quand un service backend est defaillant.
-7. **La gateway ne doit contenir aucune logique metier** — elle reste un intermediaire technique entre les clients et les services.
+1. **L'API Gateway** est le point d'entree unique pour tous les clients. Elle centralise le routing, l'auth, le rate limiting et l'observabilité.
+2. **Le pattern BFF** créé une gateway par type de client (web, mobile, IoT) pour adapter les réponses aux besoins spécifiques de chacun.
+3. **L'aggregation** combine les réponses de plusieurs services en un seul appel client, reduisant le nombre de requêtes réseau.
+4. **L'auth propagation** (JWT forwarding) permet aux services backend de connaître l'identite de l'utilisateur sans re-authentifier.
+5. **Le Correlation ID** est injecte par la gateway et propage a tous les services pour tracer une requête de bout en bout.
+6. **Le circuit breaker** au niveau gateway protege le système quand un service backend est defaillant.
+7. **La gateway ne doit contenir aucune logique metier** — elle reste un intermédiaire technique entre les clients et les services.
 
 ---
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [07 - Event-Driven Architecture](./07-event-driven-architecture.md) | [09 - Retries, Timeouts & Idempotency](./09-retries-timeouts-idempotency.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 08 api gateway](../screencasts/screencast-08-api-gateway.md)
+2. **Lab** : [lab-08-api-gateway](../labs/lab-08-api-gateway/README)
+3. **Quiz** : [quiz 08 api gateway](../quizzes/quiz-08-api-gateway.html)
+:::

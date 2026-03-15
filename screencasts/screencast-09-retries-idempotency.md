@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/09-retries-timeouts-idempotency.md`
 - **Lab associe** : Lab 09
-- **Prerequis** : Screencast 08
+- **Prérequis** : Screencast 08
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/09-retries-timeouts-idempotency.md` ouvert
 - [ ] Terminal supplementaire pour les tests
 - [ ] Aucun processus sur les ports 3001-3002
@@ -17,9 +17,9 @@
 
 ### [00:00-01:30] Introduction — Pourquoi les retries naifs sont dangereux
 
-> On a deja vu les retries dans les screencasts precedents. Mais un retry naif peut etre pire que pas de retry du tout. Imaginez : un service de paiement est lent, vous retentez 3 fois, chaque retry cree un paiement supplementaire. L'utilisateur est debite 4 fois au lieu d'une. C'est le probleme fondamental que l'idempotency resout.
+> On a déjà vu les retries dans les screencasts précédents. Mais un retry naif peut etre pire que pas de retry du tout. Imaginez : un service de paiement est lent, vous retentez 3 fois, chaque retry créé un paiement supplementaire. L'utilisateur est debite 4 fois au lieu d'une. C'est le problème fondamental que l'idempotency resout.
 
-**Action** : Ouvrir le module 09 et afficher le diagramme du probleme.
+**Action** : Ouvrir le module 09 et afficher le diagramme du problème.
 
 ```
 CLIENT                    PAYMENT SERVICE
@@ -39,9 +39,9 @@ CLIENT                    PAYMENT SERVICE
 
 ### [01:30-05:00] Backoff exponentiel avec jitter
 
-> Le premier probleme des retries naifs est le "thundering herd". Si 1000 clients retentent en meme temps apres un timeout, le serveur qui venait de se relever est immediatement submerge. Le backoff exponentiel avec jitter resout ca.
+> Le premier problème des retries naifs est le "thundering herd". Si 1000 clients retentent en même temps après un timeout, le serveur qui venait de se relever est immediatement submerge. Le backoff exponentiel avec jitter resout ça.
 
-**Action** : Creer un fichier `retry-strategies.ts`.
+**Action** : Créer un fichier `retry-strategies.ts`.
 
 ```typescript
 // --- Strategies de backoff ---
@@ -87,17 +87,17 @@ for (let i = 0; i < 5; i++) {
 }
 ```
 
-**Action** : Executer et montrer la variabilite des delais.
+**Action** : Exécuter et montrer la variabilite des delais.
 
 ```bash
 npx tsx retry-strategies.ts
 ```
 
-> La strategie "full jitter" est recommandee par Amazon. Elle repartit les retries uniformement dans la fenetre de temps, evitant les pics de charge. Sans jitter, 1000 clients retentent tous a exactement 200ms, 400ms, 800ms — ce qui cree des pics periodiques.
+> La stratégie "full jitter" est recommandee par Amazon. Elle repartit les retries uniformement dans la fenêtre de temps, evitant les pics de charge. Sans jitter, 1000 clients retentent tous a exactement 200ms, 400ms, 800ms — ce qui créé des pics periodiques.
 
 ### [05:00-09:30] Idempotency keys — Le paiement ne se fait qu'une fois
 
-> L'idempotency garantit qu'une operation peut etre executee plusieurs fois avec le meme resultat. Le client genere un identifiant unique (idempotency key) et l'envoie avec chaque requete. Le serveur detecte les doublons et retourne le resultat original.
+> L'idempotency garantit qu'une operation peut etre executee plusieurs fois avec le même résultat. Le client généré un identifiant unique (idempotency key) et l'envoie avec chaque requête. Le serveur détecté les doublons et retourne le résultat original.
 
 **Action** : Implementer un serveur idempotent.
 
@@ -190,7 +190,7 @@ app.post('/payments', async (req, res) => {
 app.listen(3001, () => console.log('[Payment Service] Started on port 3001'));
 ```
 
-**Action** : Tester avec la meme idempotency key.
+**Action** : Tester avec la même idempotency key.
 
 ```bash
 # Premier appel — traitement reel
@@ -212,13 +212,13 @@ curl -i -X POST http://localhost:3001/payments \
   -d '{"userId": "user-1", "amount": 100}'
 ```
 
-> Regardez le header `X-Idempotent-Replayed: true` dans la reponse du deuxieme appel. Le serveur n'a pas recree un paiement — il a retourne le resultat cache. L'utilisateur n'est debite qu'une seule fois, peu importe le nombre de retries.
+> Regardez le header `X-Idempotent-Replayed: true` dans la réponse du deuxieme appel. Le serveur n'a pas recree un paiement — il a retourne le résultat cache. L'utilisateur n'est debite qu'une seule fois, peu importe le nombre de retries.
 
 ### [09:30-13:00] Client HTTP resilient complet
 
 > Combinons backoff+jitter et idempotency dans un client HTTP resilient.
 
-**Action** : Creer un fichier `resilient-client.ts`.
+**Action** : Créer un fichier `resilient-client.ts`.
 
 ```typescript
 interface RetryOptions {
@@ -290,11 +290,11 @@ class ResilientHttpClient {
 }
 ```
 
-> Le client genere une idempotency key unique par requete logique et l'envoie a chaque retry. Il respecte le header `Retry-After` si le serveur le fournit. Et il utilise le full jitter pour le backoff. C'est le type de client qu'on utilise en production.
+> Le client généré une idempotency key unique par requête logique et l'envoie à chaque retry. Il respecte le header `Retry-After` si le serveur le fournit. Et il utilise le full jitter pour le backoff. C'est le type de client qu'on utilise en production.
 
 ### [13:00-15:30] Quand NE PAS retenter
 
-> Les retries ne sont pas toujours la bonne reponse. Il faut savoir quand s'arreter.
+> Les retries ne sont pas toujours la bonne réponse. Il faut savoir quand s'arreter.
 
 **Action** : Afficher la table de decision.
 
@@ -314,13 +314,13 @@ STATUS CODE    | RETRYABLE ? | POURQUOI
 Network Error  | OUI         | Connectivite temporaire
 ```
 
-> La regle : on retente les erreurs transitoires (5xx, timeout, erreur reseau), jamais les erreurs clients (4xx sauf 429). Un 400 retente 1000 fois donne toujours un 400 — c'est du gaspillage.
+> La regle : on retente les erreurs transitoires (5xx, timeout, erreur réseau), jamais les erreurs clients (4xx sauf 429). Un 400 retente 1000 fois donne toujours un 400 — c'est du gaspillage.
 
-### [15:30-17:30] Recapitulatif
+### [15:30-17:30] Récapitulatif
 
-> Recapitulons. Le backoff exponentiel avec full jitter evite le thundering herd. L'idempotency key garantit qu'une operation est executee exactement une fois, meme avec des retries. Le client resilient combine les deux avec le respect du Retry-After. Et on ne retente jamais les erreurs clients.
+> Recapitulons. Le backoff exponentiel avec full jitter evite le thundering herd. L'idempotency key garantit qu'une operation est executee exactement une fois, même avec des retries. Le client resilient combine les deux avec le respect du Retry-After. Et on ne retente jamais les erreurs clients.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -334,12 +334,12 @@ PROCHAINE ETAPE :
 → Screencast 10 : Coherence et theoreme CAP
 ```
 
-> Au prochain screencast, on change completement de sujet : on va parler de coherence des donnees et du theoreme CAP. C'est le fondement theorique qui guide toutes les decisions d'architecture en distribue. A bientot !
+> Au prochain screencast, on change complètement de sujet : on va parler de coherence des donnees et du théorème CAP. C'est le fondement théorique qui guide toutes les decisions d'architecture en distribue. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Le diagramme du triple paiement est tres parlant — y passer du temps
-- Executer le code de comparaison des strategies de backoff plusieurs fois pour montrer la variabilite
-- La demo d'idempotency est le moment cle : montrer que le meme ID de paiement est retourne
+- Le diagramme du triple paiement est très parlant — y passer du temps
+- Exécuter le code de comparaison des stratégies de backoff plusieurs fois pour montrer la variabilite
+- La demo d'idempotency est le moment clé : montrer que le même ID de paiement est retourne
 - Le header X-Idempotent-Replayed doit etre visible dans la sortie curl -i
-- La table de decision retryable/non-retryable est un reference utile — la montrer en plein ecran
-- Verifier que le serveur de paiement fonctionne avant de lancer les tests
+- La table de decision retryable/non-retryable est un référence utile — la montrer en plein ecran
+- Vérifier que le serveur de paiement fonctionne avant de lancer les tests

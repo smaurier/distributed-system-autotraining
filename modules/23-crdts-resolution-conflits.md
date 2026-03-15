@@ -8,21 +8,21 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Expliquer le probleme de la resolution de conflits dans les systemes repliques
-- Definir la Strong Eventual Consistency (SEC) et la distinguer de l'eventual consistency classique
+- Expliquer le problème de la résolution de conflits dans les systèmes repliques
+- Définir la Strong Eventual Consistency (SEC) et la distinguer de l'eventual consistency classique
 - Decrire ce que sont les CRDTs et leurs deux familles (CvRDT et CmRDT)
 - Implementer un G-Counter (Grow-only Counter) en TypeScript
 - Implementer un PN-Counter (Positive-Negative Counter) en TypeScript
 - Implementer un LWW-Register (Last Writer Wins Register) en TypeScript
 - Implementer un OR-Set (Observed-Remove Set) en TypeScript
-- Demontrer les proprietes mathematiques de convergence (commutativite, associativite, idempotence)
+- Demontrer les propriétés mathematiques de convergence (commutativite, associativite, idempotence)
 - Identifier les trade-offs des CRDTs : overhead de metadonnees, tombstones, garbage collection
 
 ---
 
-## Le probleme de la resolution de conflits
+## Le problème de la résolution de conflits
 
-Dans un systeme distribue avec replication, les noeuds peuvent modifier les memes donnees independamment (pendant une partition reseau ou simplement en mode multi-leader). Quand les repliques se resynchronisent, il faut **resoudre les conflits**.
+Dans un système distribue avec replication, les noeuds peuvent modifier les memes donnees independamment (pendant une partition réseau ou simplement en mode multi-leader). Quand les repliques se resynchronisent, il faut **résoudre les conflits**.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -55,14 +55,14 @@ Dans un systeme distribue avec replication, les noeuds peuvent modifier les meme
 ## Strong Eventual Consistency (SEC)
 
 :::tip Definition
-La **Strong Eventual Consistency** garantit que si deux repliques ont recu le meme ensemble de mises a jour (dans n'importe quel ordre), elles convergent vers le **meme etat**, sans necessiter de protocole de consensus ou de coordination.
+La **Strong Eventual Consistency** garantit que si deux repliques ont recu le même ensemble de mises a jour (dans n'importe quel ordre), elles convergent vers le **même état**, sans necessiter de protocole de consensus ou de coordination.
 :::
 
-| Propriete | Eventual Consistency | Strong Eventual Consistency |
+| Propriété | Eventual Consistency | Strong Eventual Consistency |
 |-----------|:-------------------:|:--------------------------:|
 | Convergence a terme | Oui | Oui |
-| Convergence sans coordination | Non (peut necessiter conflit resolution) | Oui |
-| Deterministe | Non garanti | Oui (meme ensemble → meme etat) |
+| Convergence sans coordination | Non (peut necessiter conflit résolution) | Oui |
+| Deterministe | Non garanti | Oui (même ensemble → même état) |
 | Resolution de conflits | Manuelle ou LWW | Automatique par la structure |
 
 ---
@@ -318,7 +318,7 @@ simulatePNCounter();
 
 ## LWW-Register (Last Writer Wins Register)
 
-Le LWW-Register resout les conflits en conservant l'ecriture avec le **timestamp le plus recent**. C'est le CRDT le plus utilise en pratique.
+Le LWW-Register resout les conflits en conservant l'écriture avec le **timestamp le plus recent**. C'est le CRDT le plus utilise en pratique.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -335,7 +335,7 @@ Le LWW-Register resout les conflits en conservant l'ecriture avec le **timestamp
 ```
 
 :::warning Perte silencieuse d'ecritures
-Le LWW-Register est simple mais **perd silencieusement des ecritures**. L'ecriture "Paris" est simplement supprimee. Si la perte d'ecritures concurrentes est inacceptable, utilisez un Multi-Value Register ou un OR-Set.
+Le LWW-Register est simple mais **perd silencieusement des ecritures**. L'écriture "Paris" est simplement supprimee. Si la perte d'ecritures concurrentes est inacceptable, utilisez un Multi-Value Register ou un OR-Set.
 :::
 
 ### Implementation TypeScript
@@ -438,7 +438,7 @@ simulateLWWRegister();
 
 ## OR-Set (Observed-Remove Set)
 
-L'OR-Set est un ensemble CRDT qui supporte l'ajout ET la suppression d'elements sans conflit. Chaque ajout est associe a un **tag unique**. La suppression ne retire que les tags observes localement.
+L'OR-Set est un ensemble CRDT qui supporte l'ajout ET la suppression d'éléments sans conflit. Chaque ajout est associe à un **tag unique**. La suppression ne retire que les tags observes localement.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -640,7 +640,7 @@ simulateORSet();
 
 ---
 
-## Convergence : proprietes mathematiques
+## Convergence : propriétés mathematiques
 
 Les CRDTs state-based (CvRDT) forment un **semi-treillis** (join semilattice). L'operation `merge` est le supremum (least upper bound).
 
@@ -736,8 +736,8 @@ proveConvergence();
 | **Cache distribue** | LWW-Register | Invalidation sans coordination |
 | **Compteur d'inventaire** | PN-Counter | Increment/decrement concurrent |
 
-:::tip Cas reel : Amazon DynamoDB
-DynamoDB et son predecesseur Dynamo utilisent des concepts proches des CRDTs pour gerer les conflits sur les repliques. L'OR-Set est similaire au mecanisme de resolution de conflits utilise dans le panier d'achat d'Amazon.
+:::tip Cas réel : Amazon DynamoDB
+DynamoDB et son predecesseur Dynamo utilisent des concepts proches des CRDTs pour gérer les conflits sur les repliques. L'OR-Set est similaire au mécanisme de résolution de conflits utilise dans le panier d'achat d'Amazon.
 :::
 
 ---
@@ -772,7 +772,7 @@ DynamoDB et son predecesseur Dynamo utilisent des concepts proches des CRDTs pou
 
 ---
 
-## Resume
+## Résumé
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -806,10 +806,20 @@ DynamoDB et son predecesseur Dynamo utilisent des concepts proches des CRDTs pou
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [22 - Stream Processing](./22-stream-processing-event-streaming.md) | [24 - Projet Final](./24-projet-final.md) |
 
 | Lab | Quiz |
 |:---:|:----:|
 | [Lab 23](../labs/lab-23-crdts/) | [Quiz 23](../quizzes/quiz-23-crdts.html) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 23 crdts](../screencasts/screencast-23-crdts.md)
+2. **Lab** : [lab-23-crdts](../labs/lab-23-crdts/README)
+3. **Quiz** : [quiz 23 crdts](../quizzes/quiz-23-crdts.html)
+:::

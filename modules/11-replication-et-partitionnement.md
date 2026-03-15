@@ -1,6 +1,6 @@
 # Module 11 : Replication & Partitionnement
 
-> **Difficulty** : 4/5 | **Duration estimee** : 4h | **Prerequis** : Modules 1-10
+> **Difficulty** : 4/5 | **Duration estimee** : 4h | **Prérequis** : Modules 1-10
 
 ---
 
@@ -8,12 +8,12 @@
 
 A la fin de ce module, vous serez capable de :
 
-1. Expliquer les differentes strategies de replication et leurs compromis
-2. Implementer les modeles leader-follower, multi-leader et leaderless
-3. Comprendre les strategies de partitionnement (hash vs range)
+1. Expliquer les différentes stratégies de replication et leurs compromis
+2. Implementer les modèles leader-follower, multi-leader et leaderless
+3. Comprendre les stratégies de partitionnement (hash vs range)
 4. Implementer le consistent hashing avec noeuds virtuels en TypeScript
-5. Identifier et resoudre les problemes de hot spots
-6. Choisir la bonne strategie de rebalancing
+5. Identifier et résoudre les problèmes de hot spots
+6. Choisir la bonne stratégie de rebalancing
 
 ---
 
@@ -41,7 +41,7 @@ La replication consiste a maintenir des **copies identiques** des donnees sur pl
 
 ## 2. Replication Leader-Follower (Primary-Replica)
 
-Le modele le plus courant. Un seul noeud (le leader) accepte les ecritures. Les followers recoivent les modifications du leader et servent les lectures.
+Le modèle le plus courant. Un seul noeud (le leader) accepte les ecritures. Les followers recoivent les modifications du leader et servent les lectures.
 
 ```
   Client (write)       Client (read)    Client (read)
@@ -185,14 +185,14 @@ class FollowerNode {
 ```
 
 :::warning
-Avec la replication **synchrone**, une ecriture est aussi lente que le follower le plus lent. Avec la replication **asynchrone**, un failover peut perdre les ecritures non encore repliquees. La plupart des systemes utilisent un compromis : **semi-synchrone** (1 follower synchrone, les autres asynchrones).
+Avec la replication **synchrone**, une écriture est aussi lente que le follower le plus lent. Avec la replication **asynchrone**, un failover peut perdre les ecritures non encore repliquees. La plupart des systèmes utilisent un compromis : **semi-synchrone** (1 follower synchrone, les autres asynchrones).
 :::
 
 ---
 
 ## 3. Replication Multi-Leader
 
-Chaque datacenter a son propre leader. Utile pour la distribution geographique, mais complexe a cause des **conflits d'ecriture**.
+Chaque datacenter a son propre leader. Utile pour la distribution geographique, mais complexe a cause des **conflits d'écriture**.
 
 ```
   Datacenter EU              Datacenter US
@@ -313,14 +313,14 @@ class MultiLeaderReplicator {
 ```
 
 :::tip
-**Last-Write-Wins (LWW)** est la strategie la plus simple mais peut perdre des donnees. Pour des cas critiques, preferez les **CRDTs** (Conflict-free Replicated Data Types) qui garantissent une convergence sans perte.
+**Last-Write-Wins (LWW)** est la stratégie la plus simple mais peut perdre des donnees. Pour des cas critiques, preferez les **CRDTs** (Conflict-free Replicated Data Types) qui garantissent une convergence sans perte.
 :::
 
 ---
 
 ## 4. Replication Leaderless
 
-Aucun leader designe. Les ecritures et lectures sont envoyees a **plusieurs repliques** en parallele (modele Dynamo).
+Aucun leader designe. Les ecritures et lectures sont envoyees a **plusieurs repliques** en parallele (modèle Dynamo).
 
 ```typescript
 class LeaderlessStore {
@@ -406,7 +406,7 @@ class LeaderlessStore {
 
 ## 5. Partitionnement (Sharding)
 
-Le partitionnement divise les donnees en **fragments** (shards) distribues sur differents noeuds. Chaque noeud ne gere qu'un sous-ensemble des donnees.
+Le partitionnement divise les donnees en **fragments** (shards) distribues sur différents noeuds. Chaque noeud ne géré qu'un sous-ensemble des donnees.
 
 ```
   Donnees totales : [A-Z]
@@ -434,14 +434,14 @@ Le partitionnement divise les donnees en **fragments** (shards) distribues sur d
 ```
 
 :::warning
-Le range partitioning peut creer des **hot spots** si les ecritures se concentrent sur un intervalle (ex: cles basees sur le timestamp => tout va sur le dernier shard). Le hash partitioning repartit mieux la charge mais rend les range queries impossibles.
+Le range partitioning peut créer des **hot spots** si les ecritures se concentrent sur un intervalle (ex: clés basees sur le timestamp => tout va sur le dernier shard). Le hash partitioning repartit mieux la charge mais rend les range queries impossibles.
 :::
 
 ---
 
 ## 6. Consistent Hashing
 
-Le consistent hashing resout le probleme du **rebalancing** : quand on ajoute ou retire un noeud, on ne veut pas re-distribuer toutes les cles.
+Le consistent hashing resout le problème du **rebalancing** : quand on ajoute ou retire un noeud, on ne veut pas re-distribuer toutes les clés.
 
 ### 6.1 Le concept
 
@@ -657,7 +657,7 @@ function demonstrateVirtualNodes(): void {
 
 ---
 
-## 7. Strategies de rebalancing
+## 7. Stratégies de rebalancing
 
 Quand un noeud est ajoute ou retire, les donnees doivent etre redistribuees.
 
@@ -798,12 +798,12 @@ class HotSpotMitigation {
 ```
 
 :::tip
-Le scatter/gather est un compromis : il repartit la charge mais complique les ecritures (ecrire a N endroits) et les lectures de donnees qui changent souvent. Reservez cette technique aux cles veritablement "hot" identifiees par le monitoring.
+Le scatter/gather est un compromis : il repartit la charge mais complique les ecritures (écrire a N endroits) et les lectures de donnees qui changent souvent. Reservez cette technique aux clés veritablement "hot" identifiees par le monitoring.
 :::
 
 ---
 
-## 9. Comparaison des strategies de replication
+## 9. Comparaison des stratégies de replication
 
 ```
   +-------------------+------------+----------+-------------+
@@ -828,12 +828,12 @@ Le scatter/gather est un compromis : il repartit la charge mais complique les ec
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
-| Concept | Cle a retenir |
+| Concept | Cle à retenir |
 |---------|---------------|
 | Leader-Follower | Simple, mais le leader est un SPOF et un bottleneck |
-| Multi-Leader | Faible latence geo, mais conflits d'ecriture |
+| Multi-Leader | Faible latence geo, mais conflits d'écriture |
 | Leaderless | Flexible (quorum), resilient, mais complexe |
 | Hash Partitioning | Bonne distribution, pas de range scans |
 | Range Partitioning | Range scans, risque de hot spots |
@@ -848,4 +848,16 @@ Le scatter/gather est un compromis : il repartit la charge mais complique les ec
 - [Quiz 11 : Testez vos connaissances](../quizzes/quiz-11-replication.html)
 - [Module suivant : Saga Pattern](./12-transactions-distribuees-saga.md)
 - [Visualisation interactive : Consistent Hashing](../visualizations/consistent-hashing.html)
-- [Module precedent : Coherence & CAP](./10-coherence-et-theoreme-cap.md)
+- [Module précédent : Coherence & CAP](./10-coherence-et-theoreme-cap.md)
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 11 replication](../screencasts/screencast-11-replication.md)
+2. **Lab** : [lab-11-replication-partitionnement](../labs/lab-11-replication-partitionnement/README)
+3. **Visualisation** : [Théorème CAP](../visualizations/cap-theorem.html)
+4. **Visualisation** : [Consistent Hashing](../visualizations/consistent-hashing.html)
+5. **Quiz** : [quiz 11 replication](../quizzes/quiz-11-replication.html)
+:::

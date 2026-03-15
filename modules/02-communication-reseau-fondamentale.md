@@ -1,4 +1,4 @@
-# 02 — Communication reseau (TCP, HTTP/2, latence, timeouts, connection pooling)
+# 02 — Communication réseau (TCP, HTTP/2, latence, timeouts, connection pooling)
 
 | Difficulte | Duree estimee | Lab | Quiz |
 |:----------:|:-------------:|:---:|:----:|
@@ -10,10 +10,10 @@ A la fin de ce module, vous serez capable de :
 
 - Expliquer le cycle de vie d'une connexion TCP (3-way handshake, transfert, fermeture)
 - Comparer HTTP/1.1 et HTTP/2 en termes de performance
-- Identifier et mesurer les composantes de la latence reseau
+- Identifier et mesurer les composantes de la latence réseau
 - Implementer des timeouts (connect, read, global) en TypeScript
-- Construire un pool de connexions reutilisable
-- Diagnostiquer les problemes de performance reseau courants
+- Construire un pool de connexions réutilisable
+- Diagnostiquer les problèmes de performance réseau courants
 
 ---
 
@@ -21,7 +21,7 @@ A la fin de ce module, vous serez capable de :
 
 ### Le 3-way handshake
 
-Chaque connexion TCP commence par un echange en 3 etapes :
+Chaque connexion TCP commence par un echange en 3 étapes :
 
 ```
 ┌──────────┐                         ┌──────────┐
@@ -119,7 +119,7 @@ async function main() {
 ```
 
 :::tip Pourquoi comprendre TCP ?
-Meme si vous utilisez HTTP (qui est bati sur TCP), comprendre TCP vous aide a diagnostiquer les problemes de performance : handshake lent, connexions en TIME_WAIT, Nagle's algorithm, etc.
+Même si vous utilisez HTTP (qui est bati sur TCP), comprendre TCP vous aide a diagnostiquer les problèmes de performance : handshake lent, connexions en TIME_WAIT, Nagle's algorithm, etc.
 :::
 
 ---
@@ -215,7 +215,7 @@ async function http2MultiplexDemo() {
 ```
 
 :::tip HTTP/2 en production
-Avec Node.js et Express, HTTP/2 est generalement gere par le reverse proxy (nginx, Envoy, Traefik) devant vos services. Entre microservices, gRPC (bati sur HTTP/2) est souvent prefere.
+Avec Node.js et Express, HTTP/2 est généralement géré par le reverse proxy (nginx, Envoy, Traefik) devant vos services. Entre microservices, gRPC (bati sur HTTP/2) est souvent préféré.
 :::
 
 ---
@@ -391,7 +391,7 @@ async function callAnalyticsService(path: string) {
 ```
 
 :::warning Le timeout de la mort
-Un timeout **trop long** est presque pire que pas de timeout : il bloque les resources pendant trop longtemps. Un timeout **trop court** genere des faux positifs. Ajustez en fonction des SLA de chaque service.
+Un timeout **trop long** est presque pire que pas de timeout : il bloque les resources pendant trop longtemps. Un timeout **trop court** généré des faux positifs. Ajustez en fonction des SLA de chaque service.
 :::
 
 ### Timeout avec retry et backoff
@@ -430,7 +430,7 @@ async function fetchWithRetry(
 
 ### Pourquoi le pooling ?
 
-Creer une connexion TCP/TLS a chaque requete est couteux (handshake). Le pooling reutilise les connexions existantes.
+Créer une connexion TCP/TLS à chaque requête est couteux (handshake). Le pooling reutilise les connexions existantes.
 
 ```
 Sans pool :                       Avec pool :
@@ -465,7 +465,7 @@ async function pooledFetch(url: string): Promise<Response> {
 }
 ```
 
-### Pool de connexions generique
+### Pool de connexions générique
 
 ```typescript
 class ConnectionPool<T> {
@@ -577,12 +577,12 @@ async function benchmarkKeepAlive(url: string, requests: number) {
 
 ---
 
-## Diagnostic des problemes reseau courants
+## Diagnostic des problèmes réseau courants
 
 | Symptome | Cause probable | Solution |
 |----------|---------------|----------|
 | Connexions refusees | Service down, port ferme | Health checks, retry |
-| Timeouts frequents | Reseau sature, service surcharge | Augmenter timeout, scaling |
+| Timeouts frequents | Réseau sature, service surcharge | Augmenter timeout, scaling |
 | Latence variable | Garbage collection, noisy neighbor | Profiling, isolation |
 | Connexions en TIME_WAIT | Trop de connexions ephemeres | Keep-alive, pooling |
 | Erreurs DNS intermittentes | Cache DNS expire, DNS instable | DNS caching local |
@@ -625,7 +625,7 @@ async function diagnoseEndpoint(url: string) {
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -645,6 +645,17 @@ async function diagnoseEndpoint(url: string) {
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| [01 - Pourquoi les systemes distribues ?](./01-pourquoi-les-systemes-distribues.md) | [03 - Premiers microservices TypeScript](./03-premiers-microservices-typescript.md) |
+| [01 - Pourquoi les systèmes distribues ?](./01-pourquoi-les-systemes-distribues.md) | [03 - Premiers microservices TypeScript](./03-premiers-microservices-typescript.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 02 communication réseau](../screencasts/screencast-02-communication-reseau.md)
+2. **Lab** : [lab-02-communication-réseau](../labs/lab-02-communication-reseau/README)
+3. **Visualisation** : [Network Partitions](../visualizations/network-partitions.html)
+4. **Quiz** : [quiz 02 communication réseau](../quizzes/quiz-02-communication-reseau.html)
+:::

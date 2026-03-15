@@ -4,11 +4,11 @@
 - **Duree estimee** : 12-15 min
 - **Module** : `modules/05-communication-synchrone-avancee.md`
 - **Lab associe** : Lab 05
-- **Prerequis** : Screencast 04
+- **Prérequis** : Screencast 04
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/05-communication-synchrone-avancee.md` ouvert
 - [ ] Trois terminaux disponibles (deux services + client)
 - [ ] Aucun processus sur les ports 3001-3003
@@ -17,9 +17,9 @@
 
 ### [00:00-01:30] Introduction — Au-dela du CRUD basique
 
-> On sait deja faire des appels HTTP entre services. Mais en production, ca ne suffit pas. Comment un service trouve-t-il l'adresse d'un autre service ? Comment repartir la charge entre plusieurs instances ? Quel niveau de maturite REST adopter ? Ce screencast repond a ces trois questions.
+> On sait déjà faire des appels HTTP entre services. Mais en production, ça ne suffit pas. Comment un service trouve-t-il l'adresse d'un autre service ? Comment repartir la charge entre plusieurs instances ? Quel niveau de maturite REST adopter ? Ce screencast repond a ces trois questions.
 
-**Action** : Ouvrir le module 05 et afficher le modele de maturite Richardson.
+**Action** : Ouvrir le module 05 et afficher le modèle de maturite Richardson.
 
 ```
 MODELE DE MATURITE RICHARDSON :
@@ -45,9 +45,9 @@ Niveau 3 : Hypermedia Controls (HATEOAS)
 
 ### [01:30-05:00] Service discovery — Trouver les autres services
 
-> Premiere question fondamentale : comment un service sait-il ou se trouve un autre service ? Coder l'adresse en dur est fragile. Le service discovery resout ce probleme.
+> Premiere question fondamentale : comment un service sait-il ou se trouve un autre service ? Coder l'adresse en dur est fragile. Le service discovery resout ce problème.
 
-**Action** : Creer un fichier `service-registry.ts`.
+**Action** : Créer un fichier `service-registry.ts`.
 
 ```typescript
 interface ServiceInstance {
@@ -131,9 +131,9 @@ console.log('Healthy instances:', registry.resolve('user-service').length); // 3
 
 ### [05:00-09:00] Load balancing — Repartir la charge
 
-> Maintenant qu'on sait trouver plusieurs instances, comment choisir laquelle appeler ? C'est le role du load balancer. Implementons trois strategies classiques.
+> Maintenant qu'on sait trouver plusieurs instances, comment choisir laquelle appeler ? C'est le role du load balancer. Implementons trois stratégies classiques.
 
-**Action** : Creer un fichier `load-balancer.ts`.
+**Action** : Créer un fichier `load-balancer.ts`.
 
 ```typescript
 interface LoadBalancerStrategy {
@@ -206,7 +206,7 @@ class LoadBalancedClient {
 }
 ```
 
-**Action** : Demontrer les trois strategies avec un compteur d'appels.
+**Action** : Demontrer les trois stratégies avec un compteur d'appels.
 
 ```typescript
 const strategy = new RoundRobinStrategy();
@@ -218,11 +218,11 @@ for (let i = 0; i < 9; i++) {
 // A, B, C, A, B, C, A, B, C — distribution parfaitement equilibree
 ```
 
-> Round Robin est le plus simple et souvent suffisant. Random est bon quand les instances ont des capacites egales. Weighted/Least Connections est ideal quand certaines requetes sont plus lourdes que d'autres. Nginx, HAProxy, et les service meshes implementent ces strategies et bien d'autres.
+> Round Robin est le plus simple et souvent suffisant. Random est bon quand les instances ont des capacites egales. Weighted/Least Connections est ideal quand certaines requêtes sont plus lourdes que d'autres. Nginx, HAProxy, et les service meshes implementent ces stratégies et bien d'autres.
 
 ### [09:00-11:30] Assembler le tout — Client resilient
 
-> Combinons le service discovery et le load balancing avec les timeouts et retries qu'on connait deja.
+> Combinons le service discovery et le load balancing avec les timeouts et retries qu'on connait déjà.
 
 **Action** : Montrer le client complet.
 
@@ -262,13 +262,13 @@ class ResilientServiceClient {
 }
 ```
 
-> Le client combine tout : il decouvre les instances, choisit via round robin, applique un timeout, et en cas d'erreur serveur il retente sur une instance differente. C'est le type de client qu'on trouve dans les SDKs de service mesh comme Istio ou Linkerd.
+> Le client combine tout : il découvre les instances, choisit via round robin, applique un timeout, et en cas d'erreur serveur il retente sur une instance différente. C'est le type de client qu'on trouve dans les SDKs de service mesh comme Istio ou Linkerd.
 
-### [11:30-13:30] Recapitulatif
+### [11:30-13:30] Récapitulatif
 
-> Recapitulons les trois concepts cles de la communication synchrone avancee.
+> Recapitulons les trois concepts clés de la communication synchrone avancee.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -281,11 +281,11 @@ PROCHAINE ETAPE :
 → Screencast 06 : Communication asynchrone avec les message queues
 ```
 
-> Jusqu'ici, toute notre communication est synchrone : le client attend la reponse. Au prochain screencast, on va decouvrir la communication asynchrone avec les message queues. C'est un changement de paradigme complet. A bientot !
+> Jusqu'ici, toute notre communication est synchrone : le client attend la réponse. Au prochain screencast, on va découvrir la communication asynchrone avec les message queues. C'est un changement de paradigme complet. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Le modele Richardson est theorique — ne pas y passer trop de temps, montrer les exemples concrets
+- Le modèle Richardson est théorique — ne pas y passer trop de temps, montrer les exemples concrets
 - Pour le service registry, bien montrer le cycle register → heartbeat → resolve → deregister
 - Demontrer visuellement le round robin avec les console.log pour que l'alternance soit evidente
-- Le client resilient est l'aboutissement du screencast — prendre le temps de commenter chaque etape
-- Verifier que les exemples de code compilent et s'executent avant l'enregistrement
+- Le client resilient est l'aboutissement du screencast — prendre le temps de commenter chaque étape
+- Vérifier que les exemples de code compilent et s'executent avant l'enregistrement

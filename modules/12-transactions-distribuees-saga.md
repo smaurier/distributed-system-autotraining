@@ -1,6 +1,6 @@
 # Module 12 : Saga Pattern
 
-> **Difficulty** : 4/5 | **Duration estimee** : 4h | **Prerequis** : Modules 1-11
+> **Difficulty** : 4/5 | **Duration estimee** : 4h | **Prérequis** : Modules 1-11
 
 ---
 
@@ -8,16 +8,16 @@
 
 A la fin de ce module, vous serez capable de :
 
-1. Expliquer pourquoi les transactions distribuees classiques (2PC) posent probleme a grande echelle
+1. Expliquer pourquoi les transactions distribuees classiques (2PC) posent problème a grande echelle
 2. Decrire le protocole Two-Phase Commit et ses limitations
 3. Implementer le pattern Saga en choreographie et en orchestration
 4. Concevoir des transactions compensatoires (semantic rollback)
-5. Gerer les erreurs dans les sagas (timeouts, retries, dead letter)
+5. Gérer les erreurs dans les sagas (timeouts, retries, dead letter)
 6. Choisir entre choreographie et orchestration selon le contexte
 
 ---
 
-## 1. Le probleme : les transactions distribuees
+## 1. Le problème : les transactions distribuees
 
 Dans une architecture microservices, une operation metier traverse souvent **plusieurs services** avec chacun sa propre base de donnees. Comment garantir l'atomicite (tout ou rien) quand il n'y a pas de base de donnees commune ?
 
@@ -144,14 +144,14 @@ class TwoPhaseCommitCoordinator {
 }
 ```
 
-### 2.2 Les problemes du 2PC
+### 2.2 Les problèmes du 2PC
 
 :::warning
-Le 2PC a des limitations serieuses dans un systeme distribue a grande echelle :
+Le 2PC a des limitations serieuses dans un système distribue a grande echelle :
 
 1. **Blocking** : si le coordinateur tombe en panne entre les deux phases, tous les participants restent bloques (locks maintenus)
 2. **Single Point of Failure** : le coordinateur est critique
-3. **Latence** : au minimum 2 allers-retours reseau
+3. **Latence** : au minimum 2 allers-retours réseau
 4. **Scalabilite** : les locks sont maintenus pendant toute la duree du protocole
 5. **Couplage fort** : tous les participants doivent etre disponibles simultanement
 :::
@@ -193,7 +193,7 @@ Le pattern Saga (Hector Garcia-Molina, 1987) decompose une transaction distribue
 ```
 
 :::tip
-Contrairement au 2PC, les sagas ne maintiennent **aucun lock distribue**. Chaque etape est une transaction locale independante. L'isolation est sacrifiee au profit de la disponibilite et de la scalabilite.
+Contrairement au 2PC, les sagas ne maintiennent **aucun lock distribue**. Chaque étape est une transaction locale independante. L'isolation est sacrifiee au profit de la disponibilité et de la scalabilité.
 :::
 
 ---
@@ -634,7 +634,7 @@ async function runExample(): Promise<void> {
 
 ## 7. Transactions compensatoires
 
-La compensation n'est **pas** un rollback technique (UNDO). C'est une action metier qui **annule semantiquement** l'effet de l'etape precedente.
+La compensation n'est **pas** un rollback technique (UNDO). C'est une action metier qui **annule semantiquement** l'effet de l'étape précédente.
 
 ```
   +-------------------+---------------------------+
@@ -833,9 +833,9 @@ class DeadLetterQueue {
 
 ---
 
-## 9. Saga Execution Log
+## 9. Saga Exécution Log
 
-Pour le monitoring et le debugging, il est essentiel de tracer l'execution de chaque saga.
+Pour le monitoring et le debugging, il est essentiel de tracer l'exécution de chaque saga.
 
 ```typescript
 type SagaLogLevel = 'INFO' | 'WARN' | 'ERROR';
@@ -900,16 +900,16 @@ class SagaExecutionLog {
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
-| Concept | Cle a retenir |
+| Concept | Cle à retenir |
 |---------|---------------|
 | 2PC | Atomique mais bloquant, ne scale pas |
 | Saga | Sequence de transactions locales + compensations |
 | Choreographie | Decentralise, event-driven, simple mais dur a debugger |
 | Orchestration | Centralise, visible, adapte aux sagas complexes |
 | Compensation | Annulation semantique, pas technique |
-| Dead Letter Queue | Filet de securite pour les echecs non-recuperables |
+| Dead Letter Queue | Filet de sécurité pour les echecs non-recuperables |
 
 ---
 
@@ -919,4 +919,15 @@ class SagaExecutionLog {
 - [Quiz 12 : Testez vos connaissances](../quizzes/quiz-12-saga.html)
 - [Module suivant : CQRS & Event Sourcing](./13-cqrs-event-sourcing.md)
 - [Visualisation interactive : Saga Orchestration](../visualizations/saga-orchestration.html)
-- [Module precedent : Replication & Partitionnement](./11-replication-et-partitionnement.md)
+- [Module précédent : Replication & Partitionnement](./11-replication-et-partitionnement.md)
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 12 saga](../screencasts/screencast-12-saga.md)
+2. **Lab** : [lab-12-saga-pattern](../labs/lab-12-saga-pattern/README)
+3. **Visualisation** : [Saga Orchestration](../visualizations/saga-orchestration.html)
+4. **Quiz** : [quiz 12 saga](../quizzes/quiz-12-saga.html)
+:::

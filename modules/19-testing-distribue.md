@@ -1,4 +1,4 @@
-# 19 — Testing des systemes distribues
+# 19 — Testing des systèmes distribues
 
 | Difficulte | Duree estimee | Lab | Quiz |
 |:----------:|:-------------:|:---:|:----:|
@@ -8,19 +8,19 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Adapter la pyramide de tests classique aux systemes distribues
+- Adapter la pyramide de tests classique aux systèmes distribues
 - Tester un service en isolation avec des mocks et stubs
 - Implementer des tests de contrat (consumer-driven contracts) en TypeScript
-- Comprendre les defis specifiques aux tests end-to-end en environnement distribue
+- Comprendre les defis spécifiques aux tests end-to-end en environnement distribue
 - Concevoir et implementer un chaos middleware pour injecter des pannes
 - Expliquer l'approche de simulation testing (FoundationDB) et ses avantages
-- Appliquer le property-based testing pour verifier les invariants distribues
-- Decrire le fonctionnement de Jepsen et les anomalies qu'il detecte
-- Choisir la bonne strategie de test selon le contexte
+- Appliquer le property-based testing pour vérifier les invariants distribues
+- Decrire le fonctionnement de Jepsen et les anomalies qu'il détecté
+- Choisir la bonne stratégie de test selon le contexte
 
 ---
 
-## La pyramide de tests pour les systemes distribues
+## La pyramide de tests pour les systèmes distribues
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -54,7 +54,7 @@ A la fin de ce module, vous serez capable de :
 
 ## Unit testing : un service en isolation
 
-Les tests unitaires d'un service distribue testent la logique metier en isolant les dependances externes (autres services, bases de donnees, message brokers).
+Les tests unitaires d'un service distribue testent la logique metier en isolant les dépendances externes (autres services, bases de donnees, message brokers).
 
 ```typescript
 // Service a tester
@@ -233,7 +233,7 @@ async function runUnitTests(): Promise<void> {
 
 ## Contract testing : consumer-driven contracts
 
-Le contract testing verifie que le **contrat** entre un consommateur et un producteur d'API est respecte, sans avoir besoin de deployer les deux services ensemble.
+Le contract testing vérifié que le **contrat** entre un consommateur et un producteur d'API est respecte, sans avoir besoin de déployer les deux services ensemble.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -437,7 +437,7 @@ class ContractProviderTest {
 
 ## Chaos testing : injection de pannes
 
-Le chaos testing consiste a injecter deliberement des pannes dans un systeme pour verifier qu'il les tolere.
+Le chaos testing consiste a injecter deliberement des pannes dans un système pour vérifier qu'il les tolere.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -647,7 +647,7 @@ async function chaosTestScenario(): Promise<void> {
 
 ## Simulation testing
 
-L'approche simulation testing, popularisee par FoundationDB, remplace toutes les sources de non-determinisme par des implementations deterministes.
+L'approche simulation testing, popularisee par FoundationDB, remplace toutes les sources de non-determinisme par des implementations déterministes.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -792,7 +792,7 @@ async function simulationTest(): Promise<void> {
 
 ## Property-based testing
 
-Le property-based testing genere automatiquement des entrees et verifie que certaines proprietes (invariants) sont toujours respectees.
+Le property-based testing généré automatiquement des entrees et vérifié que certaines propriétés (invariants) sont toujours respectees.
 
 ```typescript
 // Generateur aleatoire simple pour le property-based testing
@@ -939,7 +939,7 @@ async function testRateLimiterProperties(): Promise<void> {
 ## Jepsen : tester les bases de donnees distribuees
 
 :::tip Qu'est-ce que Jepsen ?
-Jepsen est un framework de test cree par Kyle Kingsbury (alias Aphyr) qui verifie les garanties de coherence annoncees par les bases de donnees distribuees. Il a trouve des bugs dans presque toutes les bases distribuees majeures.
+Jepsen est un framework de test créé par Kyle Kingsbury (alias Aphyr) qui vérifié les garanties de coherence annoncees par les bases de donnees distribuees. Il a trouve des bugs dans presque toutes les bases distribuees majeures.
 :::
 
 ```
@@ -1098,7 +1098,7 @@ async function miniJepsenTest(): Promise<void> {
 
 ---
 
-## Matrice des strategies de test
+## Matrice des stratégies de test
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
@@ -1125,13 +1125,13 @@ Commencez par les tests unitaires et les tests de contrat. Ajoutez le chaos test
 
 ---
 
-## Resume
+## Résumé
 
-| Strategie | Objectif | Outil / Framework |
+| Stratégie | Objectif | Outil / Framework |
 |-----------|----------|-------------------|
 | **Unit testing** | Logique metier en isolation | Mocks, stubs, vitest/jest |
 | **Contract testing** | Interfaces API entre services | Pact, custom contracts |
-| **Chaos testing** | Resilience aux pannes | Chaos middleware, Litmus |
+| **Chaos testing** | Résilience aux pannes | Chaos middleware, Litmus |
 | **Simulation testing** | Exploration exhaustive | FoundationDB-style, custom |
 | **Property-based testing** | Invariants toujours vrais | fast-check, custom generators |
 | **Jepsen** | Garanties de coherence des DBs | Jepsen (Clojure), Maelstrom |
@@ -1140,10 +1140,16 @@ Commencez par les tests unitaires et les tests de contrat. Ajoutez le chaos test
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| [18 - Observabilite des systemes distribues](./18-observabilite-distribuee.md) | [20 - Consensus & Coordination Distribuee](./20-consensus-coordination-distribuee.md) |
+| [18 - Observabilité des systèmes distribues](./18-observabilite-distribuee.md) | [20 - Consensus & Coordination Distribuee](./20-consensus-coordination-distribuee.md) |
 
-**Ressources associees :**
-- [Lab 19 — Testing distribue](../labs/lab-19-testing-distribue/)
-- [Quiz 19 — Testing distribue](../quizzes/quiz-19-testing.html)
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 19 testing](../screencasts/screencast-19-testing.md)
+2. **Lab** : [lab-19-testing-distribue](../labs/lab-19-testing-distribue/README)
+3. **Quiz** : [quiz 19 testing](../quizzes/quiz-19-testing.html)
+:::

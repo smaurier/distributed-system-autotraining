@@ -4,20 +4,20 @@
 - **Duree estimee** : 18-20 min
 - **Module** : `modules/23-crdts-resolution-conflits.md`
 - **Lab associe** : Lab 23
-- **Prerequis** : Screencast 22
+- **Prérequis** : Screencast 22
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/23-crdts-resolution-conflits.md` ouvert
 - [ ] Terminal supplementaire pour les demos
 - [ ] Fichier `labs/lab-23-crdts/` pret
 
 ## Script
 
-### [00:00-02:00] Introduction — Le probleme des conflits
+### [00:00-02:00] Introduction — Le problème des conflits
 
-> En eventual consistency, deux noeuds peuvent modifier la meme donnee en parallele sans se coordonner. Quand ils se synchronisent, il y a un conflit. Les strategies classiques — last-write-wins, merge manuel — sont fragiles. Les CRDTs (Conflict-free Replicated Data Types) resolvent ce probleme par construction : les conflits sont mathematiquement impossibles.
+> En eventual consistency, deux noeuds peuvent modifier la même donnee en parallele sans se coordonner. Quand ils se synchronisent, il y à un conflit. Les stratégies classiques — last-write-wins, merge manuel — sont fragiles. Les CRDTs (Conflict-free Replicated Data Types) resolvent ce problème par construction : les conflits sont mathematiquement impossibles.
 
 **Action** : Ouvrir le module 23 et afficher le diagramme du conflit.
 
@@ -37,13 +37,13 @@ Node B: {A: 3, B: 2} → increment B → {A: 3, B: 3}
 Merge: {A: max(4,3), B: max(2,3)} = {A: 4, B: 3} → total = 7 ✅
 ```
 
-> Le secret des CRDTs : au lieu de stocker une seule valeur, chaque noeud stocke sa contribution. Le merge prend le maximum de chaque composante. C'est mathematiquement garanti de converger vers le bon resultat.
+> Le secret des CRDTs : au lieu de stocker une seule valeur, chaque noeud stocke sa contribution. Le merge prend le maximum de chaque composante. C'est mathematiquement garanti de converger vers le bon résultat.
 
 ### [02:00-06:00] G-Counter — Le compteur qui ne decroit jamais
 
 > Le G-Counter (Grow-only Counter) est le CRDT le plus simple. Chaque noeud a son propre compteur. La valeur globale est la somme.
 
-**Action** : Creer un fichier `crdts.ts`.
+**Action** : Créer un fichier `crdts.ts`.
 
 ```typescript
 class GCounter {
@@ -158,7 +158,7 @@ stockB.merge(stockA);
 console.log(`After merge — A: ${stockA.value()}, B: ${stockB.value()}`); // 92 et 92
 ```
 
-> Le PN-Counter est ideal pour les compteurs de stock, les likes/dislikes, ou tout ce qui doit pouvoir monter et descendre. La convergence est garantie : apres le merge, tous les noeuds ont la meme valeur.
+> Le PN-Counter est ideal pour les compteurs de stock, les likes/dislikes, ou tout ce qui doit pouvoir monter et descendre. La convergence est garantie : après le merge, tous les noeuds ont la même valeur.
 
 ### [09:00-13:00] LWW-Register et OR-Set
 
@@ -283,11 +283,11 @@ console.log('Cart A after merge:', cartA.values());
 // "TypeScript Book" est present — l'intent de B (ajouter) est preserve
 ```
 
-> L'OR-Set a une semantique "add-wins" : si un noeud ajoute un element pendant qu'un autre le supprime, l'ajout gagne. C'est le comportement intuitif pour un panier e-commerce : si un utilisateur ajoute un article depuis son mobile pendant que son navigateur desktop le supprime, l'ajout devrait gagner.
+> L'OR-Set à une semantique "add-wins" : si un noeud ajoute un élément pendant qu'un autre le supprime, l'ajout gagne. C'est le comportement intuitif pour un panier e-commerce : si un utilisateur ajoute un article depuis son mobile pendant que son navigateur desktop le supprime, l'ajout devrait gagner.
 
 ### [13:00-16:30] Convergence demo — Tous les noeuds convergent
 
-> La propriete fondamentale des CRDTs : apres avoir echange leurs etats, tous les noeuds ont exactement la meme valeur, quel que soit l'ordre des operations et des merges.
+> La propriété fondamentale des CRDTs : après avoir echange leurs états, tous les noeuds ont exactement la même valeur, quel que soit l'ordre des operations et des merges.
 
 **Action** : Demontrer la convergence avec plusieurs noeuds.
 
@@ -331,7 +331,7 @@ console.log(`\nAll equal: ${allEqual} (value: ${values[0]})`);
 // Attendu : 10 + 20 + 5 - 3 + 8 - 2 = 38
 ```
 
-> Peu importe l'ordre des merges, le resultat est toujours 38. C'est la "Strong Eventual Consistency" : si tous les noeuds ont recu les memes operations, ils convergent vers le meme etat. Pas besoin de coordination, pas besoin de consensus, pas besoin de leader.
+> Peu importe l'ordre des merges, le résultat est toujours 38. C'est la "Strong Eventual Consistency" : si tous les noeuds ont recu les memes operations, ils convergent vers le même état. Pas besoin de coordination, pas besoin de consensus, pas besoin de leader.
 
 ### [16:30-18:30] Cas d'usage et limites
 
@@ -357,13 +357,13 @@ LWW-Map      | Document collaboratif     | Conflit par champ
 // - Cassandra : compteurs distribues (PN-Counter)
 ```
 
-> Les CRDTs ne sont pas une solution universelle. Ils ne gerent pas les contraintes globales (comme "le stock ne peut pas etre negatif sur l'ensemble du systeme"). Pour ca, il faut du consensus (Raft). Le choix depend du cas d'usage.
+> Les CRDTs ne sont pas une solution universelle. Ils ne gerent pas les contraintes globales (comme "le stock ne peut pas etre negatif sur l'ensemble du système"). Pour ça, il faut du consensus (Raft). Le choix depend du cas d'usage.
 
-### [18:30-19:30] Recapitulatif
+### [18:30-19:30] Récapitulatif
 
-> Recapitulons. Les CRDTs resolvent les conflits par construction mathematique. Le G-Counter somme les contributions par noeud. Le PN-Counter combine deux G-Counters pour la decrementation. L'OR-Set utilise des tags uniques pour l'add-wins. Et la convergence est garantie : tous les noeuds finissent avec la meme valeur.
+> Recapitulons. Les CRDTs resolvent les conflits par construction mathematique. Le G-Counter somme les contributions par noeud. Le PN-Counter combine deux G-Counters pour la decrementation. L'OR-Set utilise des tags uniques pour l'add-wins. Et la convergence est garantie : tous les noeuds finissent avec la même valeur.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -378,12 +378,12 @@ PROCHAINE ETAPE :
 → Screencast 24 : Projet final — Architecture complète
 ```
 
-> Au dernier screencast, on va assembler tout ce qu'on a appris dans un projet complet : microservices, events, saga, CQRS, CRDTs, observabilite. A bientot pour la grande finale !
+> Au dernier screencast, on va assembler tout ce qu'on a appris dans un projet complet : microservices, events, saga, CQRS, CRDTs, observabilité. A bientot pour la grande finale !
 
 ## Points d'attention pour l'enregistrement
-- Le diagramme du conflit classique vs G-Counter en intro est tres parlant
-- Montrer les etats internes ({A:3, B:5}) pas juste la valeur totale
-- L'OR-Set avec le conflit add/remove est le moment cle — bien montrer que l'ajout gagne
+- Le diagramme du conflit classique vs G-Counter en intro est très parlant
+- Montrer les états internes ({A:3, B:5}) pas juste la valeur totale
+- L'OR-Set avec le conflit add/remove est le moment clé — bien montrer que l'ajout gagne
 - La demo de convergence sur 5 noeuds doit montrer l'egalite finale explicitement
-- Les cas d'usage reels (Figma, SoundCloud) rendent les CRDTs concrets
+- Les cas d'usage réels (Figma, SoundCloud) rendent les CRDTs concrets
 - Prendre un rythme calme — les CRDTs sont un concept nouveau pour la plupart

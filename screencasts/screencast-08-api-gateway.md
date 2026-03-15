@@ -4,11 +4,11 @@
 - **Duree estimee** : 12-15 min
 - **Module** : `modules/08-api-gateway-et-bff.md`
 - **Lab associe** : Lab 08
-- **Prerequis** : Screencast 07
+- **Prérequis** : Screencast 07
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/08-api-gateway-et-bff.md` ouvert
 - [ ] Trois terminaux (gateway + deux services backend)
 - [ ] Aucun processus sur les ports 3000-3003
@@ -17,7 +17,7 @@
 
 ### [00:00-01:30] Introduction — Pourquoi un API Gateway ?
 
-> Avec plusieurs microservices, les clients (web, mobile) doivent gerer de multiples URLs, de multiples formats de reponse, et de multiples mecanismes d'authentification. L'API Gateway centralise tout derriere un point d'entree unique. Il route les requetes, agregge les reponses, gere l'auth, et applique le rate limiting.
+> Avec plusieurs microservices, les clients (web, mobile) doivent gérer de multiples URLs, de multiples formats de réponse, et de multiples mécanismes d'authentification. L'API Gateway centralise tout derriere un point d'entree unique. Il route les requêtes, agregge les réponses, géré l'auth, et applique le rate limiting.
 
 **Action** : Ouvrir le module 08 et afficher le diagramme.
 
@@ -42,9 +42,9 @@
 
 ### [01:30-05:00] Construire le gateway — Routing et proxy
 
-> Commencons par le routing. Le gateway regarde le path de la requete et la redirige vers le bon service backend.
+> Commencons par le routing. Le gateway regarde le path de la requête et la redirige vers le bon service backend.
 
-**Action** : Creer un fichier `api-gateway.ts`.
+**Action** : Créer un fichier `api-gateway.ts`.
 
 ```typescript
 import express from 'express';
@@ -127,9 +127,9 @@ curl http://localhost:3000/api/users/user-1
 curl http://localhost:3000/api/orders/order-1
 ```
 
-### [05:00-08:00] Aggregation — Combiner les reponses
+### [05:00-08:00] Aggregation — Combiner les réponses
 
-> L'aggregation est un des superpouvoirs du gateway. Au lieu de forcer le client a faire 3 requetes, le gateway en fait une seule et combine les resultats.
+> L'aggregation est un des superpouvoirs du gateway. Au lieu de forcer le client à faire 3 requêtes, le gateway en fait une seule et combine les résultats.
 
 **Action** : Ajouter un endpoint d'aggregation.
 
@@ -175,11 +175,11 @@ app.get('/api/dashboard/:userId', async (req, res) => {
 });
 ```
 
-> Remarquez la degradation gracieuse : si le User Service est down, on retourne quand meme les commandes avec un message d'erreur pour l'utilisateur. `Promise.allSettled` est essentiel ici — on ne veut pas qu'un service en echec bloque tout le dashboard.
+> Remarquez la degradation gracieuse : si le User Service est down, on retourne quand même les commandes avec un message d'erreur pour l'utilisateur. `Promise.allSettled` est essentiel ici — on ne veut pas qu'un service en echec bloque tout le dashboard.
 
 ### [08:00-10:30] Auth propagation
 
-> Le gateway est l'endroit ideal pour gerer l'authentification. Il verifie le token une seule fois, puis propage l'identite aux services backend.
+> Le gateway est l'endroit ideal pour gérer l'authentification. Il vérifié le token une seule fois, puis propage l'identite aux services backend.
 
 **Action** : Ajouter le middleware d'authentification.
 
@@ -225,7 +225,7 @@ function decodeSimpleToken(token: string): AuthUser {
 app.use('/api/*', authMiddleware);
 ```
 
-> Le gateway verifie le token et injecte les headers `x-user-id` et `x-user-role`. Les services backend n'ont pas besoin de connaitre le mecanisme d'auth — ils font confiance aux headers injectes par le gateway. C'est le pattern "trust the gateway".
+> Le gateway vérifié le token et injecte les headers `x-user-id` et `x-user-role`. Les services backend n'ont pas besoin de connaître le mécanisme d'auth — ils font confiance aux headers injectes par le gateway. C'est le pattern "trust the gateway".
 
 ### [10:30-12:30] Rate limiting au niveau du gateway
 
@@ -278,13 +278,13 @@ app.use((req, res, next) => {
 });
 ```
 
-> Le rate limiter utilise un token bucket simple. Les headers `X-RateLimit-*` informent le client de son quota restant. En production, on utiliserait Redis pour partager l'etat entre plusieurs instances du gateway.
+> Le rate limiter utilise un token bucket simple. Les headers `X-RateLimit-*` informent le client de son quota restant. En production, on utiliserait Redis pour partager l'état entre plusieurs instances du gateway.
 
-### [12:30-14:00] Recapitulatif
+### [12:30-14:00] Récapitulatif
 
-> Recapitulons. L'API Gateway est le point d'entree unique. Il fait le routing vers les services backend, l'aggregation de reponses avec degradation gracieuse, la verification d'auth avec propagation par headers, et le rate limiting pour proteger le systeme.
+> Recapitulons. L'API Gateway est le point d'entree unique. Il fait le routing vers les services backend, l'aggregation de réponses avec degradation gracieuse, la vérification d'auth avec propagation par headers, et le rate limiting pour proteger le système.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -298,7 +298,7 @@ PROCHAINE ETAPE :
 → Screencast 09 : Retries, timeouts avances, et idempotency
 ```
 
-> Au prochain screencast, on va approfondir les retries avec backoff et jitter, et decouvrir l'idempotency — un concept indispensable pour les systemes distribues fiables. A bientot !
+> Au prochain screencast, on va approfondir les retries avec backoff et jitter, et découvrir l'idempotency — un concept indispensable pour les systèmes distribues fiables. A bientot !
 
 ## Points d'attention pour l'enregistrement
 - Lancer les services backend AVANT le gateway pour que le proxy fonctionne

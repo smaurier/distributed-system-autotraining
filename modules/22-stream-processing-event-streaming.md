@@ -12,9 +12,9 @@ A la fin de ce module, vous serez capable de :
 - Decrire l'architecture conceptuelle de Kafka : topics, partitions, offsets, consumer groups
 - Implementer une simulation de log partitionne en TypeScript
 - Expliquer et implementer les quatre types de fenetres : tumbling, hopping, sliding, session
-- Definir la dualite stream-table et son importance pratique
-- Distinguer event time et processing time et gerer les evenements en retard
-- Decrire les mecanismes pour atteindre la semantique exactly-once dans un pipeline de streaming
+- Définir la dualite stream-table et son importance pratique
+- Distinguer event time et processing time et gérer les événements en retard
+- Decrire les mécanismes pour atteindre la semantique exactly-once dans un pipeline de streaming
 
 ---
 
@@ -50,10 +50,10 @@ A la fin de ce module, vous serez capable de :
 |---------|-------|--------|
 | **Latence** | Minutes a heures | Millisecondes a secondes |
 | **Donnees** | Jeu fini (bounded) | Flux infini (unbounded) |
-| **Traitement** | Complet, puis resultat | Continu, resultats incrementaux |
+| **Traitement** | Complet, puis résultat | Continu, résultats incrementaux |
 | **Rejeu** | Facile (relancer le job) | Possible si log persistant |
-| **Complexite** | Plus simple | Gestion du temps, retards, etat |
-| **Cas d'usage** | Rapports, ETL, ML training | Monitoring, alertes, temps reel |
+| **Complexite** | Plus simple | Gestion du temps, retards, état |
+| **Cas d'usage** | Rapports, ETL, ML training | Monitoring, alertes, temps réel |
 
 ---
 
@@ -88,16 +88,16 @@ A la fin de ce module, vous serez capable de :
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Concepts cles
+### Concepts clés
 
-- **Topic** : un flux nomme d'evenements (ex: `orders`, `payments`, `user-events`)
+- **Topic** : un flux nomme d'événements (ex: `orders`, `payments`, `user-events`)
 - **Partition** : chaque topic est divise en partitions numerotees. L'ordre est garanti **au sein d'une partition**, pas entre partitions.
 - **Offset** : position sequentielle d'un message dans une partition (0, 1, 2, ...)
 - **Consumer Group** : un groupe de consommateurs qui se partagent les partitions. Chaque partition est lue par exactement un consommateur du groupe.
-- **Replication Factor** : nombre de copies de chaque partition sur des brokers differents
+- **Replication Factor** : nombre de copies de chaque partition sur des brokers différents
 
 :::tip Partition et ordre
-L'ordre n'est garanti que dans une partition. Si vous avez besoin d'un ordre strict entre les commandes d'un meme client, utilisez `clientId` comme cle de partitionnement.
+L'ordre n'est garanti que dans une partition. Si vous avez besoin d'un ordre strict entre les commandes d'un même client, utilisez `clientId` comme clé de partitionnement.
 :::
 
 ---
@@ -276,7 +276,7 @@ simulatePartitionedLog();
 
 ## Fenetrage (Windowing)
 
-Le fenetrage permet d'agreger les evenements d'un flux infini en groupes finis et temporels.
+Le fenetrage permet d'agreger les événements d'un flux infini en groupes finis et temporels.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -630,14 +630,14 @@ Obtenir une semantique exactly-once de bout en bout est un des defis majeurs du 
 └───────────────────────────────────────────────────────────┘
 ```
 
-Les mecanismes pour atteindre exactly-once :
+Les mécanismes pour atteindre exactly-once :
 
-1. **Producteurs idempotents** : chaque message a un ID de sequence ; le broker deduplique
-2. **Transactions** : lecture + traitement + ecriture dans une transaction atomique
+1. **Producteurs idempotents** : chaque message à un ID de sequence ; le broker deduplique
+2. **Transactions** : lecture + traitement + écriture dans une transaction atomique
 3. **Deduplication cote consommateur** : stocker les IDs traites et ignorer les doublons
 
 :::warning Exactly-once en pratique
-"Exactly-once" est souvent "effectively-once" : on utilise at-least-once + idempotence pour obtenir le meme resultat qu'un traitement unique. Le vrai exactly-once de bout en bout necessite que **tous** les composants (producteur, broker, consommateur, base de donnees) participent au protocole.
+"Exactly-once" est souvent "effectively-once" : on utilise at-least-once + idempotence pour obtenir le même résultat qu'un traitement unique. Le vrai exactly-once de bout en bout nécessité que **tous** les composants (producteur, broker, consommateur, base de donnees) participent au protocole.
 :::
 
 ---
@@ -804,7 +804,7 @@ simulateWindowedAggregation();
 
 ---
 
-## Resume
+## Résumé
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -834,10 +834,20 @@ simulateWindowedAggregation();
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [21 - Temps & Horloges](./21-temps-ordre-horloges.md) | [23 - CRDTs & Resolution de Conflits](./23-crdts-resolution-conflits.md) |
 
 | Lab | Quiz |
 |:---:|:----:|
 | [Lab 22](../labs/lab-22-stream-processing/) | [Quiz 22](../quizzes/quiz-22-stream-processing.html) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 22 stream processing](../screencasts/screencast-22-stream-processing.md)
+2. **Lab** : [lab-22-stream-processing](../labs/lab-22-stream-processing/README)
+3. **Quiz** : [quiz 22 stream processing](../quizzes/quiz-22-stream-processing.html)
+:::

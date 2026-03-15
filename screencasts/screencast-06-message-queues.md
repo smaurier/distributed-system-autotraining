@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/06-communication-asynchrone-message-queues.md`
 - **Lab associe** : Lab 06
-- **Prerequis** : Screencast 05
+- **Prérequis** : Screencast 05
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/06-communication-asynchrone-message-queues.md` ouvert
 - [ ] Deux terminaux supplementaires (producteur + consommateur)
 - [ ] Aucun processus sur les ports 3001-3003
@@ -17,7 +17,7 @@
 
 ### [00:00-02:00] Introduction — Pourquoi l'asynchrone ?
 
-> Jusqu'ici, toute notre communication est synchrone : le service A appelle le service B et attend la reponse. Ca marche, mais ca cree un couplage temporel fort. Si B est lent ou down, A est bloque. Avec la communication asynchrone, A depose un message dans une queue et continue son travail. B le traitera quand il sera pret.
+> Jusqu'ici, toute notre communication est synchrone : le service A appelle le service B et attend la réponse. Ça marche, mais ça créé un couplage temporel fort. Si B est lent ou down, A est bloque. Avec la communication asynchrone, A depose un message dans une queue et continue son travail. B le traitera quand il sera pret.
 
 **Action** : Ouvrir le module 06 et afficher le diagramme comparatif.
 
@@ -29,13 +29,13 @@ A attend...                      B traite quand il veut
 Couplage temporel fort           Decouplage temporel
 ```
 
-> Les avantages : decouplage temporel, lissage de charge, resilience naturelle. Les inconvenients : complexite, eventual consistency, debugging plus difficile. C'est un trade-off, pas une solution miracle.
+> Les avantages : decouplage temporel, lissage de charge, résilience naturelle. Les inconvenients : complexite, eventual consistency, debugging plus difficile. C'est un trade-off, pas une solution miracle.
 
 ### [02:00-06:00] Pub/Sub — Implementer un message broker in-memory
 
-> Construisons un message broker minimaliste pour comprendre les mecanismes fondamentaux : publication, souscription, et consumer groups.
+> Construisons un message broker minimaliste pour comprendre les mécanismes fondamentaux : publication, souscription, et consumer groups.
 
-**Action** : Creer un fichier `message-broker.ts`.
+**Action** : Créer un fichier `message-broker.ts`.
 
 ```typescript
 type MessageHandler = (message: Message) => Promise<void>;
@@ -125,11 +125,11 @@ broker.subscribe('order.created', 'notification', async (msg) => {
 await broker.publish('order.created', { orderId: 'order-1', userId: 'user-1', total: 49.99 });
 ```
 
-> Le meme message est envoye aux deux groupes : order-processing et notification. C'est le pattern fan-out. Si on ajoute un troisieme groupe (analytics, par exemple), il recoit aussi le message sans modifier le producteur.
+> Le même message est envoye aux deux groupes : order-processing et notification. C'est le pattern fan-out. Si on ajoute un troisieme groupe (analytics, par exemple), il recoit aussi le message sans modifier le producteur.
 
 ### [06:00-09:30] Consumer groups et ordering
 
-> Les consumer groups sont essentiels pour le scaling horizontal. Plusieurs instances du meme service forment un groupe et se repartissent les messages.
+> Les consumer groups sont essentiels pour le scaling horizontal. Plusieurs instances du même service forment un groupe et se repartissent les messages.
 
 **Action** : Illustrer les consumer groups.
 
@@ -151,7 +151,7 @@ for (let i = 1; i <= 6; i++) {
 }
 ```
 
-> Attention a l'ordering. Dans une queue simple, les messages sont ordonnes. Mais avec plusieurs consommateurs en parallele, l'ordre de traitement n'est plus garanti. Pour garantir l'ordre par entite, Kafka utilise le partitioning par cle.
+> Attention a l'ordering. Dans une queue simple, les messages sont ordonnes. Mais avec plusieurs consommateurs en parallele, l'ordre de traitement n'est plus garanti. Pour garantir l'ordre par entite, Kafka utilise le partitioning par clé.
 
 **Action** : Montrer le concept de partition key.
 
@@ -189,7 +189,7 @@ partitioned.publish('user-1', { id: '2', topic: 'orders', payload: 'B', timestam
 partitioned.publish('user-2', { id: '3', topic: 'orders', payload: 'C', timestamp: 3, headers: {} });
 ```
 
-### [09:30-13:00] Dead Letter Queue — Gerer les echecs
+### [09:30-13:00] Dead Letter Queue — Gérer les echecs
 
 > Que se passe-t-il quand un consommateur echoue a traiter un message ? On ne peut pas le perdre, ni le rejouer indefiniment. La Dead Letter Queue (DLQ) est la solution.
 
@@ -242,13 +242,13 @@ const consumer = new ResilientConsumer(broker, async (msg) => {
 });
 ```
 
-**Action** : Executer le consommateur et montrer les retries et la DLQ.
+**Action** : Exécuter le consommateur et montrer les retries et la DLQ.
 
 > La DLQ est une queue speciale ou atterrissent les messages qui n'ont pas pu etre traites. Un operateur humain ou un processus automatique les examine et decide : retraiter, corriger, ou abandonner. Ne jamais ignorer la DLQ en production — elle contient vos bugs.
 
 ### [13:00-16:00] Pattern complet — Order Service asynchrone
 
-> Assemblons tout dans un scenario realiste : creer une commande publie un evenement, le service de paiement le recoit, et le service de notification aussi.
+> Assemblons tout dans un scenario realiste : créer une commande publie un événement, le service de paiement le recoit, et le service de notification aussi.
 
 **Action** : Montrer le workflow complet.
 
@@ -281,11 +281,11 @@ await eventBroker.publish('order.created', {
 });
 ```
 
-### [16:00-17:30] Recapitulatif
+### [16:00-17:30] Récapitulatif
 
 > Recapitulons. Les message queues decouplent les services dans le temps. Le pub/sub permet le fan-out vers plusieurs consommateurs. Les consumer groups permettent le scaling horizontal. Les partition keys garantissent l'ordre par entite. Et la DLQ capture les messages en echec pour un traitement ulterieur.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -299,12 +299,12 @@ PROCHAINE ETAPE :
 → Screencast 07 : Event-driven architecture — events vs commands, domain events
 ```
 
-> Dans le prochain screencast, on va passer de la simple messagerie a l'architecture event-driven. La distinction entre evenements et commandes change completement la facon dont on conçoit un systeme. A bientot !
+> Dans le prochain screencast, on va passer de la simple messagerie a l'architecture event-driven. La distinction entre événements et commandes change complètement la façon dont on conçoit un système. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- La distinction synchrone vs asynchrone doit etre tres claire des le debut (diagramme)
+- La distinction synchrone vs asynchrone doit etre très claire des le debut (diagramme)
 - Prendre le temps de montrer le fan-out : un message, deux groupes, les deux le recoivent
-- L'ordering est un piege classique — bien insister sur le partitioning par cle
+- L'ordering est un piege classique — bien insister sur le partitioning par clé
 - Montrer visuellement la DLQ qui se remplit quand les retries echouent
-- Le workflow complet (order → payment → notification) est le moment cle du screencast
+- Le workflow complet (order → payment → notification) est le moment clé du screencast
 - Ne pas aller trop vite sur le code du broker — commenter chaque section

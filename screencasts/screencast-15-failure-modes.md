@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/15-failure-modes.md`
 - **Lab associe** : Lab 15
-- **Prerequis** : Screencast 14
+- **Prérequis** : Screencast 14
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `labs/lab-15-failure-modes/` pret
 - [ ] Aucun processus sur les ports 3000-3005
 - [ ] Preparer 3 terminaux side-by-side pour la demo cascade
@@ -17,7 +17,7 @@
 
 ### [00:00-01:30] Introduction — Les pannes sont inevitables
 
-> Dans un systeme distribue, la question n'est pas SI une panne va se produire, mais QUAND. A l'echelle d'un datacenter avec des milliers de machines, des disques tombent en panne chaque jour, des processus crashent chaque heure, et des paquets reseau sont perdus chaque seconde. Un bon systeme ne cherche pas a eviter toutes les pannes — il les tolere et limite leur impact.
+> Dans un système distribue, la question n'est pas SI une panne va se produire, mais QUAND. A l'echelle d'un datacenter avec des milliers de machines, des disques tombent en panne chaque jour, des processus crashent chaque heure, et des paquets réseau sont perdus chaque seconde. Un bon système ne cherche pas a éviter toutes les pannes — il les tolere et limite leur impact.
 
 **Action** : Afficher le spectre des pannes du module 15 (crash, omission, timing, byzantine).
 
@@ -25,9 +25,9 @@
 
 ### [01:30-04:30] Simuler les pannes partielles
 
-> La panne partielle est le defi fondamental des systemes distribues. Dans un monolithe, tout fonctionne ou tout crashe. En distribue, un service peut etre down pendant que les autres fonctionnent. Le systeme est dans un etat indetermine.
+> La panne partielle est le defi fondamental des systèmes distribues. Dans un monolithe, tout fonctionne ou tout crashe. En distribue, un service peut etre down pendant que les autres fonctionnent. Le système est dans un état indetermine.
 
-**Action** : Creer un fichier `partial-failure.ts`.
+**Action** : Créer un fichier `partial-failure.ts`.
 
 ```typescript
 interface ServiceStatus {
@@ -86,11 +86,11 @@ console.log('\n=== Partial failure: payment-service down ===');
 console.log(await system.processRequest('req-2'));
 ```
 
-> Voyez : la requete traverse 4 services. Quand payment-service tombe, on a un dilemme. Est-ce qu'on echoue pour tout le monde ? Est-ce qu'on continue sans paiement ? C'est la question fondamentale de la tolerance aux pannes.
+> Voyez : la requête traverse 4 services. Quand payment-service tombe, on à un dilemme. Est-ce qu'on echoue pour tout le monde ? Est-ce qu'on continue sans paiement ? C'est la question fondamentale de la tolerance aux pannes.
 
 ### [04:30-08:00] Pannes en cascade — L'effet domino
 
-> La panne en cascade est le scenario catastrophe. Un service tombe, les services qui en dependent accumulent des timeouts, epuisent leurs threads, et tombent a leur tour. En quelques minutes, tout le systeme est down.
+> La panne en cascade est le scenario catastrophe. Un service tombe, les services qui en dependent accumulent des timeouts, epuisent leurs threads, et tombent a leur tour. En quelques minutes, tout le système est down.
 
 **Action** : Implementer une simulation de cascade.
 
@@ -156,11 +156,11 @@ class CascadeSimulator {
 
 **Action** : Lancer la simulation : d'abord tuer `database`, puis observer la cascade.
 
-> Regardez comment ca se propage : la base de donnees tombe, le service order accumule les requetes en attente, depasse sa capacite, et tombe. Puis l'API gateway fait pareil. En 15 secondes, tout est down. C'est exactement ce qui arrive en production sans protections.
+> Regardez comment ça se propage : la base de donnees tombe, le service order accumule les requêtes en attente, dépasse sa capacité, et tombe. Puis l'API gateway fait pareil. En 15 secondes, tout est down. C'est exactement ce qui arrive en production sans protections.
 
 ### [08:00-11:30] Gray Failure — La panne invisible
 
-> Le pire type de panne n'est pas le crash total — c'est la panne grise. Le service repond, mais mal. Il est lent, ou il retourne des donnees incorrectes, ou il perd un message sur dix. Les health checks passent, les alertes ne se declenchent pas, mais le systeme est degrade.
+> Le pire type de panne n'est pas le crash total — c'est la panne grise. Le service repond, mais mal. Il est lent, ou il retourne des donnees incorrectes, ou il perd un message sur dix. Les health checks passent, les alertes ne se declenchent pas, mais le système est degrade.
 
 **Action** : Implementer un detecteur de gray failures.
 
@@ -209,9 +209,9 @@ class GrayFailureDetector {
 
 ### [11:30-14:30] Fail-Fast et Blast Radius
 
-> Deux principes defensifs essentiels. Premier principe : fail-fast. Quand on detecte un probleme, on echoue immediatement au lieu d'attendre un timeout de 30 secondes.
+> Deux principes defensifs essentiels. Premier principe : fail-fast. Quand on détecté un problème, on echoue immediatement au lieu d'attendre un timeout de 30 secondes.
 
-**Action** : Montrer la difference entre fail-slow et fail-fast.
+**Action** : Montrer la différence entre fail-slow et fail-fast.
 
 ```typescript
 // Fail-slow (anti-pattern) : attend 30s pour rien
@@ -236,7 +236,7 @@ async function failFast(service: string, healthCheck: HealthChecker): Promise<st
 }
 ```
 
-> Deuxieme principe : limiter le blast radius. Une panne ne doit affecter qu'une partie du systeme, pas tout.
+> Deuxieme principe : limiter le blast radius. Une panne ne doit affecter qu'une partie du système, pas tout.
 
 ```typescript
 // Blast radius : isoler les pannes par domaine
@@ -265,13 +265,13 @@ class BlastRadiusIsolation {
 
 **Action** : Montrer qu'un crash dans la zone "background" n'impacte pas les commandes critiques.
 
-### [14:30-17:00] Recapitulatif et lien avec le Lab 15
+### [14:30-17:00] Récapitulatif et lien avec le Lab 15
 
-> Recapitulons les quatre types de pannes : le crash total, la panne partielle, la panne en cascade, et la panne grise. Pour chacun, on a des strategies : fail-fast pour detecter vite, blast radius pour isoler, et detection de gray failures pour les pannes invisibles.
+> Recapitulons les quatre types de pannes : le crash total, la panne partielle, la panne en cascade, et la panne grise. Pour chacun, on a des stratégies : fail-fast pour détecter vite, blast radius pour isoler, et detection de gray failures pour les pannes invisibles.
 
-**Action** : Montrer le tableau recapitulatif du module 15.
+**Action** : Montrer le tableau récapitulatif du module 15.
 
-> Au prochain screencast, on va construire le circuit breaker — la protection numero un contre les pannes en cascade. Et dans le lab 15, vous allez implementer un simulateur complet de pannes avec heartbeat detection.
+> Au prochain screencast, on va construire le circuit breaker — la protection numéro un contre les pannes en cascade. Et dans le lab 15, vous allez implementer un simulateur complet de pannes avec heartbeat detection.
 
 **Action** : Ouvrir le README du Lab 15.
 
@@ -283,4 +283,4 @@ class BlastRadiusIsolation {
 - Pour les gray failures, bien insister sur le fait que le health check dit "OK" alors que le service est degrade
 - Les diagrammes du module sont utiles — les afficher en split screen
 - Garder un rythme rapide pour ce screencast, les concepts s'enchainent bien
-- Verifier que la simulation de cascade fonctionne de maniere deterministe avant l'enregistrement
+- Vérifier que la simulation de cascade fonctionne de manière déterministe avant l'enregistrement

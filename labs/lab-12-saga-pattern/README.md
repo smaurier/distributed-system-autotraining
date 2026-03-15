@@ -2,26 +2,26 @@
 
 ## Objectifs
 
-Implementer le pattern Saga pour gerer les transactions distribuees : actions compensatoires, orchestration, choregraphie, timeouts et journalisation des executions.
+Implementer le pattern Saga pour gérer les transactions distribuees : actions compensatoires, orchestration, choregraphie, timeouts et journalisation des executions.
 
 ## Exercices
 
 ### Exercice 1 : Compensating transactions
-Implementer une CompensableAction avec des methodes execute() et compensate().
+Implementer une CompensableAction avec des méthodes exécuté() et compensate().
 
-### Exercice 2 : Saga step definition
-Definir un SagaStep avec un nom, une fonction d'execution et une fonction de compensation.
+### Exercice 2 : Saga step définition
+Définir un SagaStep avec un nom, une fonction d'exécution et une fonction de compensation.
 
 ### Exercice 3 : Saga orchestrator
-Executer les etapes sequentiellement ; en cas d'echec, executer les compensations en ordre inverse.
+Exécuter les étapes sequentiellement ; en cas d'echec, exécuter les compensations en ordre inverse.
 
 ### Exercice 4 : Choreography saga
-Saga pilotee par les evenements en utilisant createMockMessageBroker de test-utils.
+Saga pilotee par les événements en utilisant createMockMessageBroker de test-utils.
 
 ### Exercice 5 : Saga with timeouts
-Ajouter le support des timeouts : si une etape prend trop de temps, traiter comme un echec et compenser.
+Ajouter le support des timeouts : si une étape prend trop de temps, traiter comme un echec et compenser.
 
-### Exercice 6 : Saga execution log
+### Exercice 6 : Saga exécution log
 Journaliser toutes les executions et compensations avec horodatage, produire une chronologie.
 
 ## Lancer les tests

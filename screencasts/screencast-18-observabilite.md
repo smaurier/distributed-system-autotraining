@@ -1,14 +1,14 @@
-# Screencast 18 — Observabilite Distribuee
+# Screencast 18 — Observabilité Distribuee
 
 ## Informations
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/18-observabilite-distribuee.md`
 - **Lab associe** : Lab 18
-- **Prerequis** : Screencast 17
+- **Prérequis** : Screencast 17
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/18-observabilite-distribuee.md` ouvert
 - [ ] Trois terminaux (trois microservices)
 - [ ] Aucun processus sur les ports 3001-3003
@@ -17,7 +17,7 @@
 
 ### [00:00-01:30] Introduction — Logs, Metrics, Traces
 
-> En distribue, le debugging change radicalement. Un monolithe a un seul processus, un seul log, un seul stack trace. Avec 10 microservices, un bug peut traverser 5 services, 3 queues, et 2 bases de donnees. L'observabilite repose sur trois piliers : les logs (que s'est-il passe ?), les metriques (quelle est la sante du systeme ?), et les traces (quel chemin a pris cette requete ?).
+> En distribue, le debugging change radicalement. Un monolithe à un seul processus, un seul log, un seul stack trace. Avec 10 microservices, un bug peut traverser 5 services, 3 queues, et 2 bases de donnees. L'observabilité repose sur trois piliers : les logs (que s'est-il passe ?), les metriques (quelle est la sante du système ?), et les traces (quel chemin a pris cette requête ?).
 
 **Action** : Ouvrir le module 18 et afficher le schema des trois piliers.
 
@@ -36,9 +36,9 @@
 
 ### [01:30-05:00] Correlation IDs — Tracer un flux de bout en bout
 
-> Le correlation ID est l'identifiant unique qui relie tous les logs, metriques et traces d'une meme requete a travers tous les services. Sans lui, debugger en distribue est comme chercher une aiguille dans une botte de foin.
+> Le correlation ID est l'identifiant unique qui relie tous les logs, metriques et traces d'une même requête a travers tous les services. Sans lui, debugger en distribue est comme chercher une aiguille dans une botte de foin.
 
-**Action** : Creer un fichier `observability.ts`.
+**Action** : Créer un fichier `observability.ts`.
 
 ```typescript
 import { randomUUID } from 'node:crypto';
@@ -136,13 +136,13 @@ async function callServiceB(correlationId: string, path: string): Promise<unknow
 }
 ```
 
-> Le correlation ID est genere a l'entree du systeme (API Gateway ou premier service contacte) et propage a travers chaque appel HTTP et chaque message queue. En production, tous les logs pour une meme requete sont retrouvables avec une recherche sur ce ID.
+> Le correlation ID est généré a l'entree du système (API Gateway ou premier service contacte) et propage a travers chaque appel HTTP et chaque message queue. En production, tous les logs pour une même requête sont retrouvables avec une recherche sur ce ID.
 
 ### [05:00-09:00] Health checks avances
 
-> Au screencast 03, on a vu les health checks basiques. Implementons maintenant des health checks avances qui verifient les dependances en profondeur.
+> Au screencast 03, on a vu les health checks basiques. Implementons maintenant des health checks avances qui verifient les dépendances en profondeur.
 
-**Action** : Creer un health check composite.
+**Action** : Créer un health check composite.
 
 ```typescript
 interface HealthCheckResult {
@@ -223,11 +223,11 @@ healthChecker.register('message-broker', async () => {
 });
 ```
 
-> Le health check retourne trois etats : healthy (tout va bien), degraded (certaines dependances sont down mais le service fonctionne partiellement), et unhealthy (le service ne peut pas fonctionner). Kubernetes utilise ces informations pour le routing et le redemarrage automatique.
+> Le health check retourne trois états : healthy (tout va bien), degraded (certaines dépendances sont down mais le service fonctionne partiellement), et unhealthy (le service ne peut pas fonctionner). Kubernetes utilise ces informations pour le routing et le redemarrage automatique.
 
 ### [09:00-13:00] RED Metrics — Rate, Errors, Duration
 
-> Les RED metrics sont le minimum vital pour monitorer un microservice. Rate : combien de requetes par seconde. Errors : quel pourcentage d'erreurs. Duration : combien de temps durent les requetes.
+> Les RED metrics sont le minimum vital pour monitorer un microservice. Rate : combien de requêtes par seconde. Errors : quel pourcentage d'erreurs. Duration : combien de temps durent les requêtes.
 
 **Action** : Implementer un collecteur de metriques RED.
 
@@ -294,7 +294,7 @@ class REDMetrics {
 }
 ```
 
-**Action** : Generer du trafic et afficher le dashboard.
+**Action** : Générer du trafic et afficher le dashboard.
 
 ```typescript
 const metrics = new REDMetrics();
@@ -309,13 +309,13 @@ for (let i = 0; i < 200; i++) {
 metrics.printDashboard();
 ```
 
-> Les RED metrics sont l'equivalent du tableau de bord de votre voiture. Le rate est la vitesse, le error rate est le temoin de panne, et la duration est le temps de reaction. Si l'un des trois devie de la norme, il y a un probleme.
+> Les RED metrics sont l'équivalent du tableau de bord de votre voiture. Le rate est la vitesse, le error rate est le temoin de panne, et la duration est le temps de reaction. Si l'un des trois devie de la norme, il y à un problème.
 
-### [13:00-16:00] Integrer les trois piliers dans Express
+### [13:00-16:00] Intégrer les trois piliers dans Express
 
 > Assemblons logging structure, health checks, et metriques dans un middleware Express complet.
 
-**Action** : Montrer l'integration.
+**Action** : Montrer l'intégration.
 
 ```typescript
 import express from 'express';
@@ -363,11 +363,11 @@ app.get('/api/orders', (req: any, res) => {
 });
 ```
 
-### [16:00-17:30] Recapitulatif
+### [16:00-17:30] Récapitulatif
 
-> Recapitulons. Le correlation ID relie les logs de tous les services pour une meme requete. Le structured logging en JSON permet la recherche et l'analyse. Les health checks composites detectent les degradations. Et les RED metrics donnent la sante du service en temps reel.
+> Recapitulons. Le correlation ID relie les logs de tous les services pour une même requête. Le structured logging en JSON permet la recherche et l'analyse. Les health checks composites detectent les degradations. Et les RED metrics donnent la sante du service en temps réel.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -384,7 +384,7 @@ PROCHAINE ETAPE :
 > Au prochain screencast, on va parler de testing en distribue : contract tests, chaos middleware, et property-based testing. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Le correlation ID qui traverse les services est le concept cle — bien montrer la propagation
+- Le correlation ID qui traverse les services est le concept clé — bien montrer la propagation
 - Les logs JSON doivent etre lisibles dans le terminal — utiliser jq si disponible
 - Le health check composite avec statut "degraded" est un detail important
 - Le dashboard RED est visuellement impactant — le montrer avec des donnees realistes

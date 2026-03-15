@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/21-temps-ordre-horloges.md`
 - **Lab associe** : Lab 21
-- **Prerequis** : Screencast 20
+- **Prérequis** : Screencast 20
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/21-temps-ordre-horloges.md` ouvert
 - [ ] Terminal supplementaire pour les demos
 - [ ] Fichier `labs/lab-21-horloges-logiques/` pret
@@ -17,9 +17,9 @@
 
 ### [00:00-02:00] Introduction — Pourquoi les horloges physiques ne suffisent pas
 
-> Dans un systeme distribue, il n'y a pas d'horloge globale. Chaque machine a sa propre horloge, et ces horloges derivent les unes par rapport aux autres. NTP peut synchroniser les horloges a quelques millisecondes pres, mais pas mieux. Or, deux evenements peuvent se produire a moins d'une milliseconde d'intervalle sur deux machines differentes. Comment savoir lequel est arrive en premier ?
+> Dans un système distribue, il n'y a pas d'horloge globale. Chaque machine a sa propre horloge, et ces horloges derivent les unes par rapport aux autres. NTP peut synchroniser les horloges a quelques millisecondes pres, mais pas mieux. Or, deux événements peuvent se produire a moins d'une milliseconde d'intervalle sur deux machines différentes. Comment savoir lequel est arrive en premier ?
 
-**Action** : Ouvrir le module 21 et montrer le probleme du clock skew.
+**Action** : Ouvrir le module 21 et montrer le problème du clock skew.
 
 ```
 Machine A (horloge en avance de 3ms) :
@@ -33,13 +33,13 @@ Mais en realite B etait peut-etre premier !
 Le clock skew rend le tri par timestamp physique NON FIABLE.
 ```
 
-> Les horloges logiques resolvent ce probleme en capturant la causalite : si A a cause B, alors A est ordonne avant B, peu importe les timestamps physiques.
+> Les horloges logiques resolvent ce problème en capturant la causalite : si A a cause B, alors A est ordonne avant B, peu importe les timestamps physiques.
 
 ### [02:00-06:00] Lamport clocks — L'horloge logique fondamentale
 
-> Leslie Lamport a propose en 1978 l'horloge logique la plus simple : un compteur entier. La regle : avant chaque evenement, incrementer le compteur. A l'envoi d'un message, attacher le compteur. A la reception, prendre le max du compteur local et du compteur recu, puis incrementer.
+> Leslie Lamport a propose en 1978 l'horloge logique la plus simple : un compteur entier. La regle : avant chaque événement, incrementer le compteur. A l'envoi d'un message, attacher le compteur. A la reception, prendre le max du compteur local et du compteur recu, puis incrementer.
 
-**Action** : Creer un fichier `logical-clocks.ts`.
+**Action** : Créer un fichier `logical-clocks.ts`.
 
 ```typescript
 class LamportClock {
@@ -102,11 +102,11 @@ clockC.receive(msg3);
 console.log(`\nFinal clocks: A=${clockA.getTime()}, B=${clockB.getTime()}, C=${clockC.getTime()}`);
 ```
 
-> Si l'horloge de A est inferieure a celle de B, ca ne veut PAS dire que A est arrive avant B. Mais si A a cause B (message de A vers B), alors l'horloge de A est garantie inferieure. C'est la happened-before relation de Lamport : si a → b, alors L(a) < L(b). L'inverse n'est pas vrai.
+> Si l'horloge de A est inferieure a celle de B, ça ne veut PAS dire que A est arrive avant B. Mais si A a cause B (message de A vers B), alors l'horloge de A est garantie inferieure. C'est la happened-before relation de Lamport : si a → b, alors L(a) < L(b). L'inverse n'est pas vrai.
 
 ### [06:00-10:30] Vector clocks — Causalite complete
 
-> Le Lamport clock ne capture pas la concurrence. Deux evenements avec des timestamps proches : sont-ils causes ou concurrents ? Le vector clock resout ca en donnant a chaque noeud un compteur par noeud.
+> Le Lamport clock ne capture pas la concurrence. Deux événements avec des timestamps proches : sont-ils causes ou concurrents ? Le vector clock resout ça en donnant à chaque noeud un compteur par noeud.
 
 **Action** : Implementer les vector clocks.
 
@@ -209,11 +209,11 @@ console.log(`A1 vs C1: ${VectorClock.compare(eventA1, eventC1)}`); // concurrent
 console.log(`B1 vs C1: ${VectorClock.compare(eventB1, eventC1)}`); // concurrent
 ```
 
-> Le vector clock distingue trois relations : "before" (A a cause B), "after" (B a cause A), et "concurrent" (aucun lien causal). Quand deux ecritures sont concurrentes, il faut une strategie de resolution de conflits — on verra les CRDTs au screencast 23.
+> Le vector clock distingue trois relations : "before" (A a cause B), "after" (B a cause A), et "concurrent" (aucun lien causal). Quand deux ecritures sont concurrentes, il faut une stratégie de résolution de conflits — on verra les CRDTs au screencast 23.
 
 ### [10:30-14:00] Hybrid Logical Clocks (HLC) — Le meilleur des deux mondes
 
-> Les vector clocks ont un probleme de taille : le vecteur grandit avec le nombre de noeuds. Avec 1000 noeuds, chaque message transporte un vecteur de 1000 entiers. Le Hybrid Logical Clock (HLC) combine un timestamp physique avec un compteur logique, en taille constante.
+> Les vector clocks ont un problème de taille : le vecteur grandit avec le nombre de noeuds. Avec 1000 noeuds, chaque message transporte un vecteur de 1000 entiers. Le Hybrid Logical Clock (HLC) combine un timestamp physique avec un compteur logique, en taille constante.
 
 **Action** : Implementer le HLC.
 
@@ -293,11 +293,11 @@ console.log(`\nts1 < ts2: ${HybridLogicalClock.compare(ts1, ts2) < 0}`);
 console.log(`ts3 < ts4: ${HybridLogicalClock.compare(ts3, ts4) < 0}`);
 ```
 
-> Le HLC a deux avantages : taille constante (un entier + un compteur, pas un vecteur) et proximite avec le temps reel (le timestamp physique est toujours proche du vrai temps). C'est utilise par CockroachDB, YugabyteDB, et d'autres bases distribuees modernes.
+> Le HLC a deux avantages : taille constante (un entier + un compteur, pas un vecteur) et proximite avec le temps réel (le timestamp physique est toujours proche du vrai temps). C'est utilise par CockroachDB, YugabyteDB, et d'autres bases distribuees modernes.
 
 ### [14:00-16:00] Causal ordering en pratique
 
-> Comment utiliser les horloges logiques pour garantir l'ordre causal des messages dans un systeme de messagerie ?
+> Comment utiliser les horloges logiques pour garantir l'ordre causal des messages dans un système de messagerie ?
 
 **Action** : Montrer un exemple concret.
 
@@ -363,13 +363,13 @@ class CausalBroadcast {
 }
 ```
 
-> Le causal broadcast garantit que si Alice repond au message de Bob, tout le monde voit le message de Bob avant la reponse d'Alice. C'est l'ordre naturel d'une conversation — sans ca, les messages arrivent dans le desordre et les discussions n'ont plus de sens.
+> Le causal broadcast garantit que si Alice repond au message de Bob, tout le monde voit le message de Bob avant la réponse d'Alice. C'est l'ordre naturel d'une conversation — sans ça, les messages arrivent dans le desordre et les discussions n'ont plus de sens.
 
-### [16:00-17:30] Recapitulatif
+### [16:00-17:30] Récapitulatif
 
-> Recapitulons. Les horloges physiques ne suffisent pas a cause du clock skew. Le Lamport clock capture le happened-before mais pas la concurrence. Le vector clock detecte la concurrence mais grandit avec le nombre de noeuds. Le HLC combine le meilleur des horloges physiques et logiques en taille constante. Et le causal ordering utilise les vector clocks pour garantir l'ordre des messages.
+> Recapitulons. Les horloges physiques ne suffisent pas a cause du clock skew. Le Lamport clock capture le happened-before mais pas la concurrence. Le vector clock détecté la concurrence mais grandit avec le nombre de noeuds. Le HLC combine le meilleur des horloges physiques et logiques en taille constante. Et le causal ordering utilise les vector clocks pour garantir l'ordre des messages.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -386,9 +386,9 @@ PROCHAINE ETAPE :
 > Au prochain screencast, on va explorer le stream processing : logs partitionnes, fenetrage, stream-table duality, et exactly-once semantics. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Le probleme du clock skew doit etre illustre clairement en introduction
+- Le problème du clock skew doit etre illustre clairement en introduction
 - Le Lamport clock est simple — ne pas le survoler, c'est le fondement
-- Le vector clock avec la detection de concurrence est le moment cle
-- Comparer visuellement Lamport vs Vector : montrer le cas concurrent que Lamport ne detecte pas
+- Le vector clock avec la detection de concurrence est le moment clé
+- Comparer visuellement Lamport vs Vector : montrer le cas concurrent que Lamport ne détecté pas
 - Le HLC peut etre present comme "la version pragmatique" — bien expliquer pourquoi la taille constante compte
 - Le causal broadcast avec le buffer est un concept avance — prendre le temps

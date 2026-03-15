@@ -4,20 +4,20 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/19-testing-distribue.md`
 - **Lab associe** : Lab 19
-- **Prerequis** : Screencast 18
+- **Prérequis** : Screencast 18
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/19-testing-distribue.md` ouvert
-- [ ] Terminal supplementaire pour executer les tests
+- [ ] Terminal supplementaire pour exécuter les tests
 - [ ] Fichier `labs/lab-19-testing-distribue/` pret
 
 ## Script
 
 ### [00:00-01:30] Introduction — Pourquoi le testing change en distribue
 
-> Tester un monolithe est relativement simple : on lance l'application, on fait des requetes, on verifie les resultats. En distribue, les tests doivent verifier non seulement que chaque service fonctionne, mais aussi que les services fonctionnent ensemble, que les contrats sont respectes, et que le systeme se comporte correctement face aux pannes.
+> Tester un monolithe est relativement simple : on lance l'application, on fait des requêtes, on vérifié les résultats. En distribue, les tests doivent vérifier non seulement que chaque service fonctionne, mais aussi que les services fonctionnent ensemble, que les contrats sont respectes, et que le système se comporte correctement face aux pannes.
 
 **Action** : Ouvrir le module 19 et afficher la pyramide de tests distribues.
 
@@ -37,11 +37,11 @@
 
 > La pyramide reste valide en distribue, mais on ajoute une couche cruciale : les contract tests. Et on ajoute un type de test unique au distribue : le chaos testing.
 
-### [01:30-05:30] Contract tests — Verifier les interfaces entre services
+### [01:30-05:30] Contract tests — Vérifier les interfaces entre services
 
 > Les contract tests verifient que le producteur d'une API envoie bien ce que le consommateur attend. Sans contract tests, un changement dans le User Service peut casser le Order Service sans que personne ne s'en rende compte avant la production.
 
-**Action** : Creer un fichier `contract-tests.ts`.
+**Action** : Créer un fichier `contract-tests.ts`.
 
 ```typescript
 import { z } from 'zod';
@@ -152,13 +152,13 @@ consumer.testExtraFields();
 consumer.printResults();
 ```
 
-> Les contract tests sont rapides (pas de serveur a demarrer), fiables (pas de reseau reel), et detectent les ruptures de contrat en CI. Chaque service maintient ses tests de contrat pour les APIs qu'il consomme.
+> Les contract tests sont rapides (pas de serveur a démarrer), fiables (pas de réseau réel), et detectent les ruptures de contrat en CI. Chaque service maintient ses tests de contrat pour les APIs qu'il consomme.
 
 ### [05:30-09:30] Chaos middleware — Injecter des pannes
 
-> Le chaos testing verifie que votre systeme se comporte correctement quand les choses vont mal. Au lieu d'attendre qu'une panne arrive en production, on l'injecte volontairement.
+> Le chaos testing vérifié que votre système se comporte correctement quand les choses vont mal. Au lieu d'attendre qu'une panne arrive en production, on l'injecte volontairement.
 
-**Action** : Creer un fichier `chaos-middleware.ts`.
+**Action** : Créer un fichier `chaos-middleware.ts`.
 
 ```typescript
 interface ChaosConfig {
@@ -233,13 +233,13 @@ app.get('/api/orders', (_req, res) => {
 // CHAOS_ENABLED=true npx tsx chaos-server.ts
 ```
 
-> Le chaos middleware est active uniquement en environnement de test ou staging — jamais en production. Netflix a popularise cette approche avec Chaos Monkey. L'idee : si votre systeme survit au chaos en staging, il survivra aux pannes reelles en production.
+> Le chaos middleware est active uniquement en environnement de test ou staging — jamais en production. Netflix a popularise cette approche avec Chaos Monkey. L'idee : si votre système survit au chaos en staging, il survivra aux pannes reelles en production.
 
 ### [09:30-13:00] Property-based testing — Tester les invariants
 
-> Les tests classiques verifient des exemples specifiques. Le property-based testing verifie des proprietes qui doivent etre vraies pour TOUTES les entrees possibles. Le framework genere des centaines de cas aleatoires.
+> Les tests classiques verifient des exemples spécifiques. Le property-based testing vérifié des propriétés qui doivent etre vraies pour TOUTES les entrees possibles. Le framework généré des centaines de cas aleatoires.
 
-**Action** : Creer un fichier `property-tests.ts`.
+**Action** : Créer un fichier `property-tests.ts`.
 
 ```typescript
 // Property-based testing simplifie (sans framework externe)
@@ -345,11 +345,11 @@ pt.testProperty(
 pt.printResults();
 ```
 
-> Le property-based testing est particulierement puissant pour les invariants distribues : l'idempotency doit toujours fonctionner, le consistent hashing doit toujours etre deterministe, le circuit breaker doit toujours respecter son seuil.
+> Le property-based testing est particulierement puissant pour les invariants distribues : l'idempotency doit toujours fonctionner, le consistent hashing doit toujours etre déterministe, le circuit breaker doit toujours respecter son seuil.
 
 ### [13:00-15:30] Tester la linearizabilite
 
-> La linearizabilite est la propriete la plus forte de coherence : toute operation apparait comme si elle s'etait executee a un instant unique entre son debut et sa fin. Testons ca.
+> La linearizabilite est la propriété la plus forte de coherence : toute operation apparait comme si elle s'etait executee à un instant unique entre son debut et sa fin. Testons ça.
 
 **Action** : Implementer un test de linearizabilite simplifie.
 
@@ -417,11 +417,11 @@ const nonLinearOps: Operation[] = [
 console.log('Non-linearizable scenario:', checker.check(nonLinearOps));
 ```
 
-### [15:30-17:30] Recapitulatif
+### [15:30-17:30] Récapitulatif
 
-> Recapitulons. Les contract tests verifient les interfaces entre services — indispensables en CI. Le chaos middleware injecte des pannes pour tester la resilience. Le property-based testing verifie les invariants sur des centaines de cas aleatoires. Et le test de linearizabilite verifie la coherence des lectures et ecritures.
+> Recapitulons. Les contract tests verifient les interfaces entre services — indispensables en CI. Le chaos middleware injecte des pannes pour tester la résilience. Le property-based testing vérifié les invariants sur des centaines de cas aleatoires. Et le test de linearizabilite vérifié la coherence des lectures et ecritures.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -435,12 +435,12 @@ PROCHAINE ETAPE :
 → Screencast 20 : Consensus et coordination distribuee (Raft)
 ```
 
-> Au prochain screencast, on entre dans la phase avancee du cours : le consensus distribue avec l'algorithme Raft. C'est ce qui permet a plusieurs noeuds de se mettre d'accord, meme en cas de pannes. A bientot !
+> Au prochain screencast, on entre dans la phase avancee du cours : le consensus distribue avec l'algorithme Raft. C'est ce qui permet a plusieurs noeuds de se mettre d'accord, même en cas de pannes. A bientot !
 
 ## Points d'attention pour l'enregistrement
 - Les contract tests sont le concept le plus important — bien montrer producteur ET consommateur
 - Le chaos middleware doit etre impressionnant visuellement : montrer les erreurs qui apparaissent
 - Le property-based testing avec counter-example est un "aha moment" — bien le mettre en valeur
-- Le test de linearizabilite est theorique — ne pas aller trop vite, expliquer le stale read
+- Le test de linearizabilite est théorique — ne pas aller trop vite, expliquer le stale read
 - Rappeler que le chaos testing est uniquement en staging/test, JAMAIS en production
-- Executer tous les tests et montrer les resultats PASS/FAIL clairement
+- Exécuter tous les tests et montrer les résultats PASS/FAIL clairement

@@ -8,27 +8,27 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Classifier les differents types de pannes dans un systeme distribue (partielle, en cascade, grise)
-- Expliquer pourquoi les pannes partielles sont le defi fondamental des systemes distribues
-- Identifier et prevenir les pannes en cascade avec des strategies d'isolation
+- Classifier les différents types de pannes dans un système distribue (partielle, en cascade, grise)
+- Expliquer pourquoi les pannes partielles sont le defi fondamental des systèmes distribues
+- Identifier et prévenir les pannes en cascade avec des stratégies d'isolation
 - Diagnostiquer les pannes grises (gray failures) et comprendre pourquoi elles sont les plus insidieuses
-- Implementer le principe fail-fast pour detecter les erreurs au plus tot
+- Implementer le principe fail-fast pour détecter les erreurs au plus tot
 - Calculer et reduire le blast radius d'une panne
-- Implementer un mecanisme de detection de pannes par heartbeat
-- Concevoir des systemes qui tolerent les pannes plutot que de les eviter
+- Implementer un mécanisme de detection de pannes par heartbeat
+- Concevoir des systèmes qui tolerent les pannes plutot que de les éviter
 
 ---
 
 ## Introduction : les pannes sont inevitables
 
 :::tip Principe fondamental
-Dans un systeme distribue, la question n'est pas **si** une panne va se produire, mais **quand**. Un systeme bien concu ne cherche pas a eviter toutes les pannes — il les **tolere** et **limite leur impact**.
+Dans un système distribue, la question n'est pas **si** une panne va se produire, mais **quand**. Un système bien concu ne cherche pas a éviter toutes les pannes — il les **tolere** et **limite leur impact**.
 :::
 
 A l'echelle d'un datacenter avec des milliers de machines :
 - Des disques tombent en panne chaque jour
 - Des processus crashent chaque heure
-- Des paquets reseau sont perdus chaque seconde
+- Des paquets réseau sont perdus chaque seconde
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -47,7 +47,7 @@ A l'echelle d'un datacenter avec des milliers de machines :
 
 ---
 
-## Types de pannes dans les systemes distribues
+## Types de pannes dans les systèmes distribues
 
 ### Classification formelle
 
@@ -103,7 +103,7 @@ const realWorldFailures: Failure[] = [
 ## Pannes partielles : le defi fondamental
 
 :::warning Le piege
-Dans un monolithe, soit tout fonctionne, soit rien ne fonctionne. Dans un systeme distribue, **une partie** peut tomber en panne pendant que le reste continue. C'est la source de la plupart des bugs subtils.
+Dans un monolithe, soit tout fonctionne, soit rien ne fonctionne. Dans un système distribue, **une partie** peut tomber en panne pendant que le reste continue. C'est la source de la plupart des bugs subtils.
 :::
 
 ```
@@ -305,7 +305,7 @@ const events = sim.simulateCascade(1000);
 :::warning Causes frequentes de pannes en cascade
 - **Retry storms** : un service en panne recoit des milliers de retries
 - **Connection pool exhaustion** : les connexions vers un service lent bloquent toutes les autres
-- **Memory pressure** : les requetes en attente consomment de la memoire
+- **Memory pressure** : les requêtes en attente consomment de la mémoire
 - **Thread starvation** : les threads bloques par un service lent ne sont plus disponibles
 :::
 
@@ -313,7 +313,7 @@ const events = sim.simulateCascade(1000);
 
 ## Gray failures : les pannes fantomes
 
-Les gray failures sont les plus dangereuses car le systeme semble fonctionner mais se comporte de maniere degradee ou incorrecte de facon intermittente.
+Les gray failures sont les plus dangereuses car le système semble fonctionner mais se comporte de manière degradee ou incorrecte de façon intermittente.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -460,10 +460,10 @@ class GrayFailureDetector {
 
 ---
 
-## Fail-fast : detecter tot, echouer vite
+## Fail-fast : détecter tot, echouer vite
 
 :::tip Principe fail-fast
-Un systeme fail-fast detecte les erreurs le plus tot possible et signale immediatement l'echec plutot que de tenter de continuer dans un etat incertain. Cela evite de gaspiller des ressources et de propager des erreurs.
+Un système fail-fast détecté les erreurs le plus tot possible et signale immediatement l'echec plutot que de tenter de continuer dans un état incertain. Cela evite de gaspiller des ressources et de propager des erreurs.
 :::
 
 ```
@@ -558,7 +558,7 @@ class FailFastService {
 
 ## Blast radius : contenir l'impact
 
-Le **blast radius** est la zone d'impact d'une panne. L'objectif est de minimiser cette zone pour qu'une panne dans un composant n'affecte pas l'ensemble du systeme.
+Le **blast radius** est la zone d'impact d'une panne. L'objectif est de minimiser cette zone pour qu'une panne dans un composant n'affecte pas l'ensemble du système.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -978,10 +978,10 @@ class FailureDomainPlanner {
 ## Concevoir pour la panne
 
 :::tip Design for failure
-1. **Assume que tout peut echouer** — reseau, disque, processus, memoire
+1. **Assume que tout peut echouer** — réseau, disque, processus, mémoire
 2. **Detecte les pannes rapidement** — heartbeats, health checks, monitoring
 3. **Isole les pannes** — bulkheads, cellules, domaines de panne
-4. **Degrade gracieusement** — reponses par defaut, mode degrade
+4. **Degrade gracieusement** — réponses par defaut, mode degrade
 5. **Recupere automatiquement** — restart, failover, self-healing
 :::
 
@@ -1060,13 +1060,13 @@ const checklist: FaultToleranceChecklist = {
 
 ---
 
-## Resume
+## Résumé
 
 | Concept | Description | Impact |
 |---------|------------|--------|
-| **Panne partielle** | Certains noeuds echouent, d'autres non | Incertitude sur l'etat du systeme |
-| **Panne en cascade** | Un echec entraine une chaine de pannes | Panne totale du systeme |
-| **Gray failure** | Le systeme marche "presque" mais avec des anomalies | Tres difficile a detecter |
+| **Panne partielle** | Certains noeuds echouent, d'autres non | Incertitude sur l'état du système |
+| **Panne en cascade** | Un echec entraine une chaine de pannes | Panne totale du système |
+| **Gray failure** | Le système marche "presque" mais avec des anomalies | Très difficile a détecter |
 | **Fail-fast** | Detecter et signaler les erreurs immediatement | Economie de ressources |
 | **Blast radius** | Zone d'impact d'une panne | A minimiser par isolation |
 | **Heartbeat** | Signal periodique de vie entre noeuds | Detection de pannes |
@@ -1077,10 +1077,17 @@ const checklist: FaultToleranceChecklist = {
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [14 - Outbox pattern](./14-outbox-pattern-reliable-messaging.md) | [16 - Circuit Breaker, Bulkhead & Backpressure](./16-circuit-breaker.md) |
 
-**Ressources associees :**
-- [Lab 15 — Failure Modes](../labs/lab-15-failure-modes/)
-- [Quiz 15 — Failure Modes](../quizzes/quiz-15-failure-modes.html)
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 15 failure modes](../screencasts/screencast-15-failure-modes.md)
+2. **Lab** : [lab-15-failure-modes](../labs/lab-15-failure-modes/README)
+3. **Visualisation** : [Network Partitions](../visualizations/network-partitions.html)
+4. **Quiz** : [quiz 15 failure modes](../quizzes/quiz-15-failure-modes.html)
+:::

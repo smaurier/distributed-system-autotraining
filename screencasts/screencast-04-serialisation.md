@@ -4,11 +4,11 @@
 - **Duree estimee** : 12-15 min
 - **Module** : `modules/04-serialisation-et-contrats-api.md`
 - **Lab associe** : Lab 04
-- **Prerequis** : Screencast 03
+- **Prérequis** : Screencast 03
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/04-serialisation-et-contrats-api.md` ouvert
 - [ ] Zod installe (`npm install zod`)
 
@@ -16,7 +16,7 @@
 
 ### [00:00-01:30] Introduction — Les pieges de JSON
 
-> Au screencast precedent, on a construit deux microservices qui communiquent en JSON. Ca fonctionne, mais JSON cache des pieges redoutables. Les dates sont des strings, les nombres peuvent devenir des strings, les champs optionnels sont ambigus. En distribue, chaque service peut evoluer independamment — si un service change la structure de ses messages sans prevenir, tout casse silencieusement.
+> Au screencast précédent, on a construit deux microservices qui communiquent en JSON. Ça fonctionne, mais JSON cache des pieges redoutables. Les dates sont des strings, les nombres peuvent devenir des strings, les champs optionnels sont ambigus. En distribue, chaque service peut evoluer independamment — si un service change la structure de ses messages sans prévenir, tout casse silencieusement.
 
 **Action** : Ouvrir le module 04 et afficher les pieges JSON.
 
@@ -44,7 +44,7 @@ console.log(user.name.toUpperCase()); // TypeError: Cannot read properties of un
 
 > La solution : valider systematiquement les donnees entrantes. Zod est une librairie de validation TypeScript-first qui infere les types automatiquement. Zero duplication entre le schema et le type.
 
-**Action** : Creer un fichier `validation-demo.ts`.
+**Action** : Créer un fichier `validation-demo.ts`.
 
 ```typescript
 import { z } from 'zod';
@@ -95,17 +95,17 @@ if (!badResult.success) {
 }
 ```
 
-**Action** : Executer le code et montrer les messages d'erreur detailles.
+**Action** : Exécuter le code et montrer les messages d'erreur détaillés.
 
 ```bash
 npx tsx validation-demo.ts
 ```
 
-> Remarquez que `safeParse` ne jette pas d'exception — il retourne un objet avec `success: true` ou `success: false` et les details des erreurs. C'est ideal pour retourner des reponses HTTP 400 avec des messages clairs.
+> Remarquez que `safeParse` ne jette pas d'exception — il retourne un objet avec `success: true` ou `success: false` et les details des erreurs. C'est ideal pour retourner des réponses HTTP 400 avec des messages clairs.
 
 ### [05:00-08:30] Schema versioning et evolution
 
-> En microservices, les schemas evoluent. Un service ajoute un champ, en deprecie un autre. Si on ne gere pas ca, les anciens consommateurs cassent quand le producteur change son schema. C'est le probleme du contrat API.
+> En microservices, les schemas evoluent. Un service ajoute un champ, en deprecie un autre. Si on ne géré pas ça, les anciens consommateurs cassent quand le producteur change son schema. C'est le problème du contrat API.
 
 **Action** : Montrer l'evolution d'un schema avec compatibilite ascendante.
 
@@ -167,9 +167,9 @@ processOrderEvent({ version: 2, orderId: 'o-2', userId: 'u-1', total: 99, curren
 
 ### [08:30-11:30] Contract testing entre services
 
-> Le versionning ne suffit pas. Il faut verifier automatiquement que le producteur et le consommateur sont compatibles. C'est le contract testing.
+> Le versionning ne suffit pas. Il faut vérifier automatiquement que le producteur et le consommateur sont compatibles. C'est le contract testing.
 
-**Action** : Creer un fichier `contract-test.ts`.
+**Action** : Créer un fichier `contract-test.ts`.
 
 ```typescript
 import { z } from 'zod';
@@ -230,19 +230,19 @@ testProducerContract();
 testConsumerContract();
 ```
 
-**Action** : Executer les tests de contrat.
+**Action** : Exécuter les tests de contrat.
 
 ```bash
 npx tsx contract-test.ts
 ```
 
-> Les contract tests sont la glue entre les services. Ils verifient en CI que le producteur envoie bien ce que le consommateur attend. Si un developpeur change le schema du User Service sans mettre a jour le contrat, le test echoue avant le deploiement.
+> Les contract tests sont la glue entre les services. Ils verifient en CI que le producteur envoie bien ce que le consommateur attend. Si un développeur change le schema du User Service sans mettre a jour le contrat, le test echoue avant le déploiement.
 
-### [11:30-13:30] Recapitulatif
+### [11:30-13:30] Récapitulatif
 
 > Recapitulons. JSON a des pieges silencieux avec les types. Zod valide les donnees entrantes et infere les types TypeScript automatiquement. Le schema versioning avec des unions discriminees permet l'evolution sans casser les consommateurs. Et les contract tests verifient la compatibilite entre producteur et consommateur en CI.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -259,7 +259,7 @@ PROCHAINE ETAPE :
 > Dans le prochain screencast, on va explorer la communication synchrone en profondeur : niveaux de maturite REST, service discovery, et load balancing. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Montrer les pieges JSON en executant le code — les apprenants doivent voir le resultat inattendu
+- Montrer les pieges JSON en exécutant le code — les apprenants doivent voir le résultat inattendu
 - Prendre le temps sur `safeParse` vs `parse` — c'est une decision d'architecture
 - Pour le versionning, bien insister sur la regle "jamais casser la compatibilite ascendante"
 - Les contract tests sont un concept nouveau pour beaucoup — expliquer pourquoi les tests unitaires classiques ne suffisent pas

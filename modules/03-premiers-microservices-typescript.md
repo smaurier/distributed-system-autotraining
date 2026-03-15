@@ -8,21 +8,21 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Definir ce qu'est un microservice et ses principes fondamentaux
+- Définir ce qu'est un microservice et ses principes fondamentaux
 - Comparer architecture monolithique et microservices avec des criteres objectifs
-- Creer un service HTTP avec Express et TypeScript
+- Créer un service HTTP avec Express et TypeScript
 - Implementer la communication service-a-service via HTTP
 - Mettre en place du logging structure avec Pino
 - Implementer des health checks (liveness et readiness)
 - Dockeriser un microservice Node.js
-- Identifier les erreurs courantes des debutants en microservices
+- Identifier les erreurs courantes des débutants en microservices
 
 ---
 
 ## Qu'est-ce qu'un microservice ?
 
 :::tip Definition
-Un **microservice** est un service autonome qui implemente une seule capacite metier (single responsibility), deployable independamment, communiquant avec d'autres services via des APIs bien definies.
+Un **microservice** est un service autonome qui implemente une seule capacité metier (single responsibility), deployable independamment, communiquant avec d'autres services via des APIs bien definies.
 :::
 
 ### Principes fondamentaux
@@ -96,19 +96,19 @@ Un **microservice** est un service autonome qui implemente une seule capacite me
 
 | Critere | Monolithe | Microservices |
 |---------|-----------|---------------|
-| **Deploiement** | Tout ou rien | Service par service |
+| **Déploiement** | Tout ou rien | Service par service |
 | **Scaling** | Tout le monolithe | Service par service |
 | **Technologie** | Une seule stack | Polyglotte possible |
 | **Complexite code** | Faible | Faible par service |
 | **Complexite ops** | Faible | Elevee |
-| **Communication** | Appels de fonctions | Reseau (HTTP, gRPC, events) |
+| **Communication** | Appels de fonctions | Réseau (HTTP, gRPC, events) |
 | **Transactions** | ACID simple | Sagas, eventual consistency |
 | **Debugging** | Stack trace unique | Traces distribuees |
-| **Equipe** | 1 equipe | 1 equipe par service |
+| **Équipe** | 1 équipe | 1 équipe par service |
 
 ---
 
-## Creer un service Express avec TypeScript
+## Créer un service Express avec TypeScript
 
 ### Structure du projet
 
@@ -447,11 +447,11 @@ function loggingMiddleware(req: express.Request, res: express.Response, next: ex
 
 :::tip Niveaux de log
 - **fatal** : L'application va s'arreter
-- **error** : Erreur qui necessite une intervention
-- **warn** : Situation anormale mais geree
-- **info** : Evenement metier important (creation, suppression)
+- **error** : Erreur qui nécessité une intervention
+- **warn** : Situation anormale mais gérée
+- **info** : Événement metier important (création, suppression)
 - **debug** : Information de debogage detaillee
-- **trace** : Information tres detaillee (contenu des requetes)
+- **trace** : Information très detaillee (contenu des requêtes)
 :::
 
 ---
@@ -614,7 +614,7 @@ services:
 
 ---
 
-## Erreurs courantes des debutants
+## Erreurs courantes des débutants
 
 ### 1. Distributed monolith
 
@@ -633,7 +633,7 @@ class OrderService {
 ```
 
 :::warning Piege du monolithe distribue
-Si vos services partagent une base de donnees ou doivent etre deployes ensemble, vous avez un monolithe distribue — la pire des architectures.
+Si vos services partagent une base de donnees ou doivent etre déployés ensemble, vous avez un monolithe distribue — la pire des architectures.
 :::
 
 ### 2. Communication synchrone en cascade
@@ -692,7 +692,7 @@ async function getOrderDetailsSafe(orderId: string) {
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -712,6 +712,16 @@ async function getOrderDetailsSafe(orderId: string) {
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| [02 - Communication reseau fondamentale](./02-communication-reseau-fondamentale.md) | [04 - Serialisation & Contrats d'API](./04-serialisation-et-contrats-api.md) |
+| [02 - Communication réseau fondamentale](./02-communication-reseau-fondamentale.md) | [04 - Serialisation & Contrats d'API](./04-serialisation-et-contrats-api.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 03 microservices](../screencasts/screencast-03-microservices.md)
+2. **Lab** : [lab-03-microservices-express](../labs/lab-03-microservices-express/README)
+3. **Quiz** : [quiz 03 microservices](../quizzes/quiz-03-microservices.html)
+:::

@@ -12,7 +12,7 @@ A la fin de ce projet, vous serez capable de :
 - Appliquer le pattern Saga pour les transactions distribuees inter-services
 - Implementer l'event sourcing pour reconstruire l'historique des commandes
 - Utiliser le pattern Outbox pour garantir la coherence entre base de donnees et message broker
-- Integrer un circuit breaker sur les appels externes
+- Intégrer un circuit breaker sur les appels externes
 - Implementer du rate limiting sur une API gateway
 - Propager des correlation IDs a travers toute la chaine de services
 - Mettre en place des health checks sur chaque service
@@ -70,13 +70,13 @@ Vous allez construire une **plateforme e-commerce distribuee** composee de 4 mic
 
 ## Les 10 exigences
 
-Ce projet couvre 10 exigences techniques, chacune liee a un ou plusieurs modules du cours.
+Ce projet couvre 10 exigences techniques, chacune liee à un ou plusieurs modules du cours.
 
 ### Exigence 1 : Communication service (sync + async)
 
 **Modules associes** : 03, 04, 14
 
-Les services communiquent par HTTP synchrone (pour les requetes directes) et par evenements asynchrones (pour la notification et le decoupling).
+Les services communiquent par HTTP synchrone (pour les requêtes directes) et par événements asynchrones (pour la notification et le decoupling).
 
 ```typescript
 // service-communication.ts — Interfaces de communication
@@ -159,11 +159,11 @@ class EventBus {
 }
 ```
 
-### Exigence 2 : Saga pattern pour la creation de commande
+### Exigence 2 : Saga pattern pour la création de commande
 
 **Module associe** : 14
 
-Le flux de commande est orchestre par une Saga qui coordonne les etapes entre services.
+Le flux de commande est orchestre par une Saga qui coordonne les étapes entre services.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -701,7 +701,7 @@ function getRequestContext(): RequestContext | undefined {
 ```
 
 :::tip
-Combinez `AsyncLocalStorage` avec le `CorrelationContext` ci-dessus : le middleware injecte le correlation ID dans l'`AsyncLocalStorage`, et chaque service, logger ou appel HTTP downstream peut le recuperer via `getRequestContext()` sans jamais recevoir l'objet `req` en parametre. C'est la base du structured logging et du distributed tracing dans Node.js.
+Combinez `AsyncLocalStorage` avec le `CorrelationContext` ci-dessus : le middleware injecte le correlation ID dans l'`AsyncLocalStorage`, et chaque service, logger ou appel HTTP downstream peut le récupérer via `getRequestContext()` sans jamais recevoir l'objet `req` en paramètre. C'est la base du structured logging et du distributed tracing dans Node.js.
 :::
 
 ### Exigence 8 : Health Checks
@@ -941,7 +941,7 @@ class ResilientServiceCaller<T> {
 └─────────────────────────────────────────────────────┘
 ```
 
-### Phase 3 : Integration et resilience (2h)
+### Phase 3 : Intégration et résilience (2h)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -1001,7 +1001,7 @@ class ResilientServiceCaller<T> {
 
 ---
 
-## Strategie de tests
+## Stratégie de tests
 
 ```typescript
 // test-scenario.ts — Scenario de test complet
@@ -1070,20 +1070,20 @@ async function testIdempotency(): Promise<void> {
 
 ---
 
-## Criteres d'evaluation
+## Criteres d'évaluation
 
 | Critere | Points | Description |
 |---------|:------:|-------------|
 | **Architecture** | /15 | Services bien decomposes, responsabilites claires |
 | **Saga** | /15 | Orchestration et compensation fonctionnelles |
-| **Event Sourcing** | /10 | Reconstruction de l'etat a partir des evenements |
+| **Event Sourcing** | /10 | Reconstruction de l'état à partir des événements |
 | **Outbox Pattern** | /10 | Coherence base + events garantie |
-| **Circuit Breaker** | /10 | Transitions d'etat correctes |
+| **Circuit Breaker** | /10 | Transitions d'état correctes |
 | **Rate Limiting** | /5 | Token bucket fonctionnel |
 | **Correlation IDs** | /5 | Tracabilite bout en bout |
 | **Health Checks** | /5 | Status correct pour chaque service |
 | **Idempotence** | /10 | Pas de double traitement |
-| **Degradation** | /10 | Cache, fallback, resilience |
+| **Degradation** | /10 | Cache, fallback, résilience |
 | **Tests** | /5 | Couverture des scenarios nominaux et d'erreur |
 | **Total** | **/100** | |
 
@@ -1095,31 +1095,31 @@ Les points bonus sont accordes pour les extensions (voir section suivante) et po
 
 ## Extensions (bonus)
 
-Pour aller plus loin, vous pouvez integrer des concepts des modules avances :
+Pour aller plus loin, vous pouvez intégrer des concepts des modules avances :
 
 ### Extension 1 : CRDTs pour l'inventaire (Module 23)
 
-Utiliser un PN-Counter CRDT pour gerer l'inventaire de maniere decentralisee, permettant aux repliques de fonctionner pendant une partition reseau.
+Utiliser un PN-Counter CRDT pour gérer l'inventaire de manière decentralisee, permettant aux repliques de fonctionner pendant une partition réseau.
 
 ### Extension 2 : Raft pour l'election de leader (Module 20)
 
-Implementer une election de leader entre les instances du Order Service pour determiner quelle instance orchestre les Sagas.
+Implementer une election de leader entre les instances du Order Service pour déterminer quelle instance orchestre les Sagas.
 
 ### Extension 3 : Stream processing pour les analytics (Module 22)
 
-Ajouter un service d'analytics qui consomme les evenements en stream, avec des fenetres temporelles pour calculer des metriques en temps reel (commandes par minute, revenu par heure).
+Ajouter un service d'analytics qui consomme les événements en stream, avec des fenetres temporelles pour calculer des metriques en temps réel (commandes par minute, revenu par heure).
 
 ### Extension 4 : Vector clocks pour le tracking (Module 21)
 
-Utiliser des horloges vectorielles pour ordonner causalement les evenements entre services et detecter les anomalies.
+Utiliser des horloges vectorielles pour ordonner causalement les événements entre services et détecter les anomalies.
 
 ### Extension 5 : Chaos testing
 
-Ajouter un module de chaos testing qui injecte aleatoirement des pannes (latence, erreurs, partitions) pour valider la resilience du systeme.
+Ajouter un module de chaos testing qui injecte aleatoirement des pannes (latence, erreurs, partitions) pour valider la résilience du système.
 
 ---
 
-## Resume
+## Résumé
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -1156,10 +1156,31 @@ Ajouter un module de chaos testing qui injecte aleatoirement des pannes (latence
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [23 - CRDTs & Resolution de Conflits](./23-crdts-resolution-conflits.md) | -- (Fin du cours) |
 
 | Lab | Quiz |
 |:---:|:----:|
 | [Lab 24](../labs/lab-24-projet-final/) | [Quiz 24](../quizzes/quiz-24-projet-final.html) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 24 projet final](../screencasts/screencast-24-projet-final.md)
+2. **Lab** : [lab-24-projet-final](../labs/lab-24-projet-final/README)
+3. **Quiz** : [quiz 24 projet final](../quizzes/quiz-24-projet-final.html)
+:::
+
+---
+
+<!-- navigation-inter-cours -->
+
+::: info Cours suivant
+Bravo, tu as termine le cours **Systèmes Distribues** ! 
+Le prochain cours du curriculum est **Observabilité & SRE**.
+
+[Commencer Observabilité & SRE →](../../12-observability-sre/modules/00-prerequis-et-introduction.md)
+:::

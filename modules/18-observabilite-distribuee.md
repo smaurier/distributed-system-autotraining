@@ -1,4 +1,4 @@
-# 18 — Observabilite des systemes distribues
+# 18 — Observabilité des systèmes distribues
 
 | Difficulte | Duree estimee | Lab | Quiz |
 |:----------:|:-------------:|:---:|:----:|
@@ -8,24 +8,24 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Expliquer pourquoi l'observabilite est plus difficile dans un systeme distribue que dans un monolithe
-- Generer et propager des correlation IDs a travers plusieurs services
+- Expliquer pourquoi l'observabilité est plus difficile dans un système distribue que dans un monolithe
+- Générer et propager des correlation IDs a travers plusieurs services
 - Implementer un middleware de correlation ID en TypeScript
-- Structurer les logs pour les systemes distribues (service name, correlation ID, trace ID)
-- Implementer des health checks (liveness, readiness, startup) avec verification des dependances
-- Appliquer la methode RED (Rate, Errors, Duration) par service
-- Concevoir un workflow de debugging pour les systemes distribues
+- Structurer les logs pour les systèmes distribues (service name, correlation ID, trace ID)
+- Implementer des health checks (liveness, readiness, startup) avec vérification des dépendances
+- Appliquer la méthode RED (Rate, Errors, Duration) par service
+- Concevoir un workflow de debugging pour les systèmes distribues
 - Comprendre les concepts de distributed tracing (spans, traces, context propagation)
 
 ---
 
-## Pourquoi l'observabilite est difficile en distribue
+## Pourquoi l'observabilité est difficile en distribue
 
-:::tip Observabilite vs Monitoring
+:::tip Observabilité vs Monitoring
 - **Monitoring** : savoir quand quelque chose ne va pas (alertes predefinies)
-- **Observabilite** : pouvoir comprendre **pourquoi** quelque chose ne va pas, meme pour des problemes jamais vus auparavant
+- **Observabilité** : pouvoir comprendre **pourquoi** quelque chose ne va pas, même pour des problèmes jamais vus auparavant
 
-L'observabilite repose sur 3 piliers : **logs**, **metriques** et **traces**.
+L'observabilité repose sur 3 piliers : **logs**, **metriques** et **traces**.
 :::
 
 ```
@@ -61,7 +61,7 @@ L'observabilite repose sur 3 piliers : **logs**, **metriques** et **traces**.
 
 ## Correlation IDs
 
-Un correlation ID est un identifiant unique qui suit une requete a travers tous les services qu'elle traverse. C'est le fil d'Ariane du debugging distribue.
+Un correlation ID est un identifiant unique qui suit une requête a travers tous les services qu'elle traverse. C'est le fil d'Ariane du debugging distribue.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -206,7 +206,7 @@ async function callService(
 
 ## Structured logging
 
-Les logs dans un systeme distribue doivent etre **structures** (JSON) et contenir les identifiants de contexte.
+Les logs dans un système distribue doivent etre **structures** (JSON) et contenir les identifiants de contexte.
 
 ```typescript
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -353,7 +353,7 @@ const logger = new DistributedLogger('order-service');
 
 ## Distributed tracing
 
-Le tracing distribue permet de visualiser le chemin complet d'une requete sous forme d'arbre de spans.
+Le tracing distribue permet de visualiser le chemin complet d'une requête sous forme d'arbre de spans.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -681,17 +681,17 @@ function setupHealthChecks(): HealthChecker {
 ```
 
 :::warning Deep health checks : attention aux cascades
-Un health check qui verifie les dependances peut lui-meme echouer si une dependance est lente. Regles :
-- **Liveness** : JAMAIS de verification de dependance (sinon, un service sain est redemarre a cause d'une DB lente)
-- **Readiness** : verifier les dependances critiques avec timeout court
+Un health check qui vérifié les dépendances peut lui-même echouer si une dépendance est lente. Regles :
+- **Liveness** : JAMAIS de vérification de dépendance (sinon, un service sain est redemarre a cause d'une DB lente)
+- **Readiness** : vérifier les dépendances critiques avec timeout court
 - **Ne pas chainer** : le health check de A ne doit pas appeler le health check complet de B qui appelle C...
 :::
 
 ---
 
-## Methode RED par service
+## Méthode RED par service
 
-La methode RED donne 3 metriques essentielles pour chaque service :
+La méthode RED donne 3 metriques essentielles pour chaque service :
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -788,7 +788,7 @@ class REDMetrics {
 
 ---
 
-## Debugging des systemes distribues
+## Debugging des systèmes distribues
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -963,14 +963,14 @@ alertManager.addRule({
 
 ---
 
-## Resume
+## Résumé
 
 | Concept | Description | Outil |
 |---------|------------|-------|
 | **Correlation ID** | Identifiant unique propageant a travers les services | Header HTTP, middleware |
 | **Structured logging** | Logs en JSON avec contexte distribue | Logger custom, ELK, Datadog |
-| **Distributed tracing** | Arbre de spans visualisant le parcours d'une requete | Jaeger, Zipkin, Datadog APM |
-| **Health checks** | Verification de la sante du service et de ses dependances | Endpoints HTTP, Kubernetes probes |
+| **Distributed tracing** | Arbre de spans visualisant le parcours d'une requête | Jaeger, Zipkin, Datadog APM |
+| **Health checks** | Vérification de la sante du service et de ses dépendances | Endpoints HTTP, Kubernetes probes |
 | **RED metrics** | Rate, Errors, Duration par service | Prometheus, Grafana |
 | **Alerting** | Detection automatique des anomalies | PagerDuty, Opsgenie |
 
@@ -978,10 +978,16 @@ alertManager.addRule({
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| [17 - Rate Limiting & Load Shedding](./17-rate-limiting.md) | [19 - Testing des systemes distribues](./19-testing-distribue.md) |
+| [17 - Rate Limiting & Load Shedding](./17-rate-limiting.md) | [19 - Testing des systèmes distribues](./19-testing-distribue.md) |
 
-**Ressources associees :**
-- [Lab 18 — Observabilite](../labs/lab-18-observabilite-distribuee/)
-- [Quiz 18 — Observabilite](../quizzes/quiz-18-observabilite.html)
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 18 observabilité](../screencasts/screencast-18-observabilite.md)
+2. **Lab** : [lab-18-observabilité-distribuee](../labs/lab-18-observabilite-distribuee/README)
+3. **Quiz** : [quiz 18 observabilité](../quizzes/quiz-18-observabilite.html)
+:::

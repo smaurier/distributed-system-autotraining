@@ -2,7 +2,7 @@
 
 ## Objectifs
 
-Comprendre et implementer les principaux mecanismes de communication synchrone dans les systemes distribues : REST, HATEOAS, service discovery, load balancing, routing et service mesh.
+Comprendre et implementer les principaux mécanismes de communication synchrone dans les systèmes distribues : REST, HATEOAS, service discovery, load balancing, routing et service mesh.
 
 ## Exercices
 
@@ -10,16 +10,16 @@ Comprendre et implementer les principaux mecanismes de communication synchrone d
 Classifier des endpoints API selon les niveaux de maturite de Richardson (0 a 3).
 
 ### Exercice 2 : HATEOAS links
-Generer des liens hypermedia pour une ressource commande en fonction de son etat.
+Générer des liens hypermedia pour une ressource commande en fonction de son état.
 
 ### Exercice 3 : Service discovery
-Implementer un registre de services avec enregistrement, decouverte et eviction par heartbeat.
+Implementer un registre de services avec enregistrement, découverte et eviction par heartbeat.
 
 ### Exercice 4 : Client-side load balancer
-Implementer les strategies round-robin et least-connections pour la repartition de charge.
+Implementer les stratégies round-robin et least-connections pour la repartition de charge.
 
 ### Exercice 5 : Request routing
-Implementer un routeur qui mappe des chemins URL vers des definitions de services.
+Implementer un routeur qui mappe des chemins URL vers des définitions de services.
 
 ### Exercice 6 : Service mesh simulation
 Simuler un sidecar proxy qui encapsule les appels avec timeout, retry et collecte de metriques.

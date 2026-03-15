@@ -22,8 +22,8 @@ A la fin de ce module, vous serez capable de :
 ## Rate limiting vs Load shedding
 
 :::tip Distinction fondamentale
-- **Rate limiting** : limiter le nombre de requetes qu'un client peut envoyer dans un intervalle de temps. Protege contre l'abus et garantit l'equite entre clients.
-- **Load shedding** : rejeter proactivement des requetes quand le systeme est surcharge. Protege la stabilite du systeme entier.
+- **Rate limiting** : limiter le nombre de requêtes qu'un client peut envoyer dans un intervalle de temps. Protege contre l'abus et garantit l'equite entre clients.
+- **Load shedding** : rejeter proactivement des requêtes quand le système est surcharge. Protege la stabilite du système entier.
 :::
 
 ```
@@ -57,7 +57,7 @@ A la fin de ce module, vous serez capable de :
 
 ### 1. Fixed Window Counter
 
-L'approche la plus simple : compter les requetes dans des fenetres de temps fixes.
+L'approche la plus simple : compter les requêtes dans des fenetres de temps fixes.
 
 ```typescript
 class FixedWindowRateLimiter {
@@ -112,13 +112,13 @@ class FixedWindowRateLimiter {
 // → 200 requetes en quelques ms, alors que la limite est 100/fenetre
 ```
 
-:::warning Probleme de frontiere
-Le fixed window a un defaut connu : un client peut envoyer jusqu'a 2x le quota en concentrant les requetes a la frontiere entre deux fenetres. Le sliding window corrige ce probleme.
+:::warning Problème de frontiere
+Le fixed window à un defaut connu : un client peut envoyer jusqu'a 2x le quota en concentrant les requêtes à la frontiere entre deux fenetres. Le sliding window corrige ce problème.
 :::
 
 ### 2. Sliding Window Log
 
-Stocke le timestamp de chaque requete et compte celles dans la fenetre glissante.
+Stocke le timestamp de chaque requête et compte celles dans la fenêtre glissante.
 
 ```typescript
 class SlidingWindowLog {
@@ -161,7 +161,7 @@ class SlidingWindowLog {
 
 ### 3. Sliding Window Counter
 
-Combine fixed window et sliding window pour un bon compromis memoire/precision.
+Combine fixed window et sliding window pour un bon compromis mémoire/précision.
 
 ```typescript
 class SlidingWindowCounter {
@@ -225,7 +225,7 @@ class SlidingWindowCounter {
 
 ### 4. Token Bucket
 
-Le token bucket ajoute des tokens a un rythme constant. Chaque requete consomme un token. Permet des bursts controles.
+Le token bucket ajoute des tokens à un rythme constant. Chaque requête consomme un token. Permet des bursts controles.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -312,7 +312,7 @@ class TokenBucket {
 
 ### 5. Leaky Bucket
 
-Le leaky bucket traite les requetes a un rythme constant, en mettant les surplus dans une file d'attente.
+Le leaky bucket traite les requêtes à un rythme constant, en mettant les surplus dans une file d'attente.
 
 ```typescript
 class LeakyBucket {
@@ -403,7 +403,7 @@ class LeakyBucket {
 
 ## Rate limiting distribue
 
-Dans un systeme avec plusieurs instances, le rate limiter doit etre partage. Redis est le choix classique.
+Dans un système avec plusieurs instances, le rate limiter doit etre partage. Redis est le choix classique.
 
 ```typescript
 // Rate limiter distribue avec Redis (conceptuel)
@@ -532,7 +532,7 @@ function rateLimitMiddleware(
 
 ## Load Shedding
 
-Le load shedding est une technique de dernier recours : quand le systeme est surcharge, il rejette activement des requetes pour proteger celles qu'il accepte.
+Le load shedding est une technique de dernier recours : quand le système est surcharge, il rejette activement des requêtes pour proteger celles qu'il accepte.
 
 ### Admission control
 
@@ -694,7 +694,7 @@ class LoadSheddingError extends Error {
 
 ### CoDel : Controlled Delay
 
-CoDel est un algorithme de gestion de queue qui detecte le "bufferbloat" : quand les requetes passent trop de temps dans la queue, c'est un signe de surcharge durable.
+CoDel est un algorithme de gestion de queue qui détecté le "bufferbloat" : quand les requêtes passent trop de temps dans la queue, c'est un signe de surcharge durable.
 
 ```typescript
 // CoDel simplifie pour les requetes HTTP
@@ -771,7 +771,7 @@ class CoDelQueue<T> {
 ## Rate limiting cote client
 
 :::tip Bonne pratique
-Un client bien ecrit respecte les limites de l'API qu'il appelle en implementant son propre rate limiter. Cela evite de gaspiller des requetes qui seront de toute facon rejetees avec un 429.
+Un client bien écrit respecte les limites de l'API qu'il appelle en implementant son propre rate limiter. Cela evite de gaspiller des requêtes qui seront de toute façon rejetees avec un 429.
 :::
 
 ```typescript
@@ -859,16 +859,16 @@ class ClientRateLimiter {
 
 ---
 
-## Resume
+## Résumé
 
 | Concept | Description | Cas d'usage |
 |---------|------------|-------------|
-| **Fixed Window** | Compteur par fenetre de temps fixe | Simple, tolerant les bursts |
-| **Sliding Window Log** | Timestamp de chaque requete | Precision maximale |
+| **Fixed Window** | Compteur par fenêtre de temps fixe | Simple, tolerant les bursts |
+| **Sliding Window Log** | Timestamp de chaque requête | Precision maximale |
 | **Sliding Window Counter** | Interpolation entre 2 fenetres | Bon compromis |
 | **Token Bucket** | Tokens remplis a rythme constant | API avec burst autorise |
 | **Leaky Bucket** | Traitement a debit constant | Lissage du trafic |
-| **Load Shedding** | Rejection proactive en surcharge | Protection du systeme |
+| **Load Shedding** | Rejection proactive en surcharge | Protection du système |
 | **Admission Control** | Decision par priorite | Trafic heterogene |
 | **CoDel** | Detection du bufferbloat | Gestion de queues |
 
@@ -876,10 +876,16 @@ class ClientRateLimiter {
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| [16 - Circuit Breaker, Bulkhead & Backpressure](./16-circuit-breaker.md) | [18 - Observabilite des systemes distribues](./18-observabilite-distribuee.md) |
+| [16 - Circuit Breaker, Bulkhead & Backpressure](./16-circuit-breaker.md) | [18 - Observabilité des systèmes distribues](./18-observabilite-distribuee.md) |
 
-**Ressources associees :**
-- [Lab 17 — Rate Limiting](../labs/lab-17-rate-limiting/)
-- [Quiz 17 — Rate Limiting](../quizzes/quiz-17-rate-limiting.html)
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 17 rate limiting](../screencasts/screencast-17-rate-limiting.md)
+2. **Lab** : [lab-17-rate-limiting](../labs/lab-17-rate-limiting/README)
+3. **Quiz** : [quiz 17 rate limiting](../quizzes/quiz-17-rate-limiting.html)
+:::

@@ -1,4 +1,8 @@
-# 00 — Prerequis & Introduction aux systemes distribues
+# 00 — Prérequis & Introduction aux systèmes distribues
+
+<!-- nav-cours-précédent -->
+> **Cours précédent** : [Architecture](../../10-architecture/cours/13-culture-architecturale/06-modernisation-legacy.md). Si tu arrives ici sans avoir fait les cours précédents, consulte le [guide de démarrage](../../GUIDE-DEMARRAGE.md).
+
 
 | Difficulte | Duree estimee | Lab | Quiz |
 |:----------:|:-------------:|:---:|:----:|
@@ -8,22 +12,22 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Definir ce qu'est un systeme distribue et identifier ses caracteristiques fondamentales
+- Définir ce qu'est un système distribue et identifier ses caracteristiques fondamentales
 - Enumerer les avantages et inconvenients des architectures distribuees
-- Installer et configurer l'environnement de developpement complet (Node.js, TypeScript, Docker)
-- Executer les labs et les tests du cours avec `npx tsx`
+- Installer et configurer l'environnement de développement complet (Node.js, TypeScript, Docker)
+- Exécuter les labs et les tests du cours avec `npx tsx`
 - Naviguer dans la structure du cours (modules, labs, quizzes, visualisations)
-- Distinguer un systeme monolithique d'un systeme distribue
-- Identifier des exemples concrets de systemes distribues dans la vie quotidienne
+- Distinguer un système monolithique d'un système distribue
+- Identifier des exemples concrets de systèmes distribues dans la vie quotidienne
 - Comprendre le parcours d'apprentissage de ce cours en 5 phases et 25 modules
 - Utiliser VitePress pour consulter la documentation interactive du cours
-- Ecrire du TypeScript basique avec typage strict (prerequis valide)
+- Écrire du TypeScript basique avec typage strict (prérequis valide)
 
 ---
 
-## Prerequis techniques
+## Prérequis techniques
 
-Avant de commencer ce cours, assurez-vous de maitriser les elements suivants :
+Avant de commencer ce cours, assurez-vous de maîtriser les éléments suivants :
 
 ### Node.js 22 LTS
 
@@ -43,7 +47,7 @@ Vous devez etre a l'aise avec :
 
 - Les types primitifs (`string`, `number`, `boolean`)
 - Les interfaces et types
-- Les generiques basiques (`Array<T>`, `Promise<T>`)
+- Les génériques basiques (`Array<T>`, `Promise<T>`)
 - `async` / `await`
 - Les modules ES (`import` / `export`)
 
@@ -76,10 +80,10 @@ docker compose version
 
 ### HTTP & REST
 
-- Methodes HTTP (GET, POST, PUT, DELETE)
+- Méthodes HTTP (GET, POST, PUT, DELETE)
 - Codes de statut (200, 201, 400, 404, 500)
 - En-tetes (Content-Type, Authorization)
-- Corps de requete JSON
+- Corps de requête JSON
 
 ---
 
@@ -92,13 +96,13 @@ git clone https://github.com/votre-org/distributed-systems-course.git
 cd distributed-systems-course
 ```
 
-### 2. Installer les dependances
+### 2. Installer les dépendances
 
 ```bash
 npm install
 ```
 
-### 3. Verifier l'installation
+### 3. Vérifier l'installation
 
 ```bash
 # Executer un lab de test
@@ -125,10 +129,10 @@ distributed-systems-course/
 
 ---
 
-## Qu'est-ce qu'un systeme distribue ?
+## Qu'est-ce qu'un système distribue ?
 
 :::tip Definition
-Un **systeme distribue** est un ensemble de composants informatiques independants qui apparaissent a l'utilisateur comme un seul systeme coherent. Ces composants communiquent entre eux via un reseau et coordonnent leurs actions par echange de messages.
+Un **système distribue** est un ensemble de composants informatiques independants qui apparaissent a l'utilisateur comme un seul système coherent. Ces composants communiquent entre eux via un réseau et coordonnent leurs actions par echange de messages.
 :::
 
 ### Caracteristiques fondamentales
@@ -161,16 +165,16 @@ Un **systeme distribue** est un ensemble de composants informatiques independant
 1. **Concurrence** — Plusieurs composants s'executent simultanement
 2. **Pas d'horloge globale** — Chaque noeud a sa propre notion du temps
 3. **Pannes independantes** — Un noeud peut tomber sans affecter les autres (idealement)
-4. **Communication par messages** — Pas de memoire partagee entre noeuds
+4. **Communication par messages** — Pas de mémoire partagee entre noeuds
 
 ### Exemples dans la vie quotidienne
 
-| Systeme | Composants distribues | Pourquoi distribue ? |
+| Système | Composants distribues | Pourquoi distribue ? |
 |---------|----------------------|---------------------|
-| **DNS** | Serveurs racine, TLD, resolvers | Resilience, proximite geographique |
+| **DNS** | Serveurs racine, TLD, resolvers | Résilience, proximite geographique |
 | **CDN** | Points de presence mondiaux | Performance, localite des donnees |
 | **Gmail** | Frontend, stockage, index, spam filter | Echelle (milliards d'utilisateurs) |
-| **Netflix** | API gateway, microservices, CDN | Disponibilite, scalabilite |
+| **Netflix** | API gateway, microservices, CDN | Disponibilité, scalabilité |
 | **Git** | Chaque clone est un depot complet | Travail hors-ligne, collaboration |
 
 ---
@@ -235,14 +239,14 @@ class OrderService {
 ```
 
 :::warning Complexite ajoutee
-Remarquez les differences : le code distribue doit gerer les appels reseau, la latence, les erreurs partielles, et la coherence entre services. Ce cours vous apprendra a maitriser chacun de ces defis.
+Remarquez les différences : le code distribue doit gérer les appels réseau, la latence, les erreurs partielles, et la coherence entre services. Ce cours vous apprendra à maîtriser chacun de ces defis.
 :::
 
 ---
 
 ## Pourquoi ce cours ?
 
-Ce cours couvre les systemes distribues de maniere progressive, en partant des fondamentaux jusqu'aux patterns avances. Il est concu pour des developpeurs TypeScript/Node.js qui veulent comprendre et construire des systemes distribues robustes.
+Ce cours couvre les systèmes distribues de manière progressive, en partant des fondamentaux jusqu'aux patterns avances. Il est concu pour des développeurs TypeScript/Node.js qui veulent comprendre et construire des systèmes distribues robustes.
 
 ### Parcours d'apprentissage
 
@@ -265,32 +269,32 @@ Phase 5 : Production & Synthese (Modules 20-24)
 
 ### Structure de chaque module
 
-Chaque module suit le meme schema :
-- **Cours** : theorie illustree avec des exemples TypeScript
+Chaque module suit le même schema :
+- **Cours** : théorie illustree avec des exemples TypeScript
 - **Lab** : exercice pratique avec tests automatises (`npx tsx labs/XX-*.ts`)
-- **Quiz** : auto-evaluation (5-10 questions)
+- **Quiz** : auto-évaluation (5-10 questions)
 - **Visualisation** (certains modules) : page HTML interactive
 
 ---
 
-## Terminologie cle
+## Terminologie clé
 
 | Terme | Definition |
 |-------|-----------|
-| **Noeud** | Un processus ou une machine dans le systeme distribue |
+| **Noeud** | Un processus ou une machine dans le système distribue |
 | **Message** | Unite de communication entre noeuds |
 | **Latence** | Temps entre l'envoi et la reception d'un message |
-| **Partition reseau** | Coupure de communication entre des groupes de noeuds |
+| **Partition réseau** | Coupure de communication entre des groupes de noeuds |
 | **Coherence** | Garantie que tous les noeuds voient les memes donnees |
-| **Disponibilite** | Capacite du systeme a repondre a chaque requete |
-| **Tolerance aux pannes** | Capacite a fonctionner malgre des defaillances |
-| **Idempotence** | Operation qui produit le meme resultat si executee plusieurs fois |
-| **Consensus** | Accord entre les noeuds sur une valeur ou un etat |
-| **Scalabilite** | Capacite a gerer une charge croissante |
+| **Disponibilité** | Capacité du système a repondre à chaque requête |
+| **Tolerance aux pannes** | Capacité a fonctionner malgre des defaillances |
+| **Idempotence** | Operation qui produit le même résultat si executee plusieurs fois |
+| **Consensus** | Accord entre les noeuds sur une valeur ou un état |
+| **Scalabilite** | Capacité a gérer une charge croissante |
 
 ---
 
-## Verifier votre environnement
+## Vérifier votre environnement
 
 Executez ce script pour valider que tout est en place :
 
@@ -336,6 +340,15 @@ checkEnvironment();
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| --        | [01 - Pourquoi les systemes distribues ?](./01-pourquoi-les-systemes-distribues.md) |
+| --        | [01 - Pourquoi les systèmes distribues ?](./01-pourquoi-les-systemes-distribues.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 00 prérequis](../screencasts/screencast-00-prerequis.md)
+2. **Quiz** : [quiz 00 prérequis](../quizzes/quiz-00-prerequis.html)
+:::

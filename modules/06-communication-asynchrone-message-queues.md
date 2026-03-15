@@ -9,13 +9,13 @@
 A la fin de ce module, vous serez capable de :
 
 - Expliquer quand privilegier la communication asynchrone plutot que synchrone
-- Decrire les composants fondamentaux d'un systeme de message queues (producteurs, consommateurs, broker)
+- Decrire les composants fondamentaux d'un système de message queues (producteurs, consommateurs, broker)
 - Differencier le pattern point-to-point du pattern Pub/Sub
-- Utiliser Redis Streams (XADD, XREAD, XREADGROUP) pour implementer un systeme de messages
+- Utiliser Redis Streams (XADD, XREAD, XREADGROUP) pour implementer un système de messages
 - Implementer des consumer groups pour repartir le travail entre plusieurs consommateurs
-- Concevoir une dead letter queue (DLQ) pour gerer les messages en echec
+- Concevoir une dead letter queue (DLQ) pour gérer les messages en echec
 - Comprendre les garanties de livraison : at-most-once, at-least-once, exactly-once
-- Gerer le backpressure dans un systeme de message queues
+- Gérer le backpressure dans un système de message queues
 
 ---
 
@@ -41,14 +41,14 @@ COMMUNICATION SYNCHRONE :                COMMUNICATION ASYNCHRONE :
 
 | Critere | Synchrone | Asynchrone |
 |---------|-----------|------------|
-| Le client a besoin de la reponse immediatement | Oui | Non |
+| Le client a besoin de la réponse immediatement | Oui | Non |
 | Le traitement peut prendre du temps | Mauvais choix | Bon choix |
-| Resilience aux pannes du service cible | Faible | Forte |
+| Résilience aux pannes du service cible | Faible | Forte |
 | Complexite de debug | Plus simple | Plus complexe |
-| Exemples | Lire un profil, verifier un prix | Envoyer un email, generer un PDF, traiter une commande |
+| Exemples | Lire un profil, vérifier un prix | Envoyer un email, générer un PDF, traiter une commande |
 
 :::tip Regle d'or
-Si l'utilisateur attend la reponse pour continuer, utilisez le synchrone. Si le traitement peut etre differe, utilisez l'asynchrone. En cas de doute, posez la question : "Est-ce que l'utilisateur remarquerait un delai de 30 secondes ?"
+Si l'utilisateur attend la réponse pour continuer, utilisez le synchrone. Si le traitement peut etre differe, utilisez l'asynchrone. En cas de doute, posez la question : "Est-ce que l'utilisateur remarquerait un delai de 30 secondes ?"
 :::
 
 ---
@@ -268,7 +268,7 @@ async function processMessage(data: Record<string, string>): Promise<void> {
 
 ## 4. Dead Letter Queues (DLQ)
 
-Un message peut echouer de maniere repetee (donnees corrompues, bug, service externe indisponible). Plutot que de le reessayer indefiniment, on l'envoie dans une **dead letter queue** pour analyse.
+Un message peut echouer de manière repetee (donnees corrompues, bug, service externe indisponible). Plutot que de le reessayer indefiniment, on l'envoie dans une **dead letter queue** pour analyse.
 
 ```
 FLOW NORMAL :                            FLOW AVEC DLQ :
@@ -452,25 +452,35 @@ async function publishWithMaxLength(
 ```
 
 :::tip Commencez par Redis Streams
-Si vous avez deja Redis dans votre stack, Redis Streams est le choix le plus simple pour demarrer avec le messaging asynchrone. Vous pourrez migrer vers Kafka si les volumes l'exigent.
+Si vous avez déjà Redis dans votre stack, Redis Streams est le choix le plus simple pour démarrer avec le messaging asynchrone. Vous pourrez migrer vers Kafka si les volumes l'exigent.
 :::
 
 ---
 
-## Points cles
+## Points clés
 
-1. **La communication asynchrone** decouple les services dans le temps : le producteur n'attend pas le consommateur. C'est essentiel pour la resilience.
+1. **La communication asynchrone** decouple les services dans le temps : le producteur n'attend pas le consommateur. C'est essentiel pour la résilience.
 2. **Point-to-point** (un message → un consumer) vs **Pub/Sub** (un message → tous les abonnes) sont deux patterns complementaires.
 3. **Redis Streams** offre XADD, XREAD, XREADGROUP pour un messaging performant avec consumer groups et ACK.
-4. **Les consumer groups** repartissent automatiquement les messages entre les workers d'un meme groupe.
-5. **Les Dead Letter Queues** capturent les messages qui echouent de maniere repetee, empechant le blocage de la file.
-6. **At-least-once + idempotence** est la strategie de livraison la plus pratique dans les systemes distribues.
-7. **Le backpressure** doit etre gere explicitement : rate limiting, taille maximale du stream, ou scaling des consumers.
+4. **Les consumer groups** repartissent automatiquement les messages entre les workers d'un même groupe.
+5. **Les Dead Letter Queues** capturent les messages qui echouent de manière repetee, empechant le blocage de la file.
+6. **At-least-once + idempotence** est la stratégie de livraison la plus pratique dans les systèmes distribues.
+7. **Le backpressure** doit etre géré explicitement : rate limiting, taille maximale du stream, ou scaling des consumers.
 
 ---
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [05 - Communication synchrone avancee](./05-communication-synchrone-avancee.md) | [07 - Event-Driven Architecture](./07-event-driven-architecture.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 06 message queues](../screencasts/screencast-06-message-queues.md)
+2. **Lab** : [lab-06-message-queues](../labs/lab-06-message-queues/README)
+3. **Quiz** : [quiz 06 message queues](../quizzes/quiz-06-message-queues.html)
+:::

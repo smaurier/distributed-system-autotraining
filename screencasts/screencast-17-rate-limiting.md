@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/17-rate-limiting.md`
 - **Lab associe** : Lab 17
-- **Prerequis** : Screencast 16
+- **Prérequis** : Screencast 16
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/17-rate-limiting.md` ouvert
 - [ ] Deux terminaux (serveur + client de charge)
 - [ ] Aucun processus sur les ports 3000-3001
@@ -17,7 +17,7 @@
 
 ### [00:00-01:30] Introduction — Proteger les services contre la surcharge
 
-> Au screencast precedent, on a vu le circuit breaker qui protege un service contre ses dependances defaillantes. Le rate limiting protege un service contre ses propres clients. Trop de requetes par seconde, meme legales, peuvent saturer un service. Le rate limiting dit "tu as le droit a N requetes par minute, pas plus".
+> Au screencast précédent, on a vu le circuit breaker qui protege un service contre ses dépendances defaillantes. Le rate limiting protege un service contre ses propres clients. Trop de requêtes par seconde, même legales, peuvent saturer un service. Le rate limiting dit "tu as le droit a N requêtes par minute, pas plus".
 
 **Action** : Ouvrir le module 17 et afficher le diagramme.
 
@@ -33,9 +33,9 @@ Sans rate limiting :              Avec rate limiting :
 
 ### [01:30-05:30] Token Bucket — L'algorithme classique
 
-> L'algorithme token bucket est le plus utilise. Imaginez un seau contenant des jetons. Chaque requete consomme un jeton. Le seau se remplit a un rythme constant. Quand il est vide, les requetes sont rejetees.
+> L'algorithme token bucket est le plus utilise. Imaginez un seau contenant des jetons. Chaque requête consomme un jeton. Le seau se remplit à un rythme constant. Quand il est vide, les requêtes sont rejetees.
 
-**Action** : Creer un fichier `rate-limiter.ts`.
+**Action** : Créer un fichier `rate-limiter.ts`.
 
 ```typescript
 class TokenBucket {
@@ -92,13 +92,13 @@ for (let i = 0; i < 15; i++) {
 }
 ```
 
-**Action** : Executer et montrer que les 10 premieres passent, puis les suivantes sont rejetees.
+**Action** : Exécuter et montrer que les 10 premières passent, puis les suivantes sont rejetees.
 
-> Le token bucket a un avantage sur le compteur simple : il permet les bursts. Si le seau est plein avec 10 jetons, un client peut envoyer 10 requetes d'un coup. Mais ensuite il doit attendre que le seau se remplisse.
+> Le token bucket à un avantage sur le compteur simple : il permet les bursts. Si le seau est plein avec 10 jetons, un client peut envoyer 10 requêtes d'un coup. Mais ensuite il doit attendre que le seau se remplisse.
 
-### [05:30-09:00] Sliding Window — Plus precis
+### [05:30-09:00] Sliding Window — Plus précis
 
-> Le token bucket est simple mais imrecis aux limites de fenetre. Le sliding window est plus precis : il compte les requetes dans une fenetre glissante.
+> Le token bucket est simple mais imrecis aux limites de fenêtre. Le sliding window est plus précis : il compte les requêtes dans une fenêtre glissante.
 
 **Action** : Implementer le sliding window.
 
@@ -153,11 +153,11 @@ for (let i = 0; i < 8; i++) {
 }
 ```
 
-> Le sliding window est plus equitable : il ne penalise pas un client qui envoie ses requetes a la fin d'une fenetre. C'est l'algorithme utilise par Stripe, GitHub, et la plupart des API publiques.
+> Le sliding window est plus equitable : il ne penalise pas un client qui envoie ses requêtes à la fin d'une fenêtre. C'est l'algorithme utilise par Stripe, GitHub, et la plupart des API publiques.
 
 ### [09:00-12:30] Rate Limiting par tiers et load shedding
 
-> En production, differents clients ont des quotas differents. Et quand le systeme est vraiment surcharge, le load shedding va plus loin que le rate limiting : il abandonne activement du travail pour sauver le systeme.
+> En production, différents clients ont des quotas différents. Et quand le système est vraiment surcharge, le load shedding va plus loin que le rate limiting : il abandonne activement du travail pour sauver le système.
 
 **Action** : Implementer un rate limiter multi-tier.
 
@@ -260,13 +260,13 @@ for (let i = 0; i < 100; i++) {
 }
 ```
 
-> Le load shedding est la derniere ligne de defense. A 60% de charge, on arrete les requetes basse priorite (analytics, rapports). A 80%, on arrete les requetes normales. A 95%, meme les requetes critiques sont shedded. Mieux vaut servir 50% des clients correctement que 100% des clients mal.
+> Le load shedding est la dernière ligne de defense. A 60% de charge, on arrete les requêtes basse priorite (analytics, rapports). A 80%, on arrete les requêtes normales. A 95%, même les requêtes critiques sont shedded. Mieux vaut servir 50% des clients correctement que 100% des clients mal.
 
-### [12:30-15:30] Integration Express avec headers standards
+### [12:30-15:30] Intégration Express avec headers standards
 
 > Integrons le rate limiting dans un serveur Express avec les headers standards que les clients HTTP comprennent.
 
-**Action** : Montrer l'integration complete.
+**Action** : Montrer l'intégration complete.
 
 ```typescript
 import express from 'express';
@@ -318,11 +318,11 @@ for i in $(seq 1 15); do
 done
 ```
 
-### [15:30-17:30] Recapitulatif
+### [15:30-17:30] Récapitulatif
 
-> Recapitulons. Le token bucket permet les bursts avec un debit moyen controle. Le sliding window est plus precis et equitable. Le rate limiting par tiers differencie les clients. Le load shedding sacrifie les requetes basse priorite pour sauver le systeme. Et les headers standards (X-RateLimit-*, Retry-After) informent les clients.
+> Recapitulons. Le token bucket permet les bursts avec un debit moyen controle. Le sliding window est plus précis et equitable. Le rate limiting par tiers differencie les clients. Le load shedding sacrifie les requêtes basse priorite pour sauver le système. Et les headers standards (X-RateLimit-*, Retry-After) informent les clients.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -336,12 +336,12 @@ PROCHAINE ETAPE :
 → Screencast 18 : Observabilite distribuee
 ```
 
-> Au prochain screencast, on va parler d'observabilite : comment savoir ce qui se passe dans un systeme distribue en temps reel. Correlation IDs, structured logging, health checks avances et RED metrics. A bientot !
+> Au prochain screencast, on va parler d'observabilité : comment savoir ce qui se passe dans un système distribue en temps réel. Correlation IDs, structured logging, health checks avances et RED metrics. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Le token bucket est tres visuel — montrer les jetons qui se vident et se remplissent
+- Le token bucket est très visuel — montrer les jetons qui se vident et se remplissent
 - La comparaison token bucket vs sliding window doit etre claire
 - Les headers X-RateLimit-* sont visibles avec curl -i — les montrer a l'ecran
 - Le load shedding par priorite est un concept avance — bien expliquer le "mieux servir 50% bien que 100% mal"
 - Tester en boucle pour atteindre la limite et montrer le 429
-- Verifier que le serveur Express fonctionne avant la demo
+- Vérifier que le serveur Express fonctionne avant la demo

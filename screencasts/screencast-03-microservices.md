@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/03-premiers-microservices-typescript.md`
 - **Lab associe** : Lab 03
-- **Prerequis** : Screencast 02
+- **Prérequis** : Screencast 02
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Deux terminaux supplementaires pour lancer les microservices
 - [ ] Aucun processus sur les ports 3001-3002
 - [ ] Fichier `modules/03-premiers-microservices-typescript.md` ouvert
@@ -17,7 +17,7 @@
 
 ### [00:00-01:30] Introduction — Du monolithe aux microservices
 
-> Dans les deux premiers screencasts, on a vu pourquoi les systemes distribues existent et comment fonctionne la communication reseau. Maintenant, on va construire nos deux premiers microservices avec Express et TypeScript. On va aussi poser les bases de tout systeme distribue serieux : le logging structure et les health checks.
+> Dans les deux premiers screencasts, on a vu pourquoi les systèmes distribues existent et comment fonctionne la communication réseau. Maintenant, on va construire nos deux premiers microservices avec Express et TypeScript. On va aussi poser les bases de tout système distribue serieux : le logging structure et les health checks.
 
 **Action** : Ouvrir le module 03 et afficher le diagramme d'architecture cible.
 
@@ -32,13 +32,13 @@
  /orders                  /users/:id
 ```
 
-> On va creer un service de commandes et un service d'utilisateurs. Le service de commandes appellera le service d'utilisateurs pour valider qu'un client existe avant de creer une commande. C'est le pattern le plus basique en microservices.
+> On va créer un service de commandes et un service d'utilisateurs. Le service de commandes appellera le service d'utilisateurs pour valider qu'un client existe avant de créer une commande. C'est le pattern le plus basique en microservices.
 
 ### [01:30-05:00] Construire le User Service
 
 > Commencons par le User Service. C'est un service Express minimal avec un endpoint REST et un health check.
 
-**Action** : Creer le fichier `user-service.ts` et taper le code.
+**Action** : Créer le fichier `user-service.ts` et taper le code.
 
 ```typescript
 import express from 'express';
@@ -90,7 +90,7 @@ app.listen(3002, () => {
 });
 ```
 
-> Trois choses a remarquer. D'abord, le logging structure : chaque log est un objet JSON avec un timestamp, un niveau, et le nom du service. En production, ca permet de filtrer et chercher dans des outils comme Elasticsearch ou Loki. Ensuite, le health check : un endpoint `/health` qui retourne le statut du service. Enfin, le endpoint REST classique avec gestion du 404.
+> Trois choses a remarquer. D'abord, le logging structure : chaque log est un objet JSON avec un timestamp, un niveau, et le nom du service. En production, ça permet de filtrer et chercher dans des outils comme Elasticsearch ou Loki. Ensuite, le health check : un endpoint `/health` qui retourne le statut du service. Enfin, le endpoint REST classique avec gestion du 404.
 
 **Action** : Lancer le User Service dans le premier terminal.
 
@@ -108,9 +108,9 @@ curl http://localhost:3002/users/user-999
 
 ### [05:00-09:30] Construire le Order Service avec appel inter-service
 
-> Maintenant, le Order Service. Il va appeler le User Service pour valider l'utilisateur avant de creer une commande. C'est la premiere communication inter-service du cours.
+> Maintenant, le Order Service. Il va appeler le User Service pour valider l'utilisateur avant de créer une commande. C'est la première communication inter-service du cours.
 
-**Action** : Creer le fichier `order-service.ts`.
+**Action** : Créer le fichier `order-service.ts`.
 
 ```typescript
 import express from 'express';
@@ -201,7 +201,7 @@ app.listen(3001, () => {
 });
 ```
 
-> L'appel inter-service est dans la fonction `getUser`. Remarquez les precautions : un timeout de 3 secondes avec AbortController, la gestion du cas ou le service repond une erreur, et la gestion du cas ou le service ne repond pas du tout. C'est exactement ce qu'on a appris au screencast 02.
+> L'appel inter-service est dans la fonction `getUser`. Remarquez les precautions : un timeout de 3 secondes avec AbortController, la gestion du cas où le service repond une erreur, et la gestion du cas où le service ne repond pas du tout. C'est exactement ce qu'on a appris au screencast 02.
 
 **Action** : Lancer le Order Service dans le deuxieme terminal.
 
@@ -209,7 +209,7 @@ app.listen(3001, () => {
 npx tsx order-service.ts
 ```
 
-**Action** : Tester la creation d'une commande.
+**Action** : Tester la création d'une commande.
 
 ```bash
 # Commande valide
@@ -225,7 +225,7 @@ curl -X POST http://localhost:3001/orders \
 
 ### [09:30-12:30] Observer le logging structure
 
-> Regardons maintenant les logs des deux services. Grace au format JSON, chaque ligne contient toute l'information necessaire pour le debugging.
+> Regardons maintenant les logs des deux services. Grace au format JSON, chaque ligne contient toute l'information nécessaire pour le debugging.
 
 **Action** : Montrer les logs dans les deux terminaux side-by-side.
 
@@ -237,7 +237,7 @@ curl -X POST http://localhost:3001/orders \
 {"timestamp":"2025-01-15T10:00:01.230Z","level":"info","service":"order-service","message":"Order created","orderId":"order-1705312801234","userId":"user-1","total":29.99}
 ```
 
-> En production, ces logs JSON sont envoyes a un collecteur central. On peut alors chercher "tous les logs pour user-1 sur les 5 dernieres minutes" a travers tous les services. Sans logging structure, c'est quasiment impossible.
+> En production, ces logs JSON sont envoyes à un collecteur central. On peut alors chercher "tous les logs pour user-1 sur les 5 dernières minutes" a travers tous les services. Sans logging structure, c'est quasiment impossible.
 
 **Action** : Arreter le User Service et retenter une commande pour montrer la gestion d'erreur.
 
@@ -250,13 +250,13 @@ curl -X POST http://localhost:3001/orders \
   -d '{"userId": "user-1", "product": "Book", "total": 19.99}'
 ```
 
-> Voyez : le Order Service ne crashe pas quand le User Service est down. Il retourne une erreur propre. C'est la resilience de base.
+> Voyez : le Order Service ne crashe pas quand le User Service est down. Il retourne une erreur propre. C'est la résilience de base.
 
 ### [12:30-15:30] Health checks et monitoring
 
 > Les health checks sont le minimum vital pour operer des microservices. Kubernetes, Docker Compose, et les load balancers utilisent ces endpoints pour savoir si un service est vivant.
 
-**Action** : Ameliorer le health check avec des verifications de dependances.
+**Action** : Ameliorer le health check avec des verifications de dépendances.
 
 ```typescript
 // Health check avance avec verification des dependances
@@ -292,15 +292,15 @@ app.get('/health', async (_req, res) => {
 });
 ```
 
-> Trois niveaux de health check. Le liveness probe : "est-ce que le processus repond ?" — un simple 200 suffit. Le readiness probe : "est-ce que le service est pret a recevoir du trafic ?" — il verifie les dependances. Et le startup probe : "est-ce que le service a fini de demarrer ?" — utile pour les services lents a initialiser.
+> Trois niveaux de health check. Le liveness probe : "est-ce que le processus repond ?" — un simple 200 suffit. Le readiness probe : "est-ce que le service est pret a recevoir du trafic ?" — il vérifié les dépendances. Et le startup probe : "est-ce que le service a fini de démarrer ?" — utile pour les services lents a initialiser.
 
 **Action** : Tester le health check avance avec et sans le User Service.
 
-### [15:30-17:30] Recapitulatif
+### [15:30-17:30] Récapitulatif
 
 > Recapitulons ce qu'on a construit. Deux microservices Express en TypeScript, avec du logging structure JSON, des health checks, et un appel inter-service avec timeout. C'est une base solide et realiste.
 
-**Action** : Afficher le schema recapitulatif.
+**Action** : Afficher le schema récapitulatif.
 
 ```
 CE QU'ON A CONSTRUIT :
@@ -314,12 +314,12 @@ PROCHAINE ETAPE :
 → Screencast 04 : Serialisation, validation avec Zod, et contrats API
 ```
 
-> Dans le prochain screencast, on va s'attaquer a un probleme insidieux : la serialisation. JSON a l'air simple, mais il cache des pieges qui causent des bugs en production. On verra comment Zod nous protege. A bientot !
+> Dans le prochain screencast, on va s'attaquer à un problème insidieux : la serialisation. JSON a l'air simple, mais il cache des pieges qui causent des bugs en production. On verra comment Zod nous protege. A bientot !
 
 ## Points d'attention pour l'enregistrement
 - Lancer le User Service AVANT le Order Service pour que l'appel inter-service fonctionne
 - Montrer clairement les deux terminaux side-by-side pour les logs
 - Prendre le temps de commenter la fonction `getUser` et ses protections
-- Bien montrer le comportement quand le User Service est arrete (resilience)
+- Bien montrer le comportement quand le User Service est arrete (résilience)
 - Les health checks sont visuellement simples mais conceptuellement importants — ne pas les survoler
-- Verifier que les ports 3001 et 3002 sont libres avant de demarrer
+- Vérifier que les ports 3001 et 3002 sont libres avant de démarrer

@@ -8,21 +8,21 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Decrire les 4 niveaux du modele de maturite REST de Richardson (0 a 3)
+- Decrire les 4 niveaux du modèle de maturite REST de Richardson (0 a 3)
 - Implementer une API REST de niveau 2 avec Express et TypeScript
 - Expliquer HATEOAS et son role dans une API auto-descriptive
 - Comprendre le fonctionnement de gRPC, Protocol Buffers et les 4 types de streaming
 - Modeliser des services et messages gRPC en TypeScript
 - Comparer les patterns de service discovery : client-side, server-side, DNS, registry
 - Implementer un registre de services simple en TypeScript
-- Choisir une strategie de load balancing adaptee a votre contexte
-- Integrer des health checks dans un systeme de service discovery
+- Choisir une stratégie de load balancing adaptee a votre contexte
+- Intégrer des health checks dans un système de service discovery
 
 ---
 
-## 1. Modele de maturite REST — Richardson
+## 1. Modèle de maturite REST — Richardson
 
-Leonard Richardson a propose un modele a 4 niveaux pour evaluer la maturite d'une API REST. La plupart des APIs "REST" en production sont en realite au niveau 1 ou 2.
+Leonard Richardson a propose un modèle a 4 niveaux pour évaluer la maturite d'une API REST. La plupart des APIs "REST" en production sont en realite au niveau 1 ou 2.
 
 ```
 MODELE DE MATURITE DE RICHARDSON
@@ -83,7 +83,7 @@ app.post('/api', (req, res) => {
 });
 ```
 
-:::warning Probleme du niveau 0
+:::warning Problème du niveau 0
 L'action est cachee dans le body. Impossible d'utiliser le caching HTTP, les proxies, ou les CDN. Aucun contrat standardise entre client et serveur.
 :::
 
@@ -155,7 +155,7 @@ La grande majorite des APIs modernes se situent au niveau 2. C'est un bon compro
 
 ### 1.4 Niveau 3 — HATEOAS
 
-HATEOAS (Hypermedia As The Engine Of Application State) : chaque reponse contient des liens vers les actions possibles. Le client n'a pas besoin de connaitre la structure de l'API a l'avance.
+HATEOAS (Hypermedia As The Engine Of Application State) : chaque réponse contient des liens vers les actions possibles. Le client n'a pas besoin de connaître la structure de l'API a l'avance.
 
 ```typescript
 // Niveau 3 : Reponses avec liens hypermedia
@@ -209,7 +209,7 @@ app.get('/orders/:id', (req, res) => {
 
 ## 2. gRPC — Communication haute performance
 
-gRPC est un framework RPC (Remote Procedure Call) developpe par Google. Il utilise HTTP/2 et Protocol Buffers pour offrir des performances superieures a REST/JSON.
+gRPC est un framework RPC (Remote Procedure Call) développé par Google. Il utilise HTTP/2 et Protocol Buffers pour offrir des performances superieures a REST/JSON.
 
 ```
 COMPARAISON REST vs gRPC
@@ -324,7 +324,7 @@ interface OrderService {
 
 ## 3. Service Discovery
 
-Dans un systeme distribue, les services doivent se trouver les uns les autres. Les adresses IP et ports peuvent changer dynamiquement (scaling, deploiements, pannes).
+Dans un système distribue, les services doivent se trouver les uns les autres. Les adresses IP et ports peuvent changer dynamiquement (scaling, deploiements, pannes).
 
 ```
 SANS SERVICE DISCOVERY :                 AVEC SERVICE DISCOVERY :
@@ -452,7 +452,7 @@ class ServiceRegistry {
 
 ## 4. Load Balancing
 
-### 4.1 Strategies de repartition
+### 4.1 Stratégies de repartition
 
 ```typescript
 // load-balancer.ts — Strategies de load balancing
@@ -533,7 +533,7 @@ async function checkHealth(host: string, port: number): Promise<HealthStatus> {
 ```
 
 :::tip Health checks actifs vs passifs
-Les health checks **actifs** (le registre interroge periodiquement les services) detectent les pannes proactivement. Les health checks **passifs** (on observe les erreurs sur les requetes reelles) sont moins couteux mais detectent les problemes plus tard.
+Les health checks **actifs** (le registre interroge periodiquement les services) detectent les pannes proactivement. Les health checks **passifs** (on observe les erreurs sur les requêtes reelles) sont moins couteux mais detectent les problèmes plus tard.
 :::
 
 ---
@@ -566,13 +566,13 @@ Flow complet :
 
 ---
 
-## Points cles
+## Points clés
 
-1. **Le modele de Richardson** mesure la maturite d'une API REST en 4 niveaux. Le niveau 2 (verbes HTTP + codes de statut) est le standard courant.
-2. **HATEOAS** (niveau 3) rend l'API auto-descriptive mais ajoute de la complexite. Il est rarement implemente completement en pratique.
-3. **gRPC** offre des performances superieures a REST pour la communication inter-services grace a HTTP/2 et Protocol Buffers.
+1. **Le modèle de Richardson** mesure la maturite d'une API REST en 4 niveaux. Le niveau 2 (verbes HTTP + codes de statut) est le standard courant.
+2. **HATEOAS** (niveau 3) rend l'API auto-descriptive mais ajoute de la complexite. Il est rarement implemente complètement en pratique.
+3. **gRPC** offre des performances superieures a REST pour la communication inter-services grâce à HTTP/2 et Protocol Buffers.
 4. **Les 4 types de streaming gRPC** (unary, server, client, bidirectionnel) couvrent tous les patterns de communication.
-5. **Le service discovery** resout le probleme du routage dynamique : les services s'enregistrent et se decouvrent via un registre.
+5. **Le service discovery** resout le problème du routage dynamique : les services s'enregistrent et se decouvrent via un registre.
 6. **Le load balancing** repartit la charge entre les instances (round-robin, least connections, consistent hashing).
 7. **Les health checks** permettent de retirer automatiquement les instances defaillantes du registre.
 
@@ -580,6 +580,16 @@ Flow complet :
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [04 - Serialisation & Contrats d'API](./04-serialisation-et-contrats-api.md) | [06 - Message Queues](./06-communication-asynchrone-message-queues.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 05 communication synchrone](../screencasts/screencast-05-communication-synchrone.md)
+2. **Lab** : [lab-05-communication-synchrone](../labs/lab-05-communication-synchrone/README)
+3. **Quiz** : [quiz 05 communication synchrone](../quizzes/quiz-05-communication-synchrone.html)
+:::

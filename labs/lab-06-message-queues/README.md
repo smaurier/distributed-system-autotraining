@@ -2,7 +2,7 @@
 
 ## Objectifs
 
-Comprendre et implementer les mecanismes fondamentaux des files de messages : FIFO, pub/sub, consumer groups, dead letter queues, message ordering et backpressure.
+Comprendre et implementer les mécanismes fondamentaux des files de messages : FIFO, pub/sub, consumer groups, dead letter queues, message ordering et backpressure.
 
 ## Exercices
 
@@ -10,19 +10,19 @@ Comprendre et implementer les mecanismes fondamentaux des files de messages : FI
 Implementer une file FIFO avec enqueue, dequeue, peek, size et isEmpty.
 
 ### Exercice 2 : Pub/Sub
-Implementer un systeme pub/sub base sur des topics avec subscribe, publish et unsubscribe.
+Implementer un système pub/sub base sur des topics avec subscribe, publish et unsubscribe.
 
 ### Exercice 3 : Consumer groups
 Chaque message est traite par un seul consommateur par groupe (round-robin au sein du groupe).
 
 ### Exercice 4 : Dead letter queue
-DLQ qui capture les messages echoues apres maxRetries tentatives.
+DLQ qui capture les messages echoues après maxRetries tentatives.
 
 ### Exercice 5 : Message ordering
-Traitement ordonne avec numeros de sequence, detection de trous et tampon de reordonnancement.
+Traitement ordonne avec numéros de sequence, detection de trous et tampon de reordonnancement.
 
 ### Exercice 6 : Backpressure
-File bornee avec strategie de debordement configurable ('drop-newest' | 'drop-oldest' | 'reject').
+File bornee avec stratégie de debordement configurable ('drop-newest' | 'drop-oldest' | 'reject').
 
 ## Lancer les tests
 

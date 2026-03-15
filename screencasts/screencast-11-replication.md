@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/11-replication-et-partitionnement.md`
 - **Lab associe** : Lab 11
-- **Prerequis** : Screencast 10
+- **Prérequis** : Screencast 10
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/11-replication-et-partitionnement.md` ouvert
 - [ ] Navigateur pret pour la visualisation `consistent-hashing.html` (si disponible)
 - [ ] Terminal supplementaire pour les demos
@@ -17,7 +17,7 @@
 
 ### [00:00-02:00] Introduction — Pourquoi repliquer et partitionner ?
 
-> Au screencast precedent, on a vu le theoreme CAP et les niveaux de coherence. Maintenant, on va implementer les mecanismes concrets : la replication (avoir plusieurs copies des donnees pour la disponibilite) et le partitionnement (diviser les donnees entre plusieurs noeuds pour le scaling).
+> Au screencast précédent, on a vu le théorème CAP et les niveaux de coherence. Maintenant, on va implementer les mécanismes concrets : la replication (avoir plusieurs copies des donnees pour la disponibilité) et le partitionnement (diviser les donnees entre plusieurs noeuds pour le scaling).
 
 **Action** : Ouvrir le module 11 et afficher le diagramme comparatif.
 
@@ -46,9 +46,9 @@ Les memes donnees sur N noeuds        Des donnees differentes par noeud
 
 ### [02:00-06:30] Leader-Follower replication
 
-> Le modele le plus courant est le leader-follower. Un seul noeud (le leader) recoit les ecritures et les propage aux followers. Les followers servent les lectures.
+> Le modèle le plus courant est le leader-follower. Un seul noeud (le leader) recoit les ecritures et les propage aux followers. Les followers servent les lectures.
 
-**Action** : Creer un fichier `leader-follower.ts`.
+**Action** : Créer un fichier `leader-follower.ts`.
 
 ```typescript
 interface ReplicaNode {
@@ -147,13 +147,13 @@ console.log('\nRead after replication:');
 cluster.read('user:1', 'node-B'); // "Alice"
 ```
 
-> Le replication lag est le delai entre l'ecriture sur le leader et la propagation aux followers. En production, ce lag varie de quelques millisecondes a quelques secondes. C'est la source du "eventual" dans "eventual consistency".
+> Le replication lag est le delai entre l'écriture sur le leader et la propagation aux followers. En production, ce lag varie de quelques millisecondes a quelques secondes. C'est la source du "eventual" dans "eventual consistency".
 
 ### [06:30-11:00] Consistent hashing — Distribuer les donnees
 
-> Pour le partitionnement, on a besoin de decider quel noeud stocke quelle donnee. Le consistent hashing resout ce probleme avec elegance : quand on ajoute ou retire un noeud, seule une fraction des donnees doit etre deplacee.
+> Pour le partitionnement, on a besoin de decider quel noeud stocke quelle donnee. Le consistent hashing resout ce problème avec elegance : quand on ajoute ou retire un noeud, seule une fraction des donnees doit etre deplacee.
 
-**Action** : Creer un fichier `consistent-hashing.ts`.
+**Action** : Créer un fichier `consistent-hashing.ts`.
 
 ```typescript
 class ConsistentHashRing {
@@ -274,11 +274,11 @@ for (const [node, count] of newDistribution) {
 }
 ```
 
-> Avec le hashing naif (modulo N), ajouter un noeud redistribue presque toutes les cles. Avec le consistent hashing, seul environ 1/N des cles sont deplacees. C'est pour ca que Cassandra, DynamoDB, et Riak utilisent le consistent hashing.
+> Avec le hashing naif (modulo N), ajouter un noeud redistribue presque toutes les clés. Avec le consistent hashing, seul environ 1/N des clés sont deplacees. C'est pour ça que Cassandra, DynamoDB, et Riak utilisent le consistent hashing.
 
 ### [11:00-14:00] Virtual nodes — Equilibrer la charge
 
-> Le consistent hashing de base peut creer des desequilibres si les noeuds sont peu nombreux. Les virtual nodes resolvent ce probleme : chaque noeud physique est represente par plusieurs points sur l'anneau.
+> Le consistent hashing de base peut créer des desequilibres si les noeuds sont peu nombreux. Les virtual nodes resolvent ce problème : chaque noeud physique est represente par plusieurs points sur l'anneau.
 
 **Action** : Comparer la distribution avec et sans virtual nodes.
 
@@ -314,13 +314,13 @@ for (const [node, count] of distVN) {
 }
 ```
 
-> Sans virtual nodes, la distribution est tres inegale — un noeud peut avoir 60% des cles. Avec 150 virtual nodes, la distribution se rapproche de 33% par noeud. En production, Cassandra utilise 256 virtual nodes par defaut.
+> Sans virtual nodes, la distribution est très inegale — un noeud peut avoir 60% des clés. Avec 150 virtual nodes, la distribution se rapproche de 33% par noeud. En production, Cassandra utilise 256 virtual nodes par defaut.
 
 ### [14:00-16:00] Visualisation du consistent hashing
 
 > Ouvrons la visualisation interactive pour voir l'anneau en action.
 
-**Action** : Ouvrir la visualisation `consistent-hashing.html` dans le navigateur (ou montrer le diagramme ASCII).
+**Action** : Ouvrir la visualisation `consistent-hashing.html` dans le navigateur (où montrer le diagramme ASCII).
 
 ```
         0
@@ -340,13 +340,13 @@ for (const [node, count] of distVN) {
 Cle "user-42" → hash = 1,234,567 → tombe entre node-C#1 et node-A#3 → va sur node-A
 ```
 
-> La visualisation montre comment les cles sont distribuees sur l'anneau et comment l'ajout ou le retrait d'un noeud ne deplace qu'une fraction des cles.
+> La visualisation montre comment les clés sont distribuees sur l'anneau et comment l'ajout ou le retrait d'un noeud ne deplace qu'une fraction des clés.
 
-### [16:00-17:30] Recapitulatif
+### [16:00-17:30] Récapitulatif
 
-> Recapitulons. La replication leader-follower assure la haute disponibilite, avec un lag de replication inherent. Le consistent hashing distribue les donnees de facon equilibree et stable face aux changements de topologie. Les virtual nodes ameliorent l'equilibrage. Et en production, on combine replication et partitionnement.
+> Recapitulons. La replication leader-follower assure la haute disponibilité, avec un lag de replication inherent. Le consistent hashing distribue les donnees de façon equilibree et stable face aux changements de topologie. Les virtual nodes ameliorent l'equilibrage. Et en production, on combine replication et partitionnement.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -364,7 +364,7 @@ PROCHAINE ETAPE :
 
 ## Points d'attention pour l'enregistrement
 - Le diagramme replication vs partitionnement est essentiel pour fixer les concepts
-- Le replication lag doit etre montre en live : ecrire puis lire immediatement un follower
+- Le replication lag doit etre montre en live : écrire puis lire immediatement un follower
 - Le consistent hashing est un algorithme visuel — la visualisation ou le diagramme ASCII aide beaucoup
 - Comparer explicitement les distributions avec et sans virtual nodes (chiffres a l'ecran)
 - Si la visualisation HTML existe, interagir avec en ajoutant/retirant des noeuds

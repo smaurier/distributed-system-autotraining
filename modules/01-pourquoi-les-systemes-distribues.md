@@ -1,4 +1,4 @@
-# 01 — Pourquoi les systemes distribues ? (8 fallacies, scaling)
+# 01 — Pourquoi les systèmes distribues ? (8 fallacies, scaling)
 
 | Difficulte | Duree estimee | Lab | Quiz | Visualisation |
 |:----------:|:-------------:|:---:|:----:|:-------------:|
@@ -11,15 +11,15 @@ A la fin de ce module, vous serez capable de :
 - Enumerer et expliquer les 8 fallacies of distributed computing
 - Illustrer chaque fallacy avec un exemple TypeScript concret
 - Distinguer scaling vertical et horizontal
-- Identifier les avantages et les defis des systemes distribues
-- Determiner quand un systeme distribue est (ou n'est pas) la bonne solution
-- Concevoir une strategie de scaling adaptee a un scenario donne
+- Identifier les avantages et les defis des systèmes distribues
+- Determiner quand un système distribue est (où n'est pas) la bonne solution
+- Concevoir une stratégie de scaling adaptee à un scenario donne
 
 ---
 
 ## Les 8 Fallacies of Distributed Computing
 
-En 1994, Peter Deutsch (puis James Gosling) a identifie 8 hypotheses fausses que les developpeurs font systematiquement lorsqu'ils concoivent des systemes distribues. Comprendre ces fallacies est la premiere etape pour construire des systemes robustes.
+En 1994, Peter Deutsch (puis James Gosling) a identifie 8 hypotheses fausses que les développeurs font systematiquement lorsqu'ils concoivent des systèmes distribues. Comprendre ces fallacies est la première étape pour construire des systèmes robustes.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -38,11 +38,11 @@ En 1994, Peter Deutsch (puis James Gosling) a identifie 8 hypotheses fausses que
 
 ---
 
-### Fallacy 1 : Le reseau est fiable
+### Fallacy 1 : Le réseau est fiable
 
 > "The network is reliable"
 
-C'est la fallacy la plus fondamentale. Les developpeurs ecrivent du code comme si les appels reseau ne pouvaient jamais echouer.
+C'est la fallacy la plus fondamentale. Les développeurs ecrivent du code comme si les appels réseau ne pouvaient jamais echouer.
 
 ```typescript
 // ❌ Code naif — ignore les pannes reseau
@@ -80,7 +80,7 @@ async function getUserRobust(id: string, retries = 3): Promise<User | null> {
 ```
 
 :::warning Realite du terrain
-En production, les pannes reseau sont frequentes : cables coupes, switches defaillants, DNS qui ne resout plus, cloud provider qui a un incident. Votre code **doit** les anticiper.
+En production, les pannes réseau sont frequentes : cables coupes, switches defaillants, DNS qui ne resout plus, cloud provider qui à un incident. Votre code **doit** les anticiper.
 :::
 
 ---
@@ -89,7 +89,7 @@ En production, les pannes reseau sont frequentes : cables coupes, switches defai
 
 > "Latency is zero"
 
-Un appel de fonction local prend quelques nanosecondes. Un appel reseau prend des millisecondes, voire des secondes.
+Un appel de fonction local prend quelques nanosecondes. Un appel réseau prend des millisecondes, voire des secondes.
 
 ```typescript
 // Comparaison des temps d'acces
@@ -142,7 +142,7 @@ async function getOrdersWithUsers_GOOD(orderIds: string[]) {
 
 > "Bandwidth is infinite"
 
-La bande passante est limitee et partagee. Envoyer trop de donnees sature le reseau.
+La bande passante est limitee et partagee. Envoyer trop de donnees sature le réseau.
 
 ```typescript
 // ❌ Envoyer toutes les donnees, meme celles inutiles
@@ -162,16 +162,16 @@ async function getProductPage(page: number, limit: number = 20) {
 ```
 
 :::tip Bonne pratique
-Utilisez la **pagination**, la **projection** (ne selectionner que les champs necessaires), et la **compression** (gzip/brotli) pour minimiser la bande passante.
+Utilisez la **pagination**, la **projection** (ne selectionner que les champs nécessaires), et la **compression** (gzip/brotli) pour minimiser la bande passante.
 :::
 
 ---
 
-### Fallacy 4 : Le reseau est securise
+### Fallacy 4 : Le réseau est sécurisé
 
 > "The network is secure"
 
-Chaque communication reseau est une surface d'attaque potentielle.
+Chaque communication réseau est une surface d'attaque potentielle.
 
 ```typescript
 // ❌ Communication en clair entre services
@@ -227,11 +227,11 @@ async function callService(registry: ServiceRegistry, serviceName: string, path:
 
 ---
 
-### Fallacy 6 : Il y a un seul administrateur
+### Fallacy 6 : Il y à un seul administrateur
 
 > "There is one administrator"
 
-En realite, un systeme distribue traverse des reseaux geres par differentes equipes, organisations et fournisseurs cloud.
+En realite, un système distribue traverse des réseaux geres par différentes équipes, organisations et fournisseurs cloud.
 
 ```typescript
 // Exemple : une requete traverse plusieurs domaines d'administration
@@ -255,7 +255,7 @@ interface RequestPath {
 
 > "Transport cost is zero"
 
-Serialiser, deserialiser, chiffrer, transmettre : chaque etape a un cout CPU et memoire.
+Serialiser, deserialiser, chiffrer, transmettre : chaque étape à un cout CPU et mémoire.
 
 ```typescript
 // Mesurer le cout de serialisation
@@ -286,11 +286,11 @@ measureSerializationCost({
 
 ---
 
-### Fallacy 8 : Le reseau est homogene
+### Fallacy 8 : Le réseau est homogene
 
 > "The network is homogeneous"
 
-Les systemes distribues communiquent souvent entre technologies differentes.
+Les systèmes distribues communiquent souvent entre technologies différentes.
 
 ```typescript
 // Realite : un systeme utilise souvent plusieurs protocoles et formats
@@ -400,40 +400,40 @@ if (cluster.isPrimary) {
 
 ---
 
-## Avantages des systemes distribues
+## Avantages des systèmes distribues
 
 | Avantage | Description |
 |----------|------------|
 | **Tolerance aux pannes** | Si un noeud tombe, les autres prennent le relais |
-| **Scalabilite** | Ajouter des noeuds pour gerer plus de charge |
+| **Scalabilite** | Ajouter des noeuds pour gérer plus de charge |
 | **Distribution geographique** | Placer les donnees pres des utilisateurs |
-| **Isolation** | Un bug dans un service ne fait pas tomber tout le systeme |
-| **Deploiement independant** | Chaque equipe deploie son service a son rythme |
+| **Isolation** | Un bug dans un service ne fait pas tomber tout le système |
+| **Déploiement independant** | Chaque équipe deploie son service a son rythme |
 
-## Defis des systemes distribues
+## Defis des systèmes distribues
 
 | Defi | Description |
 |------|------------|
-| **Pannes partielles** | Partie du systeme fonctionne, partie ne fonctionne pas |
+| **Pannes partielles** | Partie du système fonctionne, partie ne fonctionne pas |
 | **Coherence** | Garder les donnees synchronisees entre les noeuds |
-| **Latence** | Chaque appel reseau ajoute du delai |
-| **Complexite operationnelle** | Deploiement, monitoring, debugging plus difficiles |
-| **Transactions distribuees** | Garantir l'atomicite entre services est tres difficile |
+| **Latence** | Chaque appel réseau ajoute du delai |
+| **Complexite operationnelle** | Déploiement, monitoring, debugging plus difficiles |
+| **Transactions distribuees** | Garantir l'atomicite entre services est très difficile |
 
 ---
 
-## Quand NE PAS utiliser un systeme distribue
+## Quand NE PAS utiliser un système distribue
 
-:::warning Attention a la complexite prematuree
-Un systeme distribue est une solution a un probleme de charge, de resilience ou de taille d'equipe. Ce n'est **pas** un objectif en soi.
+:::warning Attention à la complexite prematuree
+Un système distribue est une solution à un problème de charge, de résilience ou de taille d'équipe. Ce n'est **pas** un objectif en soi.
 :::
 
 **Ne distribuez pas si :**
 
-- Votre charge est geree par un seul serveur
-- Vous avez une petite equipe (< 5 developpeurs)
-- Vos donnees tiennent en memoire d'une seule machine
-- Vous n'avez pas besoin de disponibilite 99.99%
+- Votre charge est gérée par un seul serveur
+- Vous avez une petite équipe (< 5 développeurs)
+- Vos donnees tiennent en mémoire d'une seule machine
+- Vous n'avez pas besoin de disponibilité 99.99%
 - Vous etes en phase de prototypage/MVP
 
 ```typescript
@@ -458,8 +458,8 @@ function shouldDistribute(context: {
 
 Avant de passer au lab, reflechissez a ces questions :
 
-1. Identifiez 3 systemes distribues que vous utilisez chaque jour
-2. Pour chacune des 8 fallacies, trouvez un incident reel (cherchez sur le web)
+1. Identifiez 3 systèmes distribues que vous utilisez chaque jour
+2. Pour chacune des 8 fallacies, trouvez un incident réel (cherchez sur le web)
 3. Votre application actuelle beneficierait-elle du scaling horizontal ? Pourquoi ?
 
 ---
@@ -474,6 +474,17 @@ Avant de passer au lab, reflechissez a ces questions :
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
-| [00 - Prerequis & Introduction](./00-prerequis-et-introduction.md) | [02 - Communication reseau fondamentale](./02-communication-reseau-fondamentale.md) |
+| [00 - Prérequis & Introduction](./00-prerequis-et-introduction.md) | [02 - Communication réseau fondamentale](./02-communication-reseau-fondamentale.md) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 01 pourquoi distribue](../screencasts/screencast-01-pourquoi-distribue.md)
+2. **Lab** : [lab-01-monolithe-vs-distribue](../labs/lab-01-monolithe-vs-distribue/README)
+3. **Visualisation** : [Network Partitions](../visualizations/network-partitions.html)
+4. **Quiz** : [quiz 01 pourquoi distribue](../quizzes/quiz-01-pourquoi-distribue.html)
+:::

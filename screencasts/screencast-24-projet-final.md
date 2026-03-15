@@ -4,21 +4,21 @@
 - **Duree estimee** : 20-25 min
 - **Module** : `modules/24-projet-final.md`
 - **Lab associe** : Lab 24
-- **Prerequis** : Screencast 23
+- **Prérequis** : Screencast 23
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/24-projet-final.md` ouvert
 - [ ] 4-5 terminaux disponibles (un par service)
 - [ ] Aucun processus sur les ports 3000-3006
-- [ ] Tous les modules precedents revises
+- [ ] Tous les modules précédents revises
 
 ## Script
 
 ### [00:00-02:30] Introduction — Assembler les pieces du puzzle
 
-> Bienvenue dans le dernier screencast de cette formation. Pendant 24 modules, on a explore les fondamentaux, la communication, la coherence, la resilience, et les algorithmes avances des systemes distribues. Maintenant, on va assembler tout ca dans un projet complet : un systeme de commandes e-commerce distribue.
+> Bienvenue dans le dernier screencast de cette formation. Pendant 24 modules, on a explore les fondamentaux, la communication, la coherence, la résilience, et les algorithmes avances des systèmes distribues. Maintenant, on va assembler tout ça dans un projet complet : un système de commandes e-commerce distribue.
 
 **Action** : Ouvrir le module 24 et afficher le diagramme d'architecture global.
 
@@ -50,13 +50,13 @@
             └───────────────┘
 ```
 
-> Six composants. L'API Gateway est le point d'entree. Le Order Service utilise le CQRS et l'event sourcing. L'Inventory Service utilise un PN-Counter CRDT pour le stock. Le User Service utilise un LWW-Register. L'Event Bus distribue les evenements. Le Saga Orchestrator coordonne le flux de commande. Et le Notification Service ecoute les evenements pour envoyer les emails.
+> Six composants. L'API Gateway est le point d'entree. Le Order Service utilise le CQRS et l'event sourcing. L'Inventory Service utilise un PN-Counter CRDT pour le stock. Le User Service utilise un LWW-Register. L'Event Bus distribue les événements. Le Saga Orchestrator coordonne le flux de commande. Et le Notification Service ecoute les événements pour envoyer les emails.
 
 ### [02:30-07:00] Architecture du Order Service (CQRS + Event Sourcing)
 
-> Le Order Service est le coeur du systeme. Il utilise CQRS pour separer lectures et ecritures, et l'event sourcing pour stocker l'historique complet.
+> Le Order Service est le coeur du système. Il utilise CQRS pour separer lectures et ecritures, et l'event sourcing pour stocker l'historique complet.
 
-**Action** : Montrer les composants cles du Order Service.
+**Action** : Montrer les composants clés du Order Service.
 
 ```typescript
 // --- Domain Events ---
@@ -144,11 +144,11 @@ class OrderProjection {
 }
 ```
 
-> Le write model (Event Store) et le read model (Projection) sont completement separes. On ecrit des evenements dans le store, et la projection les transforme en une vue optimisee pour les requetes.
+> Le write model (Event Store) et le read model (Projection) sont complètement separes. On écrit des événements dans le store, et la projection les transforme en une vue optimisee pour les requêtes.
 
 ### [07:00-11:00] Le Saga Orchestrator — Flux de commande complet
 
-> Le flux de commande traverse plusieurs services : creer la commande, reserver le stock, processer le paiement, et planifier l'expedition. Le saga orchestrator coordonne ces etapes avec des compensations en cas d'echec.
+> Le flux de commande traverse plusieurs services : créer la commande, reserver le stock, processer le paiement, et planifier l'expedition. Le saga orchestrator coordonne ces étapes avec des compensations en cas d'echec.
 
 **Action** : Montrer l'orchestrateur.
 
@@ -216,7 +216,7 @@ class OrderSagaOrchestrator {
 }
 ```
 
-**Action** : Configurer les etapes du saga.
+**Action** : Configurer les étapes du saga.
 
 ```typescript
 function buildOrderSaga(orchestrator: OrderSagaOrchestrator): void {
@@ -275,11 +275,11 @@ function buildOrderSaga(orchestrator: OrderSagaOrchestrator): void {
 }
 ```
 
-### [11:00-15:00] Integration test — Le flux complet
+### [11:00-15:00] Intégration test — Le flux complet
 
-> Testons le flux de bout en bout : de la requete client a la notification de livraison.
+> Testons le flux de bout en bout : de la requête client à la notification de livraison.
 
-**Action** : Executer le test d'integration.
+**Action** : Exécuter le test d'intégration.
 
 ```typescript
 async function integrationTest() {
@@ -360,7 +360,7 @@ await integrationTest();
 
 ### [15:00-19:00] Le flux complet — Order flow de bout en bout
 
-> Recapitulons le parcours complet d'une commande a travers notre systeme.
+> Recapitulons le parcours complet d'une commande a travers notre système.
 
 **Action** : Afficher le sequence diagram complet.
 
@@ -408,11 +408,11 @@ Module 18 : Correlation IDs + structured logging + RED metrics
 Module 23 : PN-Counter CRDT pour le stock
 ```
 
-### [19:00-22:00] Resilience et observabilite du systeme complet
+### [19:00-22:00] Résilience et observabilité du système complet
 
-> En production, notre systeme doit etre resilient et observable. Montrons les mecanismes en place.
+> En production, notre système doit etre resilient et observable. Montrons les mécanismes en place.
 
-**Action** : Illustrer la resilience.
+**Action** : Illustrer la résilience.
 
 ```typescript
 // Le systeme resiste aux pannes grace a :
@@ -448,7 +448,7 @@ for (const [tool, desc] of Object.entries(observabilityStack)) {
 
 ### [22:00-24:00] Conclusion du cours
 
-> Felicitations, vous avez termine cette formation sur les systemes distribues en TypeScript. En 25 modules, vous avez appris les fallacies du distribue, la communication synchrone et asynchrone, les patterns de coherence et replication, la resilience avec circuit breaker et rate limiting, l'observabilite, et les algorithmes avances comme Raft, les horloges logiques, le stream processing, et les CRDTs.
+> Felicitations, vous avez termine cette formation sur les systèmes distribues en TypeScript. En 25 modules, vous avez appris les fallacies du distribue, la communication synchrone et asynchrone, les patterns de coherence et replication, la résilience avec circuit breaker et rate limiting, l'observabilité, et les algorithmes avances comme Raft, les horloges logiques, le stream processing, et les CRDTs.
 
 **Action** : Afficher le parcours complet.
 
@@ -475,12 +475,12 @@ Phase 5 : Avance & Synthese ✅
 
 **Action** : Afficher les ressources pour aller plus loin.
 
-> Merci d'avoir suivi cette formation. Bonne continuation dans le monde des systemes distribues !
+> Merci d'avoir suivi cette formation. Bonne continuation dans le monde des systèmes distribues !
 
 ## Points d'attention pour l'enregistrement
 - Le diagramme d'architecture global doit etre affiche clairement et longuement
-- Le saga orchestrator est le coeur du projet — bien montrer les etapes et compensations
-- L'integration test est le moment de fierte — tout fonctionne ensemble
+- Le saga orchestrator est le coeur du projet — bien montrer les étapes et compensations
+- L'intégration test est le moment de fierte — tout fonctionne ensemble
 - Le sequence diagram du flux complet relie tout le cours — prendre le temps de le commenter
 - Le tableau des patterns utilises par module est un bon rappel pour les apprenants
 - Terminer sur une note positive et encourageante — c'est le dernier screencast

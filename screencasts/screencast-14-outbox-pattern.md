@@ -4,28 +4,28 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/14-outbox-pattern-reliable-messaging.md`
 - **Lab associe** : Lab 14
-- **Prerequis** : Screencast 13
+- **Prérequis** : Screencast 13
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `labs/lab-14-outbox-pattern/` pret
 - [ ] Aucun processus sur les ports 3000-3002
 - [ ] Schema du dual write problem pret a afficher
 
 ## Script
 
-### [00:00-02:00] Introduction — Le probleme du Dual Write
+### [00:00-02:00] Introduction — Le problème du Dual Write
 
-> Dans une architecture microservices, un service doit souvent faire deux choses en sequence : ecrire dans sa base de donnees, puis publier un evenement sur un broker comme Kafka ou RabbitMQ. Le probleme, c'est qu'il n'y a pas de transaction atomique entre ces deux systemes. Si le processus crashe entre les deux, on se retrouve dans un etat inconsistant.
+> Dans une architecture microservices, un service doit souvent faire deux choses en sequence : écrire dans sa base de donnees, puis publier un événement sur un broker comme Kafka ou RabbitMQ. Le problème, c'est qu'il n'y a pas de transaction atomique entre ces deux systèmes. Si le processus crashe entre les deux, on se retrouve dans un état inconsistant.
 
 **Action** : Ouvrir le module 14 et montrer le diagramme du dual write problem.
 
-> C'est le probleme du "dual write" : deux ecritures sur deux systemes differents sans garantie d'atomicite. Aucun try/catch ne resout ce probleme fondamental.
+> C'est le problème du "dual write" : deux ecritures sur deux systèmes différents sans garantie d'atomicite. Aucun try/catch ne resout ce problème fondamental.
 
 ### [02:00-05:00] Demontrer le dual write en code
 
-**Action** : Creer un fichier `dual-write-problem.ts` pour illustrer le probleme.
+**Action** : Créer un fichier `dual-write-problem.ts` pour illustrer le problème.
 
 ```typescript
 // Anti-pattern : dual write naif
@@ -79,11 +79,11 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-> Voyez : sur 10 tentatives, certaines commandes sont en base mais l'evenement est perdu. C'est exactement ce qui arrive en production avec des crashs, des timeouts reseau, ou des redemarrages de pods.
+> Voyez : sur 10 tentatives, certaines commandes sont en base mais l'événement est perdu. C'est exactement ce qui arrive en production avec des crashs, des timeouts réseau, ou des redemarrages de pods.
 
 ### [05:00-09:30] Implementer l'Outbox Pattern
 
-> La solution : l'outbox pattern. Au lieu d'ecrire dans la base ET dans le broker, on ecrit dans la base ET dans une table outbox — dans la meme transaction SQL. Un processus separe lit ensuite la table outbox et publie les messages.
+> La solution : l'outbox pattern. Au lieu d'écrire dans la base ET dans le broker, on écrit dans la base ET dans une table outbox — dans la même transaction SQL. Un processus separe lit ensuite la table outbox et publie les messages.
 
 **Action** : Montrer le schema de l'outbox pattern, puis implementer.
 
@@ -133,7 +133,7 @@ class OutboxStore {
 }
 ```
 
-> La cle : les deux ecritures (donnees + outbox) sont dans la meme transaction de base de donnees. Pas de dual write — un seul systeme transactionnel. Si la transaction echoue, rien n'est ecrit. Si elle reussit, le message est garanti dans la table outbox.
+> La clé : les deux ecritures (donnees + outbox) sont dans la même transaction de base de donnees. Pas de dual write — un seul système transactionnel. Si la transaction echoue, rien n'est écrit. Si elle reussit, le message est garanti dans la table outbox.
 
 ### [09:30-12:30] Polling Publisher
 
@@ -183,13 +183,13 @@ class PollingPublisher {
 }
 ```
 
-> Le polling publisher est simple mais a un trade-off : la latence depend de l'intervalle de polling. A 1 seconde de poll, le message peut attendre jusqu'a 1 seconde avant d'etre publie. Pour du temps reel, on utilise le CDC (Change Data Capture) avec Debezium, mais le polling est parfait pour commencer.
+> Le polling publisher est simple mais à un trade-off : la latence depend de l'intervalle de polling. A 1 seconde de poll, le message peut attendre jusqu'a 1 seconde avant d'etre publie. Pour du temps réel, on utilise le CDC (Change Data Capture) avec Debezium, mais le polling est parfait pour commencer.
 
 **Action** : Lancer le polling publisher et montrer les messages qui se publient automatiquement.
 
 ### [12:30-16:00] Inbox Pattern pour la deduplication
 
-> Le polling publisher peut publier le meme message deux fois — si le processus crashe apres la publication mais avant le `markPublished`. Le consommateur doit etre pret a gerer les doublons. C'est le role du pattern Inbox.
+> Le polling publisher peut publier le même message deux fois — si le processus crashe après la publication mais avant le `markPublished`. Le consommateur doit etre pret a gérer les doublons. C'est le role du pattern Inbox.
 
 **Action** : Implementer l'inbox pattern cote consommateur.
 
@@ -229,7 +229,7 @@ class IdempotentConsumer {
 }
 ```
 
-**Action** : Envoyer le meme message deux fois pour montrer la deduplication en action.
+**Action** : Envoyer le même message deux fois pour montrer la deduplication en action.
 
 ```typescript
 const consumer = new IdempotentConsumer(new InboxStore(), async (payload) => {
@@ -245,9 +245,9 @@ await consumer.consume(msg); // Ignore (doublon)
 
 > Outbox cote producteur + Inbox cote consommateur = messagerie fiable de bout en bout. C'est le duo indispensable pour toute architecture event-driven serieuse.
 
-### [16:00-17:30] Recapitulatif et lien avec le Lab 14
+### [16:00-17:30] Récapitulatif et lien avec le Lab 14
 
-> Recapitulons. Le dual write est un probleme fondamental quand on ecrit dans deux systemes differents. L'outbox pattern resout ce probleme en utilisant une seule transaction base de donnees. Le polling publisher lit la table outbox et publie les messages. Et l'inbox pattern cote consommateur garantit l'idempotence.
+> Recapitulons. Le dual write est un problème fondamental quand on écrit dans deux systèmes différents. L'outbox pattern resout ce problème en utilisant une seule transaction base de donnees. Le polling publisher lit la table outbox et publie les messages. Et l'inbox pattern cote consommateur garantit l'idempotence.
 
 **Action** : Montrer le schema complet outbox + inbox du module 14.
 
@@ -259,8 +259,8 @@ await consumer.consume(msg); // Ignore (doublon)
 
 ## Points d'attention pour l'enregistrement
 - Bien mettre en evidence le point de crash dans le dual write (pause dramatique)
-- Executer la simulation plusieurs fois pour montrer l'aleatoire des echecs
-- Insister sur le mot "transaction" quand on parle de l'outbox : c'est la cle
+- Exécuter la simulation plusieurs fois pour montrer l'aleatoire des echecs
+- Insister sur le mot "transaction" quand on parle de l'outbox : c'est la clé
 - Montrer visuellement la table outbox avec les champs published true/false
-- Pour l'inbox, envoyer le meme message 3 fois pour bien montrer la deduplication
+- Pour l'inbox, envoyer le même message 3 fois pour bien montrer la deduplication
 - Ne pas aller trop vite sur le polling publisher, c'est le lien entre outbox et broker

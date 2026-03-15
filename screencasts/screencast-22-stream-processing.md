@@ -4,11 +4,11 @@
 - **Duree estimee** : 15-18 min
 - **Module** : `modules/22-stream-processing-event-streaming.md`
 - **Lab associe** : Lab 22
-- **Prerequis** : Screencast 21
+- **Prérequis** : Screencast 21
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Fichier `modules/22-stream-processing-event-streaming.md` ouvert
 - [ ] Terminal supplementaire pour les demos
 - [ ] Fichier `labs/lab-22-stream-processing/` pret
@@ -17,7 +17,7 @@
 
 ### [00:00-02:00] Introduction — Du batch au stream
 
-> Jusqu'ici, on a traite les messages un par un. Le stream processing change de perspective : les donnees sont un flux continu et infini. Au lieu de traiter un batch de 10 000 enregistrements toutes les heures, on traite chaque evenement en temps reel a mesure qu'il arrive. Kafka, Pulsar, et Kinesis sont batis sur cette idee.
+> Jusqu'ici, on a traite les messages un par un. Le stream processing change de perspective : les donnees sont un flux continu et infini. Au lieu de traiter un batch de 10 000 enregistrements toutes les heures, on traite chaque événement en temps réel à mesure qu'il arrive. Kafka, Pulsar, et Kinesis sont batis sur cette idee.
 
 **Action** : Ouvrir le module 22 et afficher le diagramme.
 
@@ -43,7 +43,7 @@ Latence : ~1h30                    Latence : ~100ms
 
 > Le partitioned log est la structure de donnees au coeur de Kafka. C'est un journal append-only divise en partitions, chacune avec son propre offset.
 
-**Action** : Creer un fichier `stream-processing.ts`.
+**Action** : Créer un fichier `stream-processing.ts`.
 
 ```typescript
 interface StreamRecord {
@@ -120,11 +120,11 @@ for (const r of records) {
 }
 ```
 
-> Le partitioned log a deux proprietes cle : l'ordre est garanti au sein d'une partition (pas entre partitions), et les consommateurs controlent leur propre offset. Si un consommateur crashe, il reprend la ou il s'etait arrete. Pas de perte de message, pas de doublon (si idempotent).
+> Le partitioned log a deux propriétés clé : l'ordre est garanti au sein d'une partition (pas entre partitions), et les consommateurs controlent leur propre offset. Si un consommateur crashe, il reprend la ou il s'etait arrete. Pas de perte de message, pas de doublon (si idempotent).
 
 ### [06:00-10:00] Windowing — Agrreger dans le temps
 
-> Le stream processing travaille avec des fenetres temporelles : agrreger les evenements des 5 dernieres minutes, compter les clics par seconde, calculer la moyenne mobile.
+> Le stream processing travaille avec des fenetres temporelles : agrreger les événements des 5 dernières minutes, compter les clics par seconde, calculer la moyenne mobile.
 
 **Action** : Implementer trois types de fenetres.
 
@@ -204,11 +204,11 @@ for (const r of results) {
 }
 ```
 
-> Trois types de fenetres. Tumbling : fenetres fixes qui ne se chevauchent pas (0-5s, 5-10s, 10-15s). Sliding : fenetres qui se chevauchent (0-5s, 1-6s, 2-7s). Session : fenetres basees sur l'activite de l'utilisateur (se ferment apres un gap d'inactivite).
+> Trois types de fenetres. Tumbling : fenetres fixes qui ne se chevauchent pas (0-5s, 5-10s, 10-15s). Sliding : fenetres qui se chevauchent (0-5s, 1-6s, 2-7s). Session : fenetres basees sur l'activite de l'utilisateur (se ferment après un gap d'inactivite).
 
 ### [10:00-13:00] Stream-table duality
 
-> Un stream et une table sont les deux faces d'une meme piece. Un stream est un journal de changements. Une table est l'etat actuel. On peut construire une table a partir d'un stream (materialiser), et un stream a partir d'une table (changelog).
+> Un stream et une table sont les deux faces d'une même piece. Un stream est un journal de changements. Une table est l'état actuel. On peut construire une table à partir d'un stream (materialiser), et un stream à partir d'une table (changelog).
 
 **Action** : Implementer la dualite.
 
@@ -264,13 +264,13 @@ for (const [key, value] of table) {
 // user-2: {name: "Bob"}
 ```
 
-> C'est le principe de Kafka Streams et ksqlDB : chaque table est une vue materialisee d'un stream. Si le stream est `order.events`, la table materialisee contient l'etat actuel de chaque commande. L'avantage : on peut reconstruire la table en rejouant le stream depuis le debut.
+> C'est le principe de Kafka Streams et ksqlDB : chaque table est une vue materialisee d'un stream. Si le stream est `order.events`, la table materialisee contient l'état actuel de chaque commande. L'avantage : on peut reconstruire la table en rejouant le stream depuis le debut.
 
 ### [13:00-16:00] Exactly-once semantics
 
-> Le saint graal du stream processing : traiter chaque evenement exactement une fois. En pratique, c'est tres difficile. Kafka propose une semantique "exactly-once" via les transactions producer-consumer.
+> Le saint graal du stream processing : traiter chaque événement exactement une fois. En pratique, c'est très difficile. Kafka propose une semantique "exactly-once" via les transactions producer-consumer.
 
-**Action** : Montrer le probleme et la solution.
+**Action** : Montrer le problème et la solution.
 
 ```typescript
 class ExactlyOnceProcessor {
@@ -343,13 +343,13 @@ for (const record of records) {
 console.log('\nFinal state:', Object.fromEntries(processor.getState()));
 ```
 
-> La cle : l'update de l'etat, la production du message de sortie, et le commit de l'offset sont dans une seule transaction atomique. Si le processus crashe avant le commit, tout est annule et le record est re-traite. Si le commit reussit, le record ne sera jamais re-traite.
+> La clé : l'update de l'état, la production du message de sortie, et le commit de l'offset sont dans une seule transaction atomique. Si le processus crashe avant le commit, tout est annule et le record est re-traite. Si le commit reussit, le record ne sera jamais re-traite.
 
-### [16:00-17:30] Recapitulatif
+### [16:00-17:30] Récapitulatif
 
-> Recapitulons. Le partitioned log est la fondation du streaming : append-only, ordonne par partition, offset controle par le consommateur. Le windowing agrege les evenements dans le temps. La stream-table duality permet de passer d'un flux a un etat et inversement. Et l'exactly-once semantics garantit un traitement correct meme en cas de crash.
+> Recapitulons. Le partitioned log est la fondation du streaming : append-only, ordonne par partition, offset controle par le consommateur. Le windowing agrege les événements dans le temps. La stream-table duality permet de passer d'un flux à un état et inversement. Et l'exactly-once semantics garantit un traitement correct même en cas de crash.
 
-**Action** : Afficher le recapitulatif.
+**Action** : Afficher le récapitulatif.
 
 ```
 CE QU'IL FAUT RETENIR :
@@ -363,12 +363,12 @@ PROCHAINE ETAPE :
 → Screencast 23 : CRDTs — Resolution de conflits sans coordination
 ```
 
-> Au prochain screencast, on va decouvrir les CRDTs — des structures de donnees qui convergent automatiquement sans coordination entre les noeuds. C'est la solution elegante aux conflits en eventual consistency. A bientot !
+> Au prochain screencast, on va découvrir les CRDTs — des structures de donnees qui convergent automatiquement sans coordination entre les noeuds. C'est la solution elegante aux conflits en eventual consistency. A bientot !
 
 ## Points d'attention pour l'enregistrement
-- Le diagramme batch vs stream doit etre tres clair en introduction
+- Le diagramme batch vs stream doit etre très clair en introduction
 - Le partitioned log est le concept fondamental — bien expliquer l'offset et la partition key
 - Les trois types de fenetres doivent etre illustres avec des exemples concrets
 - La stream-table duality est un "aha moment" — prendre le temps
 - L'exactly-once est subtil — bien insister sur la transaction atomique (state + output + offset)
-- Mentionner Kafka, Pulsar, Kinesis comme systemes reels qui implementent ces concepts
+- Mentionner Kafka, Pulsar, Kinesis comme systèmes réels qui implementent ces concepts

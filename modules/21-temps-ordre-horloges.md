@@ -8,19 +8,19 @@
 
 A la fin de ce module, vous serez capable de :
 
-- Expliquer pourquoi les horloges physiques ne peuvent pas etre utilisees pour ordonner les evenements dans un systeme distribue
-- Definir la relation "happened-before" de Lamport et l'appliquer a des scenarios concrets
+- Expliquer pourquoi les horloges physiques ne peuvent pas etre utilisees pour ordonner les événements dans un système distribue
+- Définir la relation "happened-before" de Lamport et l'appliquer a des scenarios concrets
 - Implementer des horloges de Lamport en TypeScript
-- Implementer des horloges vectorielles en TypeScript et detecter la concurrence
+- Implementer des horloges vectorielles en TypeScript et détecter la concurrence
 - Implementer des Hybrid Logical Clocks (HLC) en TypeScript
-- Distinguer l'ordre total de l'ordre partiel et savoir quand chacun est necessaire
-- Appliquer l'ordonnancement causal a des cas pratiques (CRDTs, resolution de conflits)
+- Distinguer l'ordre total de l'ordre partiel et savoir quand chacun est nécessaire
+- Appliquer l'ordonnancement causal a des cas pratiques (CRDTs, résolution de conflits)
 
 ---
 
-## Le probleme des horloges physiques
+## Le problème des horloges physiques
 
-Dans un systeme distribue, chaque noeud possede sa propre horloge materielle. Ces horloges ne sont **jamais parfaitement synchronisees**.
+Dans un système distribue, chaque noeud possede sa propre horloge materielle. Ces horloges ne sont **jamais parfaitement synchronisees**.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -46,7 +46,7 @@ Dans un systeme distribue, chaque noeud possede sa propre horloge materielle. Ce
 └───────────────────────────────────────────────────────────┘
 ```
 
-### Sources de problemes
+### Sources de problèmes
 
 | Source | Impact | Frequence |
 |--------|--------|-----------|
@@ -57,16 +57,16 @@ Dans un systeme distribue, chaque noeud possede sa propre horloge materielle. Ce
 | **VM live migration** | Pause de l'horloge | Rare mais devastateur |
 
 :::warning Ne jamais utiliser l'horloge murale pour l'ordre
-`Date.now()` ou `System.currentTimeMillis()` ne doivent **jamais** servir a determiner l'ordre causal des evenements entre machines differentes. Un evenement "plus tard" peut avoir un timestamp plus ancien a cause du clock skew.
+`Date.now()` ou `System.currentTimeMillis()` ne doivent **jamais** servir a déterminer l'ordre causal des événements entre machines différentes. Un événement "plus tard" peut avoir un timestamp plus ancien a cause du clock skew.
 :::
 
 ---
 
 ## La relation Happened-Before (Leslie Lamport, 1978)
 
-Lamport a defini une relation d'ordre partiel entre evenements, notee `→` (happened-before) :
+Lamport a défini une relation d'ordre partiel entre événements, notee `→` (happened-before) :
 
-1. **Meme processus** : si `a` se produit avant `b` sur le meme noeud, alors `a → b`
+1. **Même processus** : si `a` se produit avant `b` sur le même noeud, alors `a → b`
 2. **Envoi/Reception** : si `a` est l'envoi d'un message et `b` sa reception, alors `a → b`
 3. **Transitivite** : si `a → b` et `b → c`, alors `a → c`
 
@@ -102,7 +102,7 @@ L'horloge de Lamport est un compteur entier qui respecte la relation happened-be
 
 ### Algorithme
 
-1. Avant chaque evenement local : `clock = clock + 1`
+1. Avant chaque événement local : `clock = clock + 1`
 2. Avant d'envoyer un message : incrementer, attacher le clock au message
 3. A la reception d'un message avec timestamp `t` : `clock = max(clock, t) + 1`
 
@@ -207,18 +207,18 @@ simulateLamportClocks();
 ```
 
 :::tip Limitation des horloges de Lamport
-Si `L(a) < L(b)`, cela ne signifie **pas** que `a → b`. On sait seulement que si `a → b` alors `L(a) < L(b)`. Les horloges de Lamport ne permettent pas de detecter la **concurrence** : deux evenements avec des timestamps differents peuvent etre concurrents.
+Si `L(a) < L(b)`, cela ne signifie **pas** que `a → b`. On sait seulement que si `a → b` alors `L(a) < L(b)`. Les horloges de Lamport ne permettent pas de détecter la **concurrence** : deux événements avec des timestamps différents peuvent etre concurrents.
 :::
 
 ---
 
 ## Horloges vectorielles
 
-Les horloges vectorielles resolvent la limitation des horloges de Lamport en permettant de detecter la concurrence.
+Les horloges vectorielles resolvent la limitation des horloges de Lamport en permettant de détecter la concurrence.
 
 ### Principe
 
-Chaque noeud maintient un **vecteur** de compteurs, un par noeud du systeme. Le vecteur capture l'ensemble de la connaissance causale du noeud.
+Chaque noeud maintient un **vecteur** de compteurs, un par noeud du système. Le vecteur capture l'ensemble de la connaissance causale du noeud.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -559,7 +559,7 @@ simulateHLC();
 ```
 
 :::tip Avantage des HLC
-Les HLC sont utilises en production par CockroachDB, MongoDB et d'autres bases distribuees. Ils fournissent un ordre total compatible avec la causalite, tout en restant proches du temps reel (ce qui simplifie le debugging et les requetes temporelles).
+Les HLC sont utilises en production par CockroachDB, MongoDB et d'autres bases distribuees. Ils fournissent un ordre total compatible avec la causalite, tout en restant proches du temps réel (ce qui simplifie le debugging et les requêtes temporelles).
 :::
 
 ---
@@ -587,19 +587,19 @@ Les HLC sont utilises en production par CockroachDB, MongoDB et d'autres bases d
 └───────────────────────────────────────────────────────────┘
 ```
 
-| Propriete | Ordre Partiel | Ordre Total |
+| Propriété | Ordre Partiel | Ordre Total |
 |-----------|:-------------:|:-----------:|
 | Detecte la concurrence | Oui (vector clocks) | Non |
-| Tous les evenements comparables | Non | Oui |
+| Tous les événements comparables | Non | Oui |
 | Compatible avec la causalite | Oui | Oui |
-| Overhead memoire | O(N) par vecteur | O(1) |
-| Cas d'usage | CRDTs, resolution de conflits | Replication de log, transactions |
+| Overhead mémoire | O(N) par vecteur | O(1) |
+| Cas d'usage | CRDTs, résolution de conflits | Replication de log, transactions |
 
 ---
 
 ## Ordonnancement causal
 
-L'ordonnancement causal garantit que si un evenement `a` a cause un evenement `b`, alors tout observateur voit `a` avant `b`.
+L'ordonnancement causal garantit que si un événement `a` a cause un événement `b`, alors tout observateur voit `a` avant `b`.
 
 ```typescript
 // causal-ordering.ts — File d'attente avec ordonnancement causal
@@ -734,7 +734,7 @@ simulateCausalOrdering();
 
 ---
 
-## Resume
+## Résumé
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -768,10 +768,20 @@ simulateCausalOrdering();
 
 ## Navigation
 
-| Precedent | Suivant |
+| Précédent | Suivant |
 |:---------:|:-------:|
 | [20 - Consensus & Coordination](./20-consensus-coordination-distribuee.md) | [22 - Stream Processing](./22-stream-processing-event-streaming.md) |
 
 | Lab | Quiz |
 |:---:|:----:|
 | [Lab 21](../labs/lab-21-horloges-logiques/) | [Quiz 21](../quizzes/quiz-21-horloges.html) |
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 21 horloges](../screencasts/screencast-21-horloges.md)
+2. **Lab** : [lab-21-horloges-logiques](../labs/lab-21-horloges-logiques/README)
+3. **Quiz** : [quiz 21 horloges](../quizzes/quiz-21-horloges.html)
+:::

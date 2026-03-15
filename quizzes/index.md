@@ -1,12 +1,12 @@
 # Quizzes
 
-Testez vos connaissances apres chaque module avec ces quizzes interactifs.
+Testez vos connaissances après chaque module avec ces quizzes interactifs.
 
 | Quiz | Module | Difficulte |
 |------|--------|------------|
-| [Quiz 00 — Prerequis](/quizzes/quiz-00-prerequis.html) | Module 00 | ⭐ |
+| [Quiz 00 — Prérequis](/quizzes/quiz-00-prerequis.html) | Module 00 | ⭐ |
 | [Quiz 01 — Pourquoi le distribue](/quizzes/quiz-01-pourquoi-distribue.html) | Module 01 | ⭐ |
-| [Quiz 02 — Communication reseau](/quizzes/quiz-02-communication-reseau.html) | Module 02 | ⭐⭐ |
+| [Quiz 02 — Communication réseau](/quizzes/quiz-02-communication-reseau.html) | Module 02 | ⭐⭐ |
 | [Quiz 03 — Microservices](/quizzes/quiz-03-microservices.html) | Module 03 | ⭐⭐ |
 | [Quiz 04 — Serialisation](/quizzes/quiz-04-serialisation.html) | Module 04 | ⭐⭐ |
 | [Quiz 05 — Communication synchrone](/quizzes/quiz-05-communication-synchrone.html) | Module 05 | ⭐⭐ |
@@ -22,7 +22,7 @@ Testez vos connaissances apres chaque module avec ces quizzes interactifs.
 | [Quiz 15 — Failure Modes](/quizzes/quiz-15-failure-modes.html) | Module 15 | ⭐⭐⭐ |
 | [Quiz 16 — Circuit Breaker](/quizzes/quiz-16-circuit-breaker.html) | Module 16 | ⭐⭐⭐ |
 | [Quiz 17 — Rate Limiting](/quizzes/quiz-17-rate-limiting.html) | Module 17 | ⭐⭐⭐ |
-| [Quiz 18 — Observabilite](/quizzes/quiz-18-observabilite.html) | Module 18 | ⭐⭐⭐ |
+| [Quiz 18 — Observabilité](/quizzes/quiz-18-observabilite.html) | Module 18 | ⭐⭐⭐ |
 | [Quiz 19 — Testing](/quizzes/quiz-19-testing.html) | Module 19 | ⭐⭐⭐ |
 | [Quiz 20 — Consensus](/quizzes/quiz-20-consensus.html) | Module 20 | ⭐⭐⭐⭐ |
 | [Quiz 21 — Horloges](/quizzes/quiz-21-horloges.html) | Module 21 | ⭐⭐⭐⭐ |

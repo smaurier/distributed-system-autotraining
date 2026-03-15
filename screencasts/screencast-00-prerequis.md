@@ -1,14 +1,14 @@
-# Screencast 00 — Prerequis & Setup de l'environnement
+# Screencast 00 — Prérequis & Setup de l'environnement
 
 ## Informations
 - **Duree estimee** : 10-12 min
 - **Module** : `modules/00-prerequis-et-introduction.md`
 - **Lab associe** : --
-- **Prerequis** : Aucun
+- **Prérequis** : Aucun
 
 ## Setup
 - [ ] VS Code ouvert dans `distributed-systems-course/`
-- [ ] Terminal integre ouvert
+- [ ] Terminal intégré ouvert
 - [ ] Node.js 20+ installe
 - [ ] Docker Desktop installe et lance
 - [ ] Navigateur ouvert a cote
@@ -17,7 +17,7 @@
 
 ### [00:00-01:30] Introduction et objectifs du cours
 
-> Bienvenue dans cette formation sur les systemes distribues en TypeScript. Ce cours vous emmene des fondamentaux jusqu'aux patterns avances : microservices, communication asynchrone, saga pattern, replication, et bien plus encore. Avant de plonger dans le vif du sujet, assurons-nous que votre environnement de developpement est pret.
+> Bienvenue dans cette formation sur les systèmes distribues en TypeScript. Ce cours vous emmene des fondamentaux jusqu'aux patterns avances : microservices, communication asynchrone, saga pattern, replication, et bien plus encore. Avant de plonger dans le vif du sujet, assurons-nous que votre environnement de développement est pret.
 
 **Action** : Afficher le slide d'introduction avec le plan du cours (5 phases, 25 modules)
 
@@ -38,11 +38,11 @@ Phase 5 : Avance & Synthese (Modules 20-24)
   → Consensus, horloges, stream processing, CRDTs, projet final
 ```
 
-### [01:30-03:00] Verifier Node.js et les prerequis
+### [01:30-03:00] Vérifier Node.js et les prérequis
 
-> Commencons par verifier que Node.js est bien installe. Ce cours necessite la version 20 ou superieure, car nous utilisons les APIs modernes comme fetch natif, AbortController, et les modules ES.
+> Commencons par vérifier que Node.js est bien installe. Ce cours nécessité la version 20 ou superieure, car nous utilisons les APIs modernes comme fetch natif, AbortController, et les modules ES.
 
-**Action** : Ouvrir le terminal et verifier les versions
+**Action** : Ouvrir le terminal et vérifier les versions
 
 ```bash
 # Verifier la version de Node.js
@@ -60,11 +60,11 @@ docker compose version
 
 > Si vous n'avez pas encore Node.js 20, je vous recommande d'utiliser nvm — Node Version Manager — qui permet d'installer et de basculer entre plusieurs versions facilement. Docker sera utilise plus tard dans le cours pour certains labs, mais pas immediatement.
 
-### [03:00-05:00] Cloner le depot et installer les dependances
+### [03:00-05:00] Cloner le depot et installer les dépendances
 
-> Maintenant, clonons le depot du cours et installons les dependances npm.
+> Maintenant, clonons le depot du cours et installons les dépendances npm.
 
-**Action** : Cloner le repo et executer npm install
+**Action** : Cloner le repo et exécuter npm install
 
 ```bash
 # Cloner le depot
@@ -75,13 +75,13 @@ cd distributed-systems-course
 npm install
 ```
 
-**Action** : Montrer le terminal pendant l'installation, commenter les dependances
+**Action** : Montrer le terminal pendant l'installation, commenter les dépendances
 
-> L'installation est rapide. Nos dependances principales sont TypeScript, tsx pour executer du TypeScript directement, et VitePress pour la documentation interactive. Pas de framework lourd — on reste simple et focus sur les concepts.
+> L'installation est rapide. Nos dépendances principales sont TypeScript, tsx pour exécuter du TypeScript directement, et VitePress pour la documentation interactive. Pas de framework lourd — on reste simple et focus sur les concepts.
 
 ### [05:00-07:00] Explorer la structure du projet
 
-> Regardons la structure du projet. Elle est concue pour que vous retrouviez facilement chaque element du cours.
+> Regardons la structure du projet. Elle est concue pour que vous retrouviez facilement chaque élément du cours.
 
 **Action** : Ouvrir l'explorateur de fichiers VS Code et parcourir les dossiers
 
@@ -98,15 +98,15 @@ distributed-systems-course/
 └── public/           # Assets statiques
 ```
 
-> Chaque module suit le meme schema : un fichier de cours en Markdown dans `modules/`, un lab pratique dans `labs/`, un quiz dans `quizzes/`, et parfois une visualisation interactive. Les labs sont le coeur de cette formation — c'est en codant que vous apprendrez le mieux.
+> Chaque module suit le même schema : un fichier de cours en Markdown dans `modules/`, un lab pratique dans `labs/`, un quiz dans `quizzes/`, et parfois une visualisation interactive. Les labs sont le coeur de cette formation — c'est en codant que vous apprendrez le mieux.
 
 **Action** : Ouvrir `modules/00-prerequis-et-introduction.md` et faire defiler pour montrer le contenu
 
-### [07:00-09:00] Lancer le premier lab et verifier l'installation
+### [07:00-09:00] Lancer le premier lab et vérifier l'installation
 
-> Verifions que tout fonctionne en executant le script de test et en lancant un lab.
+> Verifions que tout fonctionne en exécutant le script de test et en lancant un lab.
 
-**Action** : Executer les commandes de verification dans le terminal
+**Action** : Exécuter les commandes de vérification dans le terminal
 
 ```bash
 # Executer le script de verification
@@ -116,9 +116,9 @@ npx tsx labs/test-utils.ts
 npx tsx labs/lab-01-monolithe-vs-distribue/exercise.ts
 ```
 
-> Les labs utilisent `npx tsx` qui compile et execute le TypeScript a la volee. Pas besoin d'etape de build. Si vous voyez la sortie s'afficher sans erreur, votre environnement est pret.
+> Les labs utilisent `npx tsx` qui compile et exécuté le TypeScript à la volee. Pas besoin d'étape de build. Si vous voyez la sortie s'afficher sans erreur, votre environnement est pret.
 
-**Action** : Montrer la sortie dans le terminal, pointer les resultats
+**Action** : Montrer la sortie dans le terminal, pointer les résultats
 
 ```typescript
 // Exemple de ce que vous verrez dans les labs
@@ -140,7 +140,7 @@ checkEnvironment();
 
 ### [09:00-10:30] Lancer le site VitePress
 
-> Le cours est aussi disponible sous forme de site web interactif grace a VitePress. Lancons-le.
+> Le cours est aussi disponible sous forme de site web interactif grâce à VitePress. Lancons-le.
 
 **Action** : Lancer VitePress et ouvrir le navigateur
 
@@ -149,11 +149,11 @@ checkEnvironment();
 npm run docs:dev
 ```
 
-> Ouvrez votre navigateur sur localhost:5173. Vous retrouvez tous les modules, les labs, et les visualisations dans une interface agreable. Vous pouvez naviguer entre les chapitres, chercher un concept, et meme voir le code avec coloration syntaxique.
+> Ouvrez votre navigateur sur localhost:5173. Vous retrouvez tous les modules, les labs, et les visualisations dans une interface agreable. Vous pouvez naviguer entre les chapitres, chercher un concept, et même voir le code avec coloration syntaxique.
 
 **Action** : Naviguer dans le site VitePress, montrer la barre laterale, ouvrir un module, montrer la recherche
 
-### [10:30-11:30] Concepts cles et terminologie
+### [10:30-11:30] Concepts clés et terminologie
 
 > Avant de terminer, fixons quelques termes que nous utiliserons tout au long du cours.
 
@@ -175,13 +175,13 @@ Idempotence       | Operation qui produit le meme resultat si executee plusieurs
 
 ### [11:30-12:00] Conclusion
 
-> Votre environnement est pret. Dans le prochain screencast, nous plongerons dans les 8 fallacies des systemes distribues — les erreurs que tout developpeur fait quand il decouvre le distribue. A tout de suite !
+> Votre environnement est pret. Dans le prochain screencast, nous plongerons dans les 8 fallacies des systèmes distribues — les erreurs que tout développeur fait quand il découvre le distribue. A tout de suite !
 
 **Action** : Afficher le lien vers le screencast suivant
 
 ## Points d'attention pour l'enregistrement
-- Verifier que Node.js 20+ est bien installe avant de demarrer
-- Avoir le repo deja clone en backup au cas ou le clone echoue en live
+- Vérifier que Node.js 20+ est bien installe avant de démarrer
+- Avoir le repo déjà clone en backup au cas où le clone echoue en live
 - Garder le terminal visible en permanence pendant les commandes
 - Montrer clairement la structure de fichiers dans l'explorateur VS Code
 - Ne pas aller trop vite sur l'installation — c'est le premier contact de l'apprenant avec le cours

@@ -1,6 +1,6 @@
 # Module 13 : CQRS & Event Sourcing
 
-> **Difficulty** : 4/5 | **Duration estimee** : 4h | **Prerequis** : Modules 1-12
+> **Difficulty** : 4/5 | **Duration estimee** : 4h | **Prérequis** : Modules 1-12
 
 ---
 
@@ -10,20 +10,20 @@ A la fin de ce module, vous serez capable de :
 
 1. Expliquer le principe de CQRS et pourquoi separer lectures et ecritures
 2. Implementer des Command Handlers et Query Handlers en TypeScript
-3. Comprendre l'Event Sourcing et ses differences avec le stockage classique (CRUD)
-4. Implementer un Event Store avec des evenements types
-5. Construire des projections (read models) a partir d'evenements
-6. Optimiser la reconstruction d'etat avec des snapshots
-7. Effectuer des requetes temporelles (etat a un instant T)
+3. Comprendre l'Event Sourcing et ses différences avec le stockage classique (CRUD)
+4. Implementer un Event Store avec des événements types
+5. Construire des projections (read models) à partir d'événements
+6. Optimiser la reconstruction d'état avec des snapshots
+7. Effectuer des requêtes temporelles (état à un instant T)
 8. Combiner CQRS et Event Sourcing dans une architecture complete
 
 ---
 
 ## 1. CQRS : Command Query Responsibility Segregation
 
-CQRS est un pattern qui **separe** le modele d'ecriture (commandes) du modele de lecture (requetes). Chaque cote peut etre optimise independamment.
+CQRS est un pattern qui **separe** le modèle d'écriture (commandes) du modèle de lecture (requêtes). Chaque cote peut etre optimise independamment.
 
-### 1.1 Le probleme du modele unique
+### 1.1 Le problème du modèle unique
 
 ```
   Architecture classique (CRUD) :
@@ -76,7 +76,7 @@ CQRS est un pattern qui **separe** le modele d'ecriture (commandes) du modele de
 ```
 
 :::tip
-CQRS ne necessite pas obligatoirement deux bases de donnees differentes. On peut commencer avec une seule base et des modeles/tables differents pour les lectures et les ecritures. La separation physique vient ensuite si necessaire.
+CQRS ne nécessité pas obligatoirement deux bases de donnees différentes. On peut commencer avec une seule base et des modèles/tables différents pour les lectures et les ecritures. La separation physique vient ensuite si nécessaire.
 :::
 
 ---
@@ -208,7 +208,7 @@ class QueryBus {
 
 ---
 
-## 3. Event Sourcing : stocker les evenements, pas l'etat
+## 3. Event Sourcing : stocker les événements, pas l'état
 
 ### 3.1 CRUD vs Event Sourcing
 
@@ -238,10 +238,10 @@ class QueryBus {
 ```
 
 :::warning
-L'Event Sourcing change fondamentalement la facon dont on pense au stockage. Les evenements sont **immutables** : on ne modifie jamais, on ne supprime jamais un evenement. Pour "corriger" une erreur, on ajoute un evenement correctif.
+L'Event Sourcing change fondamentalement la façon dont on pense au stockage. Les événements sont **immutables** : on ne modifie jamais, on ne supprime jamais un événement. Pour "corriger" une erreur, on ajoute un événement correctif.
 :::
 
-### 3.2 Les types d'evenements
+### 3.2 Les types d'événements
 
 ```typescript
 // --- Domain Events ---
@@ -390,7 +390,7 @@ class EventStore {
 
 ---
 
-## 5. Aggregate : reconstruction de l'etat depuis les evenements
+## 5. Aggregate : reconstruction de l'état depuis les événements
 
 ```typescript
 interface AccountState {
@@ -525,9 +525,9 @@ class AccountAggregate {
 
 ---
 
-## 6. Projections : materialiser des modeles de lecture
+## 6. Projections : materialiser des modèles de lecture
 
-Les projections transforment le flux d'evenements en **read models** optimises pour des requetes specifiques.
+Les projections transforment le flux d'événements en **read models** optimises pour des requêtes spécifiques.
 
 ```
   Event Store                    Projections (Read Models)
@@ -710,7 +710,7 @@ class TransactionHistoryProjection {
 
 ## 7. Snapshots : optimiser la reconstruction
 
-Quand un aggregate a des milliers d'evenements, reconstruire l'etat en rejouant tous les evenements est couteux. Les **snapshots** sauvegardent periodiquement l'etat pour accelerer la reconstruction.
+Quand un aggregate a des milliers d'événements, reconstruire l'état en rejouant tous les événements est couteux. Les **snapshots** sauvegardent periodiquement l'état pour accelerer la reconstruction.
 
 ```
   Sans snapshot : replay 10 000 evenements
@@ -836,7 +836,7 @@ class AccountRepository {
 
 ## 8. Temporal Queries : voyager dans le temps
 
-Un avantage majeur de l'Event Sourcing : on peut reconstruire l'etat a **n'importe quel moment** dans le passe.
+Un avantage majeur de l'Event Sourcing : on peut reconstruire l'état a **n'importe quel moment** dans le passe.
 
 ```typescript
 class TemporalQueryService {
@@ -909,7 +909,7 @@ class TemporalQueryService {
 
 ## 9. CQRS + Event Sourcing ensemble
 
-La combinaison naturelle : les **commandes** produisent des **evenements** stockes dans l'Event Store. Les **projections** consomment ces evenements pour construire des **read models** optimises pour les **requetes**.
+La combinaison naturelle : les **commandes** produisent des **événements** stockes dans l'Event Store. Les **projections** consomment ces événements pour construire des **read models** optimises pour les **requêtes**.
 
 ```
   +----------+    +----------+    +----------+    +-----------+
@@ -1038,25 +1038,25 @@ class BankingApplication {
 ```
 
 :::warning
-CQRS et Event Sourcing ajoutent de la **complexite significative**. Ne les utilisez pas "par defaut". Commencez simple (CRUD) et migrez vers CQRS/ES seulement quand les benefices justifient le cout. La complexite de gestion des projections, de la coherence eventuelle entre read et write models, et du schema evolution des evenements est reelle.
+CQRS et Event Sourcing ajoutent de la **complexite significative**. Ne les utilisez pas "par defaut". Commencez simple (CRUD) et migrez vers CQRS/ES seulement quand les benefices justifient le cout. La complexite de gestion des projections, de la coherence eventuelle entre read et write models, et du schema evolution des événements est réelle.
 :::
 
 :::tip
-Vous pouvez adopter CQRS **sans** Event Sourcing (juste separer les modeles de lecture et d'ecriture). C'est souvent un bon premier pas avant d'introduire l'Event Sourcing si necessaire.
+Vous pouvez adopter CQRS **sans** Event Sourcing (juste separer les modèles de lecture et d'écriture). C'est souvent un bon premier pas avant d'introduire l'Event Sourcing si nécessaire.
 :::
 
 ---
 
-## Recapitulatif
+## Récapitulatif
 
-| Concept | Cle a retenir |
+| Concept | Cle à retenir |
 |---------|---------------|
 | CQRS | Separer lectures et ecritures pour optimiser chaque cote |
-| Event Sourcing | Stocker les evenements, pas l'etat — l'etat est derive |
+| Event Sourcing | Stocker les événements, pas l'état — l'état est dérivé |
 | Event Store | Log append-only avec controle de concurrence optimiste |
-| Projection | Read model materialise a partir du flux d'evenements |
+| Projection | Read model materialise à partir du flux d'événements |
 | Snapshot | Sauvegarde periodique pour accelerer la reconstruction |
-| Temporal Query | Reconstruire l'etat a n'importe quel instant dans le passe |
+| Temporal Query | Reconstruire l'état a n'importe quel instant dans le passe |
 | CQRS + ES | Combinaison naturelle : commandes -> events -> projections |
 
 ---
@@ -1066,4 +1066,14 @@ Vous pouvez adopter CQRS **sans** Event Sourcing (juste separer les modeles de l
 - [Lab 13 : Implementer un Event Store et des projections](../labs/lab-13-cqrs-event-sourcing/)
 - [Quiz 13 : Testez vos connaissances](../quizzes/quiz-13-cqrs-event-sourcing.html)
 - [Module suivant : Outbox Pattern](./14-outbox-pattern-reliable-messaging.md)
-- [Module precedent : Saga Pattern](./12-transactions-distribuees-saga.md)
+- [Module précédent : Saga Pattern](./12-transactions-distribuees-saga.md)
+
+---
+
+<!-- parcours-recommande -->
+
+::: tip Parcours recommandé
+1. **Screencast** : [screencast 13 cqrs event sourcing](../screencasts/screencast-13-cqrs-event-sourcing.md)
+2. **Lab** : [lab-13-cqrs-event-sourcing](../labs/lab-13-cqrs-event-sourcing/README)
+3. **Quiz** : [quiz 13 cqrs event sourcing](../quizzes/quiz-13-cqrs-event-sourcing.html)
+:::
