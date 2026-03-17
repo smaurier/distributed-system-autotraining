@@ -17,6 +17,8 @@ A la fin de ce module, vous serez capable de :
 7. Effectuer des requêtes temporelles (état à un instant T)
 8. Combiner CQRS et Event Sourcing dans une architecture complete
 
+> **Analogie** : CQRS, c'est séparer le guichet des dépôts et le guichet des retraits à la banque. Les opérations d'écriture et de lecture ont des files différentes, optimisées chacune pour leur usage. L'Event Sourcing, c'est le relevé de compte : au lieu de stocker juste le solde (état), tu stockes chaque opération (événement). Tu peux recalculer le solde à tout moment.
+
 ---
 
 ## 1. CQRS : Command Query Responsibility Segregation

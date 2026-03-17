@@ -17,6 +17,8 @@ A la fin de ce module, vous serez capable de :
 - Concevoir une degradation gracieuse avec des réponses par defaut et feature flags
 - Combiner circuit breaker, bulkhead et timeout pour une résilience en profondeur
 
+> **Analogie** : Le circuit breaker, c'est exactement le disjoncteur électrique de ta maison. Quand un appareil consomme trop (un service externe timeout), le disjoncteur saute (circuit ouvert) pour protéger toute l'installation. Après un moment, tu remontes le disjoncteur (half-open) pour voir si le problème est résolu.
+
 ---
 
 ## Circuit Breaker : le disjoncteur logiciel

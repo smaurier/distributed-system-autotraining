@@ -15,6 +15,8 @@ A la fin de ce module, vous serez capable de :
 5. Gérer les erreurs dans les sagas (timeouts, retries, dead letter)
 6. Choisir entre choreographie et orchestration selon le contexte
 
+> **Analogie** : Une saga, c'est comme organiser un voyage avec plusieurs réservations (vol, hôtel, location). Si l'hôtel est complet après avoir réservé le vol, tu ne peux pas annuler le vol comme si de rien n'était — tu dois appeler la compagnie pour un remboursement (transaction compensatoire). Chaque étape a son plan B.
+
 ---
 
 ## 1. Le problème : les transactions distribuees
