@@ -25,3 +25,12 @@ Le site s'ouvre avec une sidebar navigable. Commence par le premier module (00).
 ## Parcours
 
 Consulte `cours/parcours.md` ou ouvre le site VitePress pour le plan de formation détaillé.
+
+## Competences visees
+
+Au-dela de la theorie, l'objectif est de savoir operer des flux distribues en conditions reelles :
+
+- communication synchrone et asynchrone entre services
+- fiabilite messaging (ack, retry, dead-letter, idempotence)
+- resilience applicative (timeouts, backpressure, degradation)
+- diagnostic d'incidents avec logs, traces et metriques
