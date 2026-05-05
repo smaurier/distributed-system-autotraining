@@ -1,8 +1,8 @@
 # 06 — Message Queues (pub/sub, Redis Streams, dead letter queues)
 
-| Difficulte | Duree estimee | Lab | Quiz |
-|:----------:|:-------------:|:---:|:----:|
-| 3/5        | 60 min        | [Lab 06](../labs/lab-06-message-queues/exercise.ts) | [Quiz 06](../quizzes/quiz-06-message-queues.html) |
+| Difficulte | Duree estimee |                         Lab                         |                       Quiz                        |
+| :--------: | :-----------: | :-------------------------------------------------: | :-----------------------------------------------: |
+|    3/5     |    60 min     | [Lab 06](../labs/lab-06-message-queues/exercise.ts) | [Quiz 06](../quizzes/quiz-06-message-queues.html) |
 
 ## Objectifs pedagogiques
 
@@ -39,13 +39,13 @@ COMMUNICATION SYNCHRONE :                COMMUNICATION ASYNCHRONE :
 
 ### Quand utiliser quoi ?
 
-| Critere | Synchrone | Asynchrone |
-|---------|-----------|------------|
-| Le client a besoin de la réponse immediatement | Oui | Non |
-| Le traitement peut prendre du temps | Mauvais choix | Bon choix |
-| Résilience aux pannes du service cible | Faible | Forte |
-| Complexite de debug | Plus simple | Plus complexe |
-| Exemples | Lire un profil, vérifier un prix | Envoyer un email, générer un PDF, traiter une commande |
+| Critere                                        | Synchrone                        | Asynchrone                                             |
+| ---------------------------------------------- | -------------------------------- | ------------------------------------------------------ |
+| Le client a besoin de la réponse immediatement | Oui                              | Non                                                    |
+| Le traitement peut prendre du temps            | Mauvais choix                    | Bon choix                                              |
+| Résilience aux pannes du service cible         | Faible                           | Forte                                                  |
+| Complexite de debug                            | Plus simple                      | Plus complexe                                          |
+| Exemples                                       | Lire un profil, vérifier un prix | Envoyer un email, générer un PDF, traiter une commande |
 
 :::tip Regle d'or
 Si l'utilisateur attend la réponse pour continuer, utilisez le synchrone. Si le traitement peut etre differe, utilisez l'asynchrone. En cas de doute, posez la question : "Est-ce que l'utilisateur remarquerait un delai de 30 secondes ?"
@@ -136,9 +136,9 @@ Chaque message est delivre a UN SEUL consumer du groupe.
 
 ```typescript
 // redis-streams.ts — Producteur et consommateur avec Redis Streams
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
-const redis = new Redis({ host: 'localhost', port: 6379 });
+const redis = new Redis({ host: "localhost", port: 6379 });
 
 // --- PRODUCTEUR ---
 
@@ -153,29 +153,38 @@ async function publishOrderEvent(event: OrderEvent): Promise<string> {
   // XADD ajoute un message au stream
   // '*' = ID auto-genere par Redis (timestamp-based)
   const messageId = await redis.xadd(
-    'orders-stream',    // nom du stream
-    '*',                // ID auto-genere
-    'orderId', event.orderId,
-    'action', event.action,
-    'userId', event.userId,
-    'timestamp', event.timestamp,
+    "orders-stream", // nom du stream
+    "*", // ID auto-genere
+    "orderId",
+    event.orderId,
+    "action",
+    event.action,
+    "userId",
+    event.userId,
+    "timestamp",
+    event.timestamp,
   );
-  console.log(`[PUBLISH] Message ${messageId}: ${event.action} for order ${event.orderId}`);
+  console.log(
+    `[PUBLISH] Message ${messageId}: ${event.action} for order ${event.orderId}`,
+  );
   return messageId;
 }
 
 // --- CONSOMMATEUR SIMPLE (sans consumer group) ---
 
 async function consumeFromBeginning(): Promise<void> {
-  let lastId = '0'; // Lire depuis le debut
+  let lastId = "0"; // Lire depuis le debut
 
   while (true) {
     // XREAD lit les nouveaux messages (BLOCK = attendre si rien de nouveau)
     const results = await redis.xread(
-      'BLOCK', 5000,        // Attendre 5 secondes max
-      'COUNT', 10,          // Lire 10 messages max
-      'STREAMS', 'orders-stream',
-      lastId,               // Depuis le dernier ID lu
+      "BLOCK",
+      5000, // Attendre 5 secondes max
+      "COUNT",
+      10, // Lire 10 messages max
+      "STREAMS",
+      "orders-stream",
+      lastId, // Depuis le dernier ID lu
     );
 
     if (!results) continue; // Timeout, pas de nouveaux messages
@@ -200,16 +209,16 @@ async function consumeFromBeginning(): Promise<void> {
 ```typescript
 // consumer-group.ts — Consumer groups pour traitement distribue
 
-const STREAM = 'orders-stream';
-const GROUP = 'order-processors';
+const STREAM = "orders-stream";
+const GROUP = "order-processors";
 
 async function setupConsumerGroup(): Promise<void> {
   try {
     // Creer le consumer group (depuis le debut du stream)
-    await redis.xgroup('CREATE', STREAM, GROUP, '0', 'MKSTREAM');
+    await redis.xgroup("CREATE", STREAM, GROUP, "0", "MKSTREAM");
     console.log(`[SETUP] Consumer group "${GROUP}" cree`);
   } catch (err: any) {
-    if (err.message.includes('BUSYGROUP')) {
+    if (err.message.includes("BUSYGROUP")) {
       console.log(`[SETUP] Consumer group "${GROUP}" existe deja`);
     } else {
       throw err;
@@ -223,11 +232,16 @@ async function consumeAsGroupMember(consumerName: string): Promise<void> {
   while (true) {
     // XREADGROUP lit les messages pour CE consumer dans le groupe
     const results = await redis.xreadgroup(
-      'GROUP', GROUP, consumerName,
-      'BLOCK', 5000,
-      'COUNT', 5,
-      'STREAMS', STREAM,
-      '>',  // '>' = seulement les nouveaux messages (pas encore assignes)
+      "GROUP",
+      GROUP,
+      consumerName,
+      "BLOCK",
+      5000,
+      "COUNT",
+      5,
+      "STREAMS",
+      STREAM,
+      ">", // '>' = seulement les nouveaux messages (pas encore assignes)
     );
 
     if (!results) continue;
@@ -256,10 +270,12 @@ async function consumeAsGroupMember(consumerName: string): Promise<void> {
 
 async function processMessage(data: Record<string, string>): Promise<void> {
   // Simuler un traitement (envoi email, mise a jour DB, etc.)
-  console.log(`  Traitement de l'action "${data.action}" pour commande ${data.orderId}`);
+  console.log(
+    `  Traitement de l'action "${data.action}" pour commande ${data.orderId}`,
+  );
   // Simuler un echec aleatoire (10% du temps)
   if (Math.random() < 0.1) {
-    throw new Error('Processing failed randomly');
+    throw new Error("Processing failed randomly");
   }
 }
 ```
@@ -295,7 +311,7 @@ Message → Queue → Consumer → OK         Message → Queue → Consumer →
 ```typescript
 // dead-letter-queue.ts — Implementation d'une DLQ avec Redis Streams
 
-const DLQ_STREAM = 'orders-dlq';
+const DLQ_STREAM = "orders-dlq";
 const MAX_RETRIES = 3;
 
 interface MessageAttempt {
@@ -312,7 +328,10 @@ async function processWithDLQ(
   data: Record<string, string>,
 ): Promise<void> {
   const attempt = retryTracker.get(messageId) || {
-    messageId, data, attempts: 0, lastError: '',
+    messageId,
+    data,
+    attempts: 0,
+    lastError: "",
   };
 
   attempt.attempts++;
@@ -328,18 +347,26 @@ async function processWithDLQ(
     if (attempt.attempts >= MAX_RETRIES) {
       // Envoyer en DLQ
       await redis.xadd(
-        DLQ_STREAM, '*',
-        'originalId', messageId,
-        'attempts', String(attempt.attempts),
-        'lastError', attempt.lastError,
+        DLQ_STREAM,
+        "*",
+        "originalId",
+        messageId,
+        "attempts",
+        String(attempt.attempts),
+        "lastError",
+        attempt.lastError,
         ...Object.entries(data).flat(),
       );
       // ACK le message original (il est maintenant en DLQ)
       await redis.xack(STREAM, GROUP, messageId);
       retryTracker.delete(messageId);
-      console.log(`[DLQ] Message ${messageId} envoye en DLQ apres ${MAX_RETRIES} echecs`);
+      console.log(
+        `[DLQ] Message ${messageId} envoye en DLQ apres ${MAX_RETRIES} echecs`,
+      );
     } else {
-      console.log(`[RETRY] Message ${messageId} - tentative ${attempt.attempts}/${MAX_RETRIES}`);
+      console.log(
+        `[RETRY] Message ${messageId} - tentative ${attempt.attempts}/${MAX_RETRIES}`,
+      );
     }
   }
 }
@@ -348,6 +375,20 @@ async function processWithDLQ(
 :::warning Les DLQ necessitent une supervision
 Une DLQ qui se remplit est un signal d'alarme. Mettez en place des alertes sur la taille de la DLQ et prevoyez un processus de re-traitement ou de correction manuelle des messages.
 :::
+
+### 4.1 Metriques minimales a suivre
+
+Pour piloter un systeme de queues, quelques indicateurs suffisent a detecter 80% des incidents :
+
+| Metrique               | Pourquoi                        | Seuil de depart                       |
+| ---------------------- | ------------------------------- | ------------------------------------- |
+| Queue depth            | Detecte l'engorgement           | Alerte si tendance haussiere > 10 min |
+| Message age (oldest)   | Detecte le retard de traitement | Alerte si > 300 s                     |
+| Success rate consumer  | Mesure la sante metier          | Alerte si < 99% sur 5 min             |
+| DLQ ingress rate       | Detecte les erreurs definitives | Alerte des le premier pic inhabituel  |
+| Processing latency p95 | Detecte degradation progressive | Alerte si x2 vs baseline              |
+
+Ces chiffres ne sont pas universels : ils servent de baseline pour demarrer et seront ajustes apres quelques semaines de trafic reel.
 
 ---
 
@@ -401,13 +442,16 @@ class RateLimitedProducer {
     }, 1000);
   }
 
-  async publish(stream: string, data: Record<string, string>): Promise<string | null> {
+  async publish(
+    stream: string,
+    data: Record<string, string>,
+  ): Promise<string | null> {
     if (this.tokens <= 0) {
-      console.log('[BACKPRESSURE] Rate limit atteint, message differe');
+      console.log("[BACKPRESSURE] Rate limit atteint, message differe");
       return null;
     }
     this.tokens--;
-    return redis.xadd(stream, '*', ...Object.entries(data).flat());
+    return redis.xadd(stream, "*", ...Object.entries(data).flat());
   }
 }
 
@@ -419,7 +463,11 @@ async function publishWithMaxLength(
 ): Promise<string> {
   // MAXLEN ~ N : garde approximativement N messages (trim performant)
   return redis.xadd(
-    stream, 'MAXLEN', '~', String(maxLength), '*',
+    stream,
+    "MAXLEN",
+    "~",
+    String(maxLength),
+    "*",
     ...Object.entries(data).flat(),
   );
 }
@@ -471,8 +519,8 @@ Si vous avez déjà Redis dans votre stack, Redis Streams est le choix le plus s
 
 ## Navigation
 
-| Précédent | Suivant |
-|:---------:|:-------:|
+|                                    Précédent                                    |                               Suivant                               |
+| :-----------------------------------------------------------------------------: | :-----------------------------------------------------------------: |
 | [05 - Communication synchrone avancee](./05-communication-synchrone-avancee.md) | [07 - Event-Driven Architecture](./07-event-driven-architecture.md) |
 
 ---
@@ -480,7 +528,8 @@ Si vous avez déjà Redis dans votre stack, Redis Streams est le choix le plus s
 <!-- parcours-recommande -->
 
 ::: tip Parcours recommandé
+
 1. **Screencast** : [screencast 06 message queues](../screencasts/screencast-06-message-queues.md)
 2. **Lab** : [lab-06-message-queues](../labs/lab-06-message-queues/README)
 3. **Quiz** : [quiz 06 message queues](../quizzes/quiz-06-message-queues.html)
-:::
+   :::
