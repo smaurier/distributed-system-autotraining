@@ -20,26 +20,27 @@ features:
     details: Exercices progressifs avec corrections — monolithe vs distribue, message queues, circuit breakers, saga orchestration, CRDTs, et plus.
   - title: 6 Visualisations animees
     details: Diagrammes interactifs pour comprendre les network partitions, le theoreme CAP, l'orchestration de sagas, le circuit breaker, le consistent hashing et le consensus Raft.
-  - title: 25 Quizzes
-    details: Testez vos connaissances apres chaque module avec des quiz interactifs.
+  - title: 26 Quizzes
+    details: Testez vos connaissances apres chaque module avec des quiz interactifs, plus un quiz bonus transverse.
 ---
 
 ## Plan du cours
 
-| # | Module | Niveau | Lab | Quiz |
-|---|--------|--------|-----|------|
-| | **Phase 1 — Fondamentaux** | | | |
-| 00 | [Prérequis et introduction](/modules/00-prerequis-et-introduction) | Débutant | — | [Quiz](/quizzes/quiz-00-prerequis.html) |
-| 01 | [Monolithe vs distribue](/modules/01-pourquoi-les-systemes-distribues) | Débutant | [Lab 01](/labs/lab-01-monolithe-vs-distribue/README) | [Quiz](/quizzes/quiz-01-pourquoi-distribue.html) |
-| 02 | [Communication réseau](/modules/02-communication-reseau-fondamentale) | Débutant | [Lab 02](/labs/lab-02-communication-reseau/README) | [Quiz](/quizzes/quiz-02-communication-reseau.html) |
-| 03 | [Microservices fondamentaux](/modules/03-premiers-microservices-typescript) | Débutant | [Lab 03](/labs/lab-03-microservices-express/README) | [Quiz](/quizzes/quiz-03-microservices.html) |
-| 04 | [Serialisation et validation](/modules/04-serialisation-et-contrats-api) | Débutant | [Lab 04](/labs/lab-04-serialisation-validation/README) | [Quiz](/quizzes/quiz-04-serialisation.html) |
-| | **Phase 2 — Patterns de Communication** | | | |
-| 05 | [Communication synchrone](/modules/05-communication-synchrone-avancee) | Intermédiaire | [Lab 05](/labs/lab-05-communication-synchrone/README) | [Quiz](/quizzes/quiz-05-communication-synchrone.html) |
-| 06 | [Message queues](/modules/06-communication-asynchrone-message-queues) | Intermédiaire | [Lab 06](/labs/lab-06-message-queues/README) | [Quiz](/quizzes/quiz-06-message-queues.html) |
-| 07 | [Event-driven architecture](/modules/07-event-driven-architecture) | Intermédiaire | [Lab 07](/labs/lab-07-event-driven/README) | [Quiz](/quizzes/quiz-07-event-driven.html) |
-| 08 | [API Gateway et BFF](/modules/08-api-gateway-et-bff) | Intermédiaire | [Lab 08](/labs/lab-08-api-gateway/README) | [Quiz](/quizzes/quiz-08-api-gateway.html) |
-| 09 | [Retries et idempotency](/modules/09-retries-timeouts-idempotency) | Intermédiaire | [Lab 09](/labs/lab-09-retries-idempotency/README) | [Quiz](/quizzes/quiz-09-retries-idempotency.html) |
+| #   | Module                                                                      | Niveau        | Lab                                                    | Quiz                                                  |
+| --- | --------------------------------------------------------------------------- | ------------- | ------------------------------------------------------ | ----------------------------------------------------- |
+|     | **Phase 1 — Fondamentaux**                                                  |               |                                                        |                                                       |
+| 00  | [Prérequis et introduction](/modules/00-prerequis-et-introduction)          | Débutant      | —                                                      | [Quiz](/quizzes/quiz-00-prerequis.html)               |
+| 01  | [Monolithe vs distribue](/modules/01-pourquoi-les-systemes-distribues)      | Débutant      | [Lab 01](/labs/lab-01-monolithe-vs-distribue/README)   | [Quiz](/quizzes/quiz-01-pourquoi-distribue.html)      |
+| 02  | [Communication réseau](/modules/02-communication-reseau-fondamentale)       | Débutant      | [Lab 02](/labs/lab-02-communication-reseau/README)     | [Quiz](/quizzes/quiz-02-communication-reseau.html)    |
+| 03  | [Microservices fondamentaux](/modules/03-premiers-microservices-typescript) | Débutant      | [Lab 03](/labs/lab-03-microservices-express/README)    | [Quiz](/quizzes/quiz-03-microservices.html)           |
+| 04  | [Serialisation et validation](/modules/04-serialisation-et-contrats-api)    | Débutant      | [Lab 04](/labs/lab-04-serialisation-validation/README) | [Quiz](/quizzes/quiz-04-serialisation.html)           |
+|     | **Phase 2 — Patterns de Communication**                                     |               |                                                        |                                                       |
+| 05  | [Communication synchrone](/modules/05-communication-synchrone-avancee)      | Intermédiaire | [Lab 05](/labs/lab-05-communication-synchrone/README)  | [Quiz](/quizzes/quiz-05-communication-synchrone.html) |
+| 06  | [Message queues](/modules/06-communication-asynchrone-message-queues)       | Intermédiaire | [Lab 06](/labs/lab-06-message-queues/README)           | [Quiz](/quizzes/quiz-06-message-queues.html)          |
+| 07  | [Event-driven architecture](/modules/07-event-driven-architecture)          | Intermédiaire | [Lab 07](/labs/lab-07-event-driven/README)             | [Quiz](/quizzes/quiz-07-event-driven.html)            |
+| 08  | [API Gateway et BFF](/modules/08-api-gateway-et-bff)                        | Intermédiaire | [Lab 08](/labs/lab-08-api-gateway/README)              | [Quiz](/quizzes/quiz-08-api-gateway.html)             |
+| 09  | [Retries et idempotency](/modules/09-retries-timeouts-idempotency)          | Intermédiaire | [Lab 09](/labs/lab-09-retries-idempotency/README)      | [Quiz](/quizzes/quiz-09-retries-idempotency.html)     |
+
 > **Chevauchement avec 10-Architecture** : les modules saga (12), CQRS (13) et circuit breaker (16) sont aussi traites dans le cours 10-Architecture (module 07). Ici l'angle est implementation distribuee. Dans le cours 10, l'angle est design pattern et decision architecturale. Les deux se completent.
 
 | | **Phase 3 — Donnees & État Distribue** | | | |
@@ -63,7 +64,7 @@ features:
 
 ## Annexes
 
-| Ressource | Description |
-|-----------|-------------|
+| Ressource                                                   | Description                                                                                       |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | [Références & Lectures](/modules/99-references-et-lectures) | DDIA, Building Microservices, Release It!, papiers Raft/Dynamo/Kafka — guide de lecture par phase |
-| [Glossaire](/glossaire) | ~70 termes techniques définis et illustres |
+| [Glossaire](/glossaire)                                     | ~70 termes techniques définis et illustres                                                        |

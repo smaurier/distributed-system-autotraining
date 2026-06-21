@@ -1,24 +1,24 @@
-version: '3.8'
+version: "3.8"
 
 services:
   redis:
     image: redis:7-alpine
     container_name: ds-redis
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: ds-postgres
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       POSTGRES_USER: distributed
       POSTGRES_PASSWORD: distributed
@@ -26,7 +26,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U distributed']
+      test: ["CMD-SHELL", "pg_isready -U distributed"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -37,7 +37,7 @@ services:
       dockerfile: Dockerfile
     container_name: ds-api-gateway
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       SERVICE_NAME: api-gateway
       PORT: 3000
@@ -59,7 +59,7 @@ services:
       dockerfile: Dockerfile
     container_name: ds-order-service
     ports:
-      - '3001:3001'
+      - "3001:3001"
     environment:
       SERVICE_NAME: order-service
       PORT: 3001
@@ -80,7 +80,7 @@ services:
       dockerfile: Dockerfile
     container_name: ds-payment-service
     ports:
-      - '3002:3002'
+      - "3002:3002"
     environment:
       SERVICE_NAME: payment-service
       PORT: 3002
@@ -98,7 +98,7 @@ services:
       dockerfile: Dockerfile
     container_name: ds-inventory-service
     ports:
-      - '3003:3003'
+      - "3003:3003"
     environment:
       SERVICE_NAME: inventory-service
       PORT: 3003
@@ -116,7 +116,7 @@ services:
       dockerfile: Dockerfile
     container_name: ds-notification-service
     ports:
-      - '3004:3004'
+      - "3004:3004"
     environment:
       SERVICE_NAME: notification-service
       PORT: 3004
