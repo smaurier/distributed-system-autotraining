@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz 26 — Kubernetes fondamental</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem; color: #ffffff; }
+    .subtitle { text-align: center; color: #8892b0; margin-bottom: 2rem; font-size: 1rem; }
+    .progress-bar-container { background: #0d1117; border-radius: 10px; height: 14px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-bar { background: linear-gradient(90deg, #0d6efd, #4dabf7); height: 100%; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+    .progress-text { text-align: center; color: #8892b0; margin-bottom: 1rem; font-size: 0.9rem; }
+    .card { background: #16213e; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .question-label { font-size: 0.85rem; color: #4dabf7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .question-text { font-size: 1.15rem; margin-bottom: 1.2rem; line-height: 1.5; color: #ffffff; }
+    pre { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem; overflow-x: auto; font-size: 0.95rem; }
+    code { font-family: 'Consolas', 'Fira Code', 'Courier New', monospace; color: #c9d1d9; }
+    .options { list-style: none; }
+    .options li { margin-bottom: 0.5rem; }
+    .options label { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: #0d1117; border: 2px solid #30363d; border-radius: 8px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 1rem; }
+    .options label:hover { border-color: #4dabf7; background: #1c2a4a; }
+    .options input[type="radio"] { accent-color: #0d6efd; width: 18px; height: 18px; flex-shrink: 0; }
+    .btn { display: inline-block; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-primary:hover { background: #3b82f6; }
+    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
+    .btn-restart { background: #238636; color: #fff; margin-top: 1rem; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-restart:hover { background: #2ea043; }
+    .feedback { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; display: none; }
+    .feedback.correct { background: #0f5132; border: 1px solid #198754; color: #d1fae5; display: block; }
+    .feedback.wrong { background: #842029; border: 1px solid #dc3545; color: #fdd; display: block; }
+    .score-card { text-align: center; padding: 3rem 2rem; }
+    .score-card .score { font-size: 3rem; font-weight: 700; color: #4dabf7; margin-bottom: 0.5rem; }
+    .score-card .score-label { font-size: 1.2rem; color: #8892b0; margin-bottom: 1.5rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz 26 — Kubernetes fondamental</h1>
+    <p class="subtitle">Pods, Deployments, Services, Probes et architecture du cluster</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <p class="progress-text" id="progressText">Question 1 / 5</p>
+    <div id="quizContainer"></div>
+    <div id="scoreContainer" class="card score-card hidden"></div>
+  </div>
+  <script>
+    const questions = [
+      {
+        label: "Question 1 — Architecture K8s",
+        text: "Quel composant du Control Plane est responsable de l'attribution des Pods aux Nodes ?",
+        code: "# Control Plane:\n# - kube-apiserver: point d'entree API REST\n# - etcd: stockage key-value distribue\n# - kube-scheduler: attribution pods -> nodes\n# - kube-controller-manager: boucles de reconciliation\n\n# Sur chaque Node:\n# - kubelet: gere les containers\n# - kube-proxy: regles reseau / iptables",
+        options: [
+          "etcd, car il contient toutes les donnees du cluster",
+          "kube-apiserver, car il recoit toutes les requetes",
+          "kube-scheduler, qui evalue les contraintes (resources, affinites, taints) pour choisir le node optimal pour chaque Pod",
+          "kubelet, car il execute les containers sur le node"
+        ],
+        answer: 2,
+        explanation: "Le kube-scheduler watch les Pods non assignes et leur attribue un node en evaluant les filtres (resources disponibles, nodeSelector, taints/tolerations) puis le scoring (affinites, balance de charge). Le kubelet sur le node cible prend ensuite le relais pour lancer les containers."
+      },
+      {
+        label: "Question 2 — Pods vs Deployments",
+        text: "Pourquoi ne devrait-on presque jamais creer un Pod directement en production ?",
+        code: "# Pod seul (fragile)\napiVersion: v1\nkind: Pod\nmetadata:\n  name: my-api\nspec:\n  containers:\n  - name: api\n    image: node:20\n\n# Deployment (resilient)\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: my-api\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: api",
+        options: [
+          "Les Pods sont plus lents a demarrer que les Deployments",
+          "Un Pod seul ne sera pas recree s'il tombe. Un Deployment gere un ReplicaSet qui maintient le nombre desire de replicas, relance les Pods en echec, et permet les rolling updates",
+          "Kubernetes ne supporte pas les Pods sans Deployment",
+          "Les Pods ne peuvent pas avoir de labels"
+        ],
+        answer: 1,
+        explanation: "Un Pod est l'unite atomique mais est ephemere par nature. Si le node tombe ou le Pod crash, il disparait definitivement. Le Deployment controller surveille en permanence l'etat reel vs desire et recree les Pods manquants. Il gere aussi les updates progressives et les rollbacks."
+      },
+      {
+        label: "Question 3 — Services et types",
+        text: "Quelle est la difference entre ClusterIP, NodePort et LoadBalancer ?",
+        code: "# ClusterIP (defaut): accessible uniquement dans le cluster\napiVersion: v1\nkind: Service\nspec:\n  type: ClusterIP\n  ports:\n  - port: 80\n    targetPort: 3000\n\n# NodePort: expose sur un port du node (30000-32767)\n# LoadBalancer: provisionne un LB cloud externe",
+        options: [
+          "ClusterIP est plus rapide que NodePort qui est plus rapide que LoadBalancer",
+          "ClusterIP expose le service uniquement dans le cluster. NodePort ouvre un port sur chaque node du cluster. LoadBalancer provisionne un load balancer externe (cloud) qui redirige vers le service",
+          "Les trois types sont identiques mais utilises par differents cloud providers",
+          "ClusterIP est pour le developpement, NodePort pour la staging, LoadBalancer pour la production"
+        ],
+        answer: 1,
+        explanation: "ClusterIP cree une IP virtuelle interne (via iptables/IPVS). NodePort etend ClusterIP en ouvrant un port identique sur tous les nodes. LoadBalancer etend NodePort en provisionant un LB cloud (AWS ALB/NLB, GCP LB). En pratique, on utilise souvent un Ingress controller + ClusterIP."
+      },
+      {
+        label: "Question 4 — Health Probes",
+        text: "Quelle est la difference entre liveness probe et readiness probe ?",
+        code: "spec:\n  containers:\n  - name: api\n    livenessProbe:\n      httpGet:\n        path: /healthz\n        port: 3000\n      initialDelaySeconds: 10\n      periodSeconds: 5\n      failureThreshold: 3\n    readinessProbe:\n      httpGet:\n        path: /ready\n        port: 3000\n      periodSeconds: 5\n      failureThreshold: 1",
+        options: [
+          "La liveness probe verifie si l'application demarre, la readiness probe verifie si elle est rapide",
+          "Les deux probes font exactement la meme chose",
+          "La liveness probe determine si le container doit etre redemarre (crash = restart). La readiness probe determine si le Pod doit recevoir du trafic (not ready = retire des endpoints du Service)",
+          "La liveness probe est pour HTTP et la readiness probe est pour TCP"
+        ],
+        answer: 2,
+        explanation: "Liveness = 'es-tu vivant ?' Si non, kubelet restart le container. Readiness = 'es-tu pret a servir ?' Si non, le Pod est retire des endpoints du Service (plus de trafic). Un container peut etre vivant mais pas pret (ex: chargement d'un cache). La startup probe est un troisieme type pour les demarrages lents."
+      },
+      {
+        label: "Question 5 — Labels et Selectors",
+        text: "Comment Kubernetes utilise-t-il les labels pour connecter un Service a ses Pods ?",
+        code: "# Deployment avec labels\napiVersion: apps/v1\nkind: Deployment\nspec:\n  template:\n    metadata:\n      labels:\n        app: api\n        version: v2\n---\n# Service avec selector\napiVersion: v1\nkind: Service\nspec:\n  selector:\n    app: api\n  ports:\n  - port: 80\n    targetPort: 3000",
+        options: [
+          "Le Service se connecte aux Pods par leur nom",
+          "Le selector du Service est compare aux labels des Pods. Tous les Pods dont les labels matchent sont ajoutes comme endpoints. Ici, tout Pod avec 'app: api' recevra du trafic, quelle que soit sa version",
+          "Kubernetes utilise les adresses IP pour connecter Services et Pods",
+          "Les labels sont juste des annotations informatives sans effet fonctionnel"
+        ],
+        answer: 1,
+        explanation: "Les labels sont le mecanisme fondamental de couplage dans Kubernetes. Le Service controller watch continuellement les Pods et met a jour ses Endpoints en fonction du selector. C'est ce qui permet le decoupling : le Deployment et le Service sont des ressources independantes reliees par les labels."
+      }
+    ];
+    let currentQuestion = 0, score = 0, answered = false;
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const total = questions.length;
+      document.getElementById('progressBar').style.width = ((currentQuestion / total) * 100) + '%';
+      document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} / ${total}`;
+      let html = `<div class="card"><p class="question-label">${q.label}</p><p class="question-text">${q.text}</p>`;
+      if (q.code) html += `<pre><code>${q.code}</code></pre>`;
+      html += `<ul class="options">`;
+      q.options.forEach((opt, i) => { html += `<li><label><input type="radio" name="q" value="${i}"> ${opt}</label></li>`; });
+      html += `</ul><button class="btn btn-primary" id="validateBtn" onclick="validate()" disabled>Valider</button><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizContainer').innerHTML = html;
+      document.querySelectorAll('input[name="q"]').forEach(r => { r.addEventListener('change', () => { document.getElementById('validateBtn').disabled = false; }); });
+      answered = false;
+    }
+    function validate() {
+      if (answered) { currentQuestion++; if (currentQuestion < questions.length) renderQuestion(); else showScore(); return; }
+      answered = true;
+      const selected = document.querySelector('input[name="q"]:checked');
+      if (!selected) return;
+      const val = parseInt(selected.value);
+      const q = questions[currentQuestion];
+      const fb = document.getElementById('feedback');
+      const btn = document.getElementById('validateBtn');
+      document.querySelectorAll('input[name="q"]').forEach(r => r.disabled = true);
+      if (val === q.answer) { score++; fb.className = 'feedback correct'; fb.innerHTML = `<strong>Correct !</strong> ${q.explanation}`; }
+      else { fb.className = 'feedback wrong'; fb.innerHTML = `<strong>Incorrect.</strong> ${q.explanation}`; }
+      btn.textContent = currentQuestion < questions.length - 1 ? 'Suivant' : 'Voir le score';
+    }
+    function showScore() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = 'Termine !';
+      const sc = document.getElementById('scoreContainer');
+      sc.classList.remove('hidden');
+      const pct = Math.round((score / questions.length) * 100);
+      let msg = pct === 100 ? 'Parfait !' : pct >= 60 ? 'Bien joue !' : 'Continuez a reviser !';
+      sc.innerHTML = `<div class="score">${score} / ${questions.length}</div><div class="score-label">${msg} (${pct}%)</div><button class="btn-restart" onclick="restart()">Recommencer</button>`;
+    }
+    function restart() { currentQuestion = 0; score = 0; answered = false; document.getElementById('scoreContainer').classList.add('hidden'); document.getElementById('quizContainer').classList.remove('hidden'); renderQuestion(); }
+    renderQuestion();
+  </script>
+</body>
+</html>

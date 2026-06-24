@@ -14,13 +14,13 @@ hero:
       link: /labs/lab-01-monolithe-vs-distribue/README
 
 features:
-  - title: 25 Modules theoriques
-    details: Des fondamentaux reseau aux algorithmes de consensus, en passant par les microservices, les patterns de communication, CQRS, event sourcing, sagas et la resilience.
-  - title: 24 Labs pratiques
-    details: Exercices progressifs avec corrections — monolithe vs distribue, message queues, circuit breakers, saga orchestration, CRDTs, et plus.
+  - title: 28 Modules theoriques
+    details: Des fondamentaux reseau aux algorithmes de consensus, en passant par les microservices, les patterns de communication, CQRS, event sourcing, sagas, la resilience, Docker et Kubernetes.
+  - title: 27 Labs pratiques
+    details: Exercices progressifs avec corrections — monolithe vs distribue, message queues, circuit breakers, saga orchestration, CRDTs, Docker avance, Kubernetes, et plus.
   - title: 6 Visualisations animees
     details: Diagrammes interactifs pour comprendre les network partitions, le theoreme CAP, l'orchestration de sagas, le circuit breaker, le consistent hashing et le consensus Raft.
-  - title: 26 Quizzes
+  - title: 28 Quizzes
     details: Testez vos connaissances apres chaque module avec des quiz interactifs, plus un quiz bonus transverse.
 ---
 
@@ -61,6 +61,10 @@ features:
 | 22 | [Stream processing](/modules/22-stream-processing-event-streaming) | Expert | [Lab 22](/labs/lab-22-stream-processing/README) | [Quiz](/quizzes/quiz-22-stream-processing.html) |
 | 23 | [CRDTs](/modules/23-crdts-resolution-conflits) | Expert | [Lab 23](/labs/lab-23-crdts/README) | [Quiz](/quizzes/quiz-23-crdts.html) |
 | 24 | [Projet final](/modules/24-projet-final) | Expert | [Lab 24](/labs/lab-24-projet-final/README) | [Quiz](/quizzes/quiz-24-projet-final.html) |
+| | **Phase 6 — Conteneurisation & Orchestration** | | | |
+| 25 | [Docker en profondeur](/modules/25-docker-en-profondeur) | Intermédiaire | [Lab 25](/labs/lab-25-docker-avance/README) | [Quiz](/quizzes/quiz-25-docker.html) |
+| 26 | [Kubernetes fondamental](/modules/26-kubernetes-fondamental) | Avancé | [Lab 26](/labs/lab-26-kubernetes-fondamental/README) | [Quiz](/quizzes/quiz-26-kubernetes.html) |
+| 27 | [Kubernetes en pratique](/modules/27-kubernetes-en-pratique) | Expert | [Lab 27](/labs/lab-27-kubernetes-pratique/README) | [Quiz](/quizzes/quiz-27-kubernetes-pratique.html) |
 
 ## Annexes
 

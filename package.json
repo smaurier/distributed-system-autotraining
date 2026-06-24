@@ -32,6 +32,9 @@
     "lab:22": "npx tsx labs/lab-22-stream-processing/exercise.ts",
     "lab:23": "npx tsx labs/lab-23-crdts/exercise.ts",
     "lab:24": "npx tsx labs/lab-24-projet-final/exercise.ts",
+    "lab:25": "npx tsx labs/lab-25-docker-avance/exercise.ts",
+    "lab:26": "npx tsx labs/lab-26-kubernetes-fondamental/exercise.ts",
+    "lab:27": "npx tsx labs/lab-27-kubernetes-pratique/exercise.ts",
     "solution:01": "npx tsx labs/lab-01-monolithe-vs-distribue/solution.ts",
     "solution:02": "npx tsx labs/lab-02-communication-reseau/solution.ts",
     "solution:03": "npx tsx labs/lab-03-microservices-express/solution.ts",
@@ -55,7 +58,10 @@
     "solution:21": "npx tsx labs/lab-21-horloges-logiques/solution.ts",
     "solution:22": "npx tsx labs/lab-22-stream-processing/solution.ts",
     "solution:23": "npx tsx labs/lab-23-crdts/solution.ts",
-    "solution:24": "npx tsx labs/lab-24-projet-final/solution.ts"
+    "solution:24": "npx tsx labs/lab-24-projet-final/solution.ts",
+    "solution:25": "npx tsx labs/lab-25-docker-avance/solution.ts",
+    "solution:26": "npx tsx labs/lab-26-kubernetes-fondamental/solution.ts",
+    "solution:27": "npx tsx labs/lab-27-kubernetes-pratique/solution.ts"
   },
   "engines": {
     "node": ">=20.0.0"
