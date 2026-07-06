@@ -8,15 +8,9 @@ export default defineConfig({
   srcDir: '.',
   ignoreDeadLinks: true,
 
-  // Docs statiques : neutralise l'interpolation Vue `{{ }}` en prose (traceparent,
-  // payloads, PromQL, templating) pour ne pas casser le build SSR.
-  vue: {
-    template: {
-      compilerOptions: {
-        delimiters: ['(%(', ')%)'],
-      },
-    },
-  },
+  // NB : PAS d'override `vue.template.compilerOptions.delimiters` — il s'applique aussi
+  // aux composants .vue du thème par défaut et casse leur `{{ }}` (menu/outline affichés
+  // littéralement). Les moustaches du contenu restent dans des blocs de code (non interprétés).
 
   // Refonte v1 : le cours vit dans modules/ + labs/. Le reste (quizzes, visualizations,
   // demo-app, config, docker-compose, scripts, screencasts) = outillage/archive, exclu du build.
