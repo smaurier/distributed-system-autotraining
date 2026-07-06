@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz — AsyncLocalStorage, Outbox Pattern & Systemes distribues</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem; color: #ffffff; }
+    .subtitle { text-align: center; color: #8892b0; margin-bottom: 2rem; font-size: 1rem; }
+    .progress-bar-container { background: #0d1117; border-radius: 10px; height: 14px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-bar { background: linear-gradient(90deg, #0d6efd, #4dabf7); height: 100%; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+    .progress-text { text-align: center; color: #8892b0; margin-bottom: 1rem; font-size: 0.9rem; }
+    .card { background: #16213e; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .question-label { font-size: 0.85rem; color: #4dabf7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .question-text { font-size: 1.15rem; margin-bottom: 1.2rem; line-height: 1.5; color: #ffffff; }
+    pre { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem; overflow-x: auto; font-size: 0.95rem; }
+    code { font-family: 'Consolas', 'Fira Code', 'Courier New', monospace; color: #c9d1d9; }
+    .options { list-style: none; }
+    .options li { margin-bottom: 0.5rem; }
+    .options label { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: #0d1117; border: 2px solid #30363d; border-radius: 8px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 1rem; }
+    .options label:hover { border-color: #4dabf7; background: #1c2a4a; }
+    .options input[type="radio"] { accent-color: #0d6efd; width: 18px; height: 18px; flex-shrink: 0; }
+    .btn { display: inline-block; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-primary:hover { background: #3b82f6; }
+    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
+    .btn-restart { background: #238636; color: #fff; margin-top: 1rem; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-restart:hover { background: #2ea043; }
+    .feedback { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; display: none; }
+    .feedback.correct { background: #0f5132; border: 1px solid #198754; color: #d1fae5; display: block; }
+    .feedback.wrong { background: #842029; border: 1px solid #dc3545; color: #fdd; display: block; }
+    .score-card { text-align: center; padding: 3rem 2rem; }
+    .score-card .score { font-size: 3rem; font-weight: 700; color: #4dabf7; margin-bottom: 0.5rem; }
+    .score-card .score-label { font-size: 1.2rem; color: #8892b0; margin-bottom: 1.5rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz — AsyncLocalStorage, Outbox & Systemes distribues</h1>
+    <p class="subtitle">Contexte de requete, outbox pattern, CDC vs polling, correlation IDs, consistance eventuelle</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <p class="progress-text" id="progressText">Question 1 / 5</p>
+    <div id="quizContainer"></div>
+    <div id="scoreContainer" class="card score-card hidden"></div>
+  </div>
+  <script>
+    const questions = [
+      {
+        label: "Question 1",
+        text: "Quel est le role d'AsyncLocalStorage dans Node.js et pourquoi est-il essentiel dans les systemes distribues ?",
+        code: "import { AsyncLocalStorage } from 'node:async_hooks';\n\nconst requestContext = new AsyncLocalStorage();\n\napp.use((req, res, next) =&gt; {\n  const store = {\n    correlationId: req.headers['x-correlation-id'] || crypto.randomUUID(),\n    userId: req.user?.id,\n  };\n  requestContext.run(store, () =&gt; next());\n});\n\n// Dans n'importe quel service en aval :\nfunction getCorrelationId() {\n  return requestContext.getStore()?.correlationId;\n}",
+        options: [
+          "Il remplace les variables globales en stockant des donnees partagees entre tous les threads du processus",
+          "Il permet de propager un contexte (correlation ID, user, etc.) a travers toute la chaine d'appels asynchrones d'une requete, sans passer explicitement les parametres",
+          "Il sert uniquement a mesurer les performances des fonctions asynchrones via async_hooks",
+          "Il persiste les donnees dans un fichier local entre les redemarrages du serveur"
+        ],
+        answer: 1,
+        explanation: "AsyncLocalStorage (module node:async_hooks) cree un store isole par chaine d'appels asynchrones. Quand on appelle .run(store, callback), toutes les fonctions executees dans ce callback (meme les await, setTimeout, Promise) peuvent acceder au store via .getStore(). C'est l'equivalent Node.js du ThreadLocal de Java. Dans un systeme distribue, cela permet de propager le correlation ID, l'identifiant utilisateur ou le contexte de tracing a travers tous les services et middlewares sans polluer les signatures de fonctions."
+      },
+      {
+        label: "Question 2",
+        text: "Qu'est-ce que le pattern Outbox et pourquoi utilise-t-on un backoff exponentiel pour le relay ?",
+        code: "// 1. Ecriture atomique (meme transaction DB)\nawait prisma.$transaction(async (tx) =&gt; {\n  const order = await tx.order.create({ data: orderData });\n  await tx.outboxEvent.create({\n    data: {\n      aggregateId: order.id,\n      type: 'ORDER_CREATED',\n      payload: JSON.stringify(order),\n      status: 'PENDING',\n    },\n  });\n});\n\n// 2. Relay avec backoff exponentiel\nasync function processOutbox(attempt = 0) {\n  const events = await getUnsentEvents();\n  for (const event of events) {\n    try {\n      await publishToMessageBroker(event);\n      await markAsSent(event.id);\n    } catch (err) {\n      const delay = Math.min(1000 * 2 ** attempt, 30000);\n      await sleep(delay);\n    }\n  }\n}",
+        options: [
+          "L'outbox stocke les evenements directement dans le message broker dans une transaction distribuee (2PC)",
+          "L'outbox ecrit l'evenement dans la meme base de donnees que l'entite metier (meme transaction), puis un processus separe (relay) publie les evenements ; le backoff exponentiel evite de surcharger le broker en cas de panne",
+          "Le backoff exponentiel sert a ralentir les ecritures en base pour eviter les deadlocks",
+          "L'outbox pattern est specifique a Kafka et ne fonctionne pas avec RabbitMQ ou d'autres brokers"
+        ],
+        answer: 1,
+        explanation: "Le pattern Outbox resout le probleme de la double ecriture (dual write) : au lieu d'ecrire en base ET de publier un evenement (deux operations qui peuvent echouer independamment), on ecrit l'evenement dans une table outbox dans la meme transaction que l'entite metier. Un relay (processus periodique) lit ensuite les evenements PENDING et les publie sur le broker. Le backoff exponentiel (delai = base * 2^attempt, avec un plafond) evite de bombarder un broker en panne et lui laisse le temps de se retablir, tout en reprenant rapidement quand le service redevient disponible."
+      },
+      {
+        label: "Question 3",
+        text: "Quelle est la difference entre le CDC (Change Data Capture) et le polling pour consommer les evenements de la table outbox ?",
+        code: "// Approche 1 : Polling\nsetInterval(async () =&gt; {\n  const events = await db.query(\n    \"SELECT * FROM outbox WHERE status = 'PENDING' ORDER BY created_at LIMIT 100\"\n  );\n  // ... traitement et publication\n}, 5000);\n\n// Approche 2 : CDC (ex. Debezium sur PostgreSQL)\n// Lit le WAL (Write-Ahead Log) de PostgreSQL\n// et emet un evenement Kafka pour chaque INSERT dans la table outbox",
+        options: [
+          "Le polling est toujours preferable car il est plus simple et offre une latence plus faible",
+          "Le CDC est une technique qui remplace completement la table outbox en ecoutant directement les logs de replication",
+          "Le CDC lit le journal de transactions de la base (WAL) pour detecter les changements en quasi temps reel, sans requetes repetitives ; le polling interroge periodiquement la base, ce qui introduit de la latence et de la charge supplementaire",
+          "Le CDC et le polling sont equivalents en termes de performances et de latence"
+        ],
+        answer: 2,
+        explanation: "Le CDC (Change Data Capture) s'appuie sur le journal de transactions de la base de donnees (WAL pour PostgreSQL, binlog pour MySQL) pour detecter les nouvelles lignes inserees dans la table outbox. Cela offre une latence tres faible (quasi temps reel) et n'ajoute aucune charge de requetes sur la base. Le polling, lui, execute une requete SELECT a intervalle regulier : c'est plus simple a mettre en place mais introduit une latence egale a l'intervalle de polling et genere une charge constante sur la base. Des outils comme Debezium permettent d'implementer le CDC en connectant le WAL directement a Kafka."
+      },
+      {
+        label: "Question 4",
+        text: "Quel est le role d'un correlation ID dans une architecture de microservices et comment le propager ?",
+        code: "// Service A (API Gateway)\napp.use((req, res, next) =&gt; {\n  req.correlationId = req.headers['x-correlation-id']\n    || crypto.randomUUID();\n  res.setHeader('x-correlation-id', req.correlationId);\n  next();\n});\n\n// Appel vers Service B\nawait fetch('http://service-b/api/data', {\n  headers: { 'x-correlation-id': req.correlationId },\n});\n\n// Service B - dans les logs\nlogger.info('Traitement recu', {\n  correlationId: req.headers['x-correlation-id'],\n});",
+        options: [
+          "Le correlation ID sert d'identifiant d'authentification entre les services pour securiser les appels internes",
+          "Le correlation ID est un identifiant unique genere a l'entree du systeme et propage a travers tous les services pour pouvoir tracer une requete de bout en bout dans les logs",
+          "Le correlation ID est genere par le message broker et ne peut pas etre defini par l'application",
+          "Le correlation ID est equivalent au session ID et sert a maintenir l'etat utilisateur entre les services"
+        ],
+        answer: 1,
+        explanation: "Le correlation ID est un identifiant unique (generalement un UUID) genere des l'entree de la requete dans le systeme (API Gateway ou premier service). Il est ensuite propage dans les en-tetes HTTP (x-correlation-id), dans les messages du broker, et dans le contexte AsyncLocalStorage. Chaque service inclut ce correlation ID dans ses logs, ce qui permet de reconstituer le parcours complet d'une requete a travers tous les microservices. C'est un pilier fondamental de l'observabilite en architecture distribuee, complementaire au distributed tracing (OpenTelemetry)."
+      },
+      {
+        label: "Question 5",
+        text: "Qu'est-ce que la consistance eventuelle (eventual consistency) et pourquoi est-elle incontournable dans les systemes distribues ?",
+        code: null,
+        options: [
+          "La consistance eventuelle signifie que les donnees ne seront jamais coherentes entre les services",
+          "La consistance eventuelle garantit que toutes les lectures retournent toujours la derniere ecriture, avec un delai maximum configurable",
+          "La consistance eventuelle signifie que si aucune nouvelle mise a jour n'est effectuee, tous les replicas convergeront vers le meme etat ; c'est un compromis necessaire (theoreme CAP) pour assurer disponibilite et tolerance aux partitions",
+          "La consistance eventuelle est un anti-pattern qui doit toujours etre remplace par des transactions distribuees (2PC)"
+        ],
+        answer: 2,
+        explanation: "Le theoreme CAP demontre qu'un systeme distribue ne peut garantir simultanement la Coherence forte, la disponibilite (Availability) et la tolerance aux Partitions reseau. Comme les partitions sont inevitables, il faut choisir entre coherence forte (CP) et disponibilite (AP). La consistance eventuelle est le modele AP : apres une ecriture, il peut y avoir un delai avant que tous les noeuds voient la meme donnee, mais sans nouvelle modification, le systeme convergera vers un etat coherent. Le pattern Outbox avec un relay illustre parfaitement ce modele : l'ecriture locale est immediate, mais la propagation de l'evenement aux autres services prend un certain temps."
+      }
+    ];
+
+    let currentQuestion = 0, score = 0, answered = false;
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const total = questions.length;
+      document.getElementById('progressBar').style.width = ((currentQuestion / total) * 100) + '%';
+      document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} / ${total}`;
+      let html = `<div class="card">
+        <p class="question-label">${q.label}</p>
+        <p class="question-text">${q.text}</p>`;
+      if (q.code) {
+        html += `<pre><code>${q.code}</code></pre>`;
+      }
+      html += `<ul class="options">`;
+      q.options.forEach((opt, i) => {
+        html += `<li><label><input type="radio" name="q" value="${i}"> ${opt}</label></li>`;
+      });
+      html += `</ul>
+        <button class="btn btn-primary" id="validateBtn" onclick="validate()" disabled>Valider</button>
+        <div class="feedback" id="feedback"></div>
+      </div>`;
+      document.getElementById('quizContainer').innerHTML = html;
+      document.querySelectorAll('input[name="q"]').forEach(r => {
+        r.addEventListener('change', () => {
+          document.getElementById('validateBtn').disabled = false;
+        });
+      });
+      answered = false;
+    }
+
+    function validate() {
+      if (answered) {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          renderQuestion();
+        } else {
+          showScore();
+        }
+        return;
+      }
+      answered = true;
+      const selected = document.querySelector('input[name="q"]:checked');
+      if (!selected) return;
+      const val = parseInt(selected.value);
+      const q = questions[currentQuestion];
+      const fb = document.getElementById('feedback');
+      const btn = document.getElementById('validateBtn');
+      document.querySelectorAll('input[name="q"]').forEach(r => r.disabled = true);
+      if (val === q.answer) {
+        score++;
+        fb.className = 'feedback correct';
+        fb.innerHTML = `<strong>Correct !</strong> ${q.explanation}`;
+      } else {
+        fb.className = 'feedback wrong';
+        fb.innerHTML = `<strong>Incorrect.</strong> ${q.explanation}`;
+      }
+      btn.textContent = currentQuestion < questions.length - 1 ? 'Suivant' : 'Voir le score';
+    }
+
+    function showScore() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = `Termine !`;
+      const sc = document.getElementById('scoreContainer');
+      sc.classList.remove('hidden');
+      const pct = Math.round((score / questions.length) * 100);
+      let msg = pct === 100 ? 'Parfait !' : pct >= 60 ? 'Bien joue !' : 'Continuez a reviser !';
+      sc.innerHTML = `<div class="score">${score} / ${questions.length}</div>
+        <div class="score-label">${msg} (${pct}%)</div>
+        <button class="btn-restart" onclick="restart()">Recommencer</button>`;
+    }
+
+    function restart() {
+      currentQuestion = 0; score = 0; answered = false;
+      document.getElementById('scoreContainer').classList.add('hidden');
+      document.getElementById('quizContainer').classList.remove('hidden');
+      renderQuestion();
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>

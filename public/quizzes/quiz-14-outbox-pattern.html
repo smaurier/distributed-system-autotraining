@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz 14 — Outbox Pattern</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem; color: #ffffff; }
+    .subtitle { text-align: center; color: #8892b0; margin-bottom: 2rem; font-size: 1rem; }
+    .progress-bar-container { background: #0d1117; border-radius: 10px; height: 14px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-bar { background: linear-gradient(90deg, #0d6efd, #4dabf7); height: 100%; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+    .progress-text { text-align: center; color: #8892b0; margin-bottom: 1rem; font-size: 0.9rem; }
+    .card { background: #16213e; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .question-label { font-size: 0.85rem; color: #4dabf7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .question-text { font-size: 1.15rem; margin-bottom: 1.2rem; line-height: 1.5; color: #ffffff; }
+    pre { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem; overflow-x: auto; font-size: 0.95rem; }
+    code { font-family: 'Consolas', 'Fira Code', 'Courier New', monospace; color: #c9d1d9; }
+    .options { list-style: none; }
+    .options li { margin-bottom: 0.5rem; }
+    .options label { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: #0d1117; border: 2px solid #30363d; border-radius: 8px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 1rem; }
+    .options label:hover { border-color: #4dabf7; background: #1c2a4a; }
+    .options input[type="radio"] { accent-color: #0d6efd; width: 18px; height: 18px; flex-shrink: 0; }
+    .btn { display: inline-block; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-primary:hover { background: #3b82f6; }
+    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
+    .btn-restart { background: #238636; color: #fff; margin-top: 1rem; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-restart:hover { background: #2ea043; }
+    .feedback { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; display: none; }
+    .feedback.correct { background: #0f5132; border: 1px solid #198754; color: #d1fae5; display: block; }
+    .feedback.wrong { background: #842029; border: 1px solid #dc3545; color: #fdd; display: block; }
+    .score-card { text-align: center; padding: 3rem 2rem; }
+    .score-card .score { font-size: 3rem; font-weight: 700; color: #4dabf7; margin-bottom: 0.5rem; }
+    .score-card .score-label { font-size: 1.2rem; color: #8892b0; margin-bottom: 1.5rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz 14 — Outbox Pattern</h1>
+    <p class="subtitle">Dual write, outbox pattern, CDC, inbox pattern et consommateurs idempotents</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <p class="progress-text" id="progressText">Question 1 / 5</p>
+    <div id="quizContainer"></div>
+    <div id="scoreContainer" class="card score-card hidden"></div>
+  </div>
+  <script>
+    const questions = [
+      {
+        label: "Question 1 — Dual Write Problem",
+        text: "Quel est le probleme fondamental du code suivant ?",
+        code: "async function placeOrder(order) {\n  await database.save(order);        // Etape 1\n  await messageBroker.publish(        // Etape 2\n    'order.placed', order\n  );\n}",
+        options: [
+          "Le message sera toujours publie avant la sauvegarde en base",
+          "Si l'etape 2 echoue apres l'etape 1, la base contient la commande mais aucun message n'est publie, creant une incoherence",
+          "Les deux operations sont atomiques grace au await",
+          "Le message broker ne supporte pas les objets JSON"
+        ],
+        answer: 1,
+        explanation: "C'est le dual write problem : deux systemes (DB + broker) ne partagent pas de transaction. Si le publish echoue apres le save, on a un etat incoherent. L'outbox pattern resout ce probleme."
+      },
+      {
+        label: "Question 2 — Outbox Pattern",
+        text: "Comment le transactional outbox pattern resout-il le dual write problem ?",
+        code: "BEGIN TRANSACTION;\n  INSERT INTO orders (id, product, qty)\n    VALUES ('ord-1', 'Widget', 3);\n  INSERT INTO outbox (id, event_type, payload)\n    VALUES (uuid(), 'OrderPlaced',\n      '{\"orderId\":\"ord-1\"}');\nCOMMIT;",
+        options: [
+          "En utilisant une transaction distribuee (2PC) entre la base et le broker",
+          "En ecrivant l'evenement dans une table outbox dans la meme transaction que la donnee metier, puis un processus separe relay les messages vers le broker",
+          "En envoyant le message d'abord puis en sauvegardant en base ensuite",
+          "En dupliquant les donnees dans deux bases differentes"
+        ],
+        answer: 1,
+        explanation: "L'outbox pattern ecrit l'evenement dans la meme base (meme transaction ACID) que la donnee metier. Un relay (polling ou CDC) lit ensuite la table outbox et publie vers le broker. L'atomicite locale est garantie."
+      },
+      {
+        label: "Question 3 — CDC (Change Data Capture)",
+        text: "Quel est l'avantage principal du CDC (ex: Debezium) par rapport au polling de la table outbox ?",
+        code: "// Polling approach\nsetInterval(async () => {\n  const events = await db.query(\n    'SELECT * FROM outbox WHERE sent = false'\n  );\n  for (const evt of events) {\n    await broker.publish(evt);\n    await db.update(evt.id, { sent: true });\n  }\n}, 5000);  // toutes les 5 secondes",
+        options: [
+          "Le CDC elimine completement le besoin d'une table outbox",
+          "Le CDC est plus simple a configurer que le polling",
+          "Le CDC capture les changements en temps reel via le WAL de la base, reduisant la latence et la charge sur la base par rapport au polling periodique",
+          "Le CDC garantit l'exactly-once delivery sans effort supplementaire"
+        ],
+        answer: 2,
+        explanation: "Le CDC lit le write-ahead log (WAL) de la base de donnees en streaming, capturant chaque changement quasi instantanement sans faire de requetes SELECT repetees. Cela reduit la latence et la charge sur la base."
+      },
+      {
+        label: "Question 4 — Inbox Pattern",
+        text: "Un service consommateur recoit parfois le meme message deux fois (at-least-once delivery). Comment l'inbox pattern gere-t-il ce probleme ?",
+        code: null,
+        options: [
+          "En configurant le broker pour garantir exactly-once delivery",
+          "En stockant l'ID de chaque message traite dans une table inbox et en verifiant l'existence avant traitement, le tout dans une meme transaction",
+          "En ignorant tout message dont le timestamp est ancien",
+          "En utilisant un compteur global de messages pour detecter les doublons"
+        ],
+        answer: 1,
+        explanation: "L'inbox pattern enregistre le messageId dans une table inbox (avec contrainte UNIQUE). Avant de traiter un message, on verifie qu'il n'existe pas deja. L'insertion dans inbox et le traitement se font dans la meme transaction, garantissant l'idempotence."
+      },
+      {
+        label: "Question 5 — Idempotent Consumer",
+        text: "Parmi ces implementations, laquelle est veritablement idempotente ?",
+        code: "// Option A\nasync function handlePayment(event) {\n  await db.query(\n    `INSERT INTO payments (order_id, amount)\n     VALUES ($1, $2)\n     ON CONFLICT (order_id) DO NOTHING`,\n    [event.orderId, event.amount]\n  );\n}\n\n// Option B\nasync function handlePayment(event) {\n  const count = await db.query(\n    'SELECT count FROM payments WHERE order_id=$1',\n    [event.orderId]\n  );\n  if (!count) {\n    await db.query(\n      'INSERT INTO payments (order_id, amount) VALUES ($1,$2)',\n      [event.orderId, event.amount]\n    );\n  }\n}",
+        options: [
+          "Option B, car le SELECT verifie l'existence avant l'INSERT",
+          "Option A, car le ON CONFLICT DO NOTHING est atomique au niveau de la base",
+          "Les deux sont equivalentes et idempotentes",
+          "Aucune des deux n'est idempotente"
+        ],
+        answer: 1,
+        explanation: "L'option A utilise ON CONFLICT DO NOTHING qui est atomique : meme avec des appels concurrents, la contrainte UNIQUE empeche les doublons. L'option B a une race condition : deux threads peuvent faire le SELECT simultanement, ne rien trouver, et inserer deux fois."
+      }
+    ];
+    let currentQuestion = 0, score = 0, answered = false;
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const total = questions.length;
+      document.getElementById('progressBar').style.width = ((currentQuestion / total) * 100) + '%';
+      document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} / ${total}`;
+      let html = `<div class="card"><p class="question-label">${q.label}</p><p class="question-text">${q.text}</p>`;
+      if (q.code) html += `<pre><code>${q.code}</code></pre>`;
+      html += `<ul class="options">`;
+      q.options.forEach((opt, i) => { html += `<li><label><input type="radio" name="q" value="${i}"> ${opt}</label></li>`; });
+      html += `</ul><button class="btn btn-primary" id="validateBtn" onclick="validate()" disabled>Valider</button><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizContainer').innerHTML = html;
+      document.querySelectorAll('input[name="q"]').forEach(r => { r.addEventListener('change', () => { document.getElementById('validateBtn').disabled = false; }); });
+      answered = false;
+    }
+    function validate() {
+      if (answered) { currentQuestion++; if (currentQuestion < questions.length) renderQuestion(); else showScore(); return; }
+      answered = true;
+      const selected = document.querySelector('input[name="q"]:checked');
+      if (!selected) return;
+      const val = parseInt(selected.value);
+      const q = questions[currentQuestion];
+      const fb = document.getElementById('feedback');
+      const btn = document.getElementById('validateBtn');
+      document.querySelectorAll('input[name="q"]').forEach(r => r.disabled = true);
+      if (val === q.answer) { score++; fb.className = 'feedback correct'; fb.innerHTML = `<strong>Correct !</strong> ${q.explanation}`; }
+      else { fb.className = 'feedback wrong'; fb.innerHTML = `<strong>Incorrect.</strong> ${q.explanation}`; }
+      btn.textContent = currentQuestion < questions.length - 1 ? 'Suivant' : 'Voir le score';
+    }
+    function showScore() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = 'Termine !';
+      const sc = document.getElementById('scoreContainer');
+      sc.classList.remove('hidden');
+      const pct = Math.round((score / questions.length) * 100);
+      let msg = pct === 100 ? 'Parfait !' : pct >= 60 ? 'Bien joue !' : 'Continuez a reviser !';
+      sc.innerHTML = `<div class="score">${score} / ${questions.length}</div><div class="score-label">${msg} (${pct}%)</div><button class="btn-restart" onclick="restart()">Recommencer</button>`;
+    }
+    function restart() { currentQuestion = 0; score = 0; answered = false; document.getElementById('scoreContainer').classList.add('hidden'); document.getElementById('quizContainer').classList.remove('hidden'); renderQuestion(); }
+    renderQuestion();
+  </script>
+</body>
+</html>

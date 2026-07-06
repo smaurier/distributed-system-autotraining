@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consistent Hashing - Anneau de hachage</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, sans-serif; min-height: 100vh; }
+  h1 { text-align: center; padding: 16px 0 6px; font-size: 1.45rem; color: #c9d1d9; }
+  .layout { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 18px; max-width: 1260px; margin: 0 auto; }
+  .ring-panel { flex: 1 1 560px; background: #16213e; border-radius: 12px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 480px; }
+  .side { flex: 0 0 310px; display: flex; flex-direction: column; gap: 10px; }
+  .card { background: #16213e; border-radius: 10px; padding: 14px; }
+  .card h3 { font-size: .9rem; margin-bottom: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: .5px; }
+  button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: .84rem; transition: background .2s; }
+  button:hover { filter: brightness(1.15); }
+  button.red { background: #dc3545; }
+  input[type=text] { background: #0d1117; color: #e0e0e0; border: 1px solid #30363d; border-radius: 6px; padding: 7px 10px; width: 100%; font-size: .85rem; margin-bottom: 6px; }
+  input[type=range] { width: 100%; accent-color: #4dabf7; }
+  select { background: #0d1117; color: #e0e0e0; border: 1px solid #30363d; border-radius: 6px; padding: 6px; width: 100%; font-size: .85rem; margin-bottom: 6px; }
+  label { font-size: .82rem; color: #8b949e; display: block; margin-bottom: 2px; }
+  .row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .row button { flex: 1; }
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  th, td { padding: 5px 8px; border-bottom: 1px solid #21262d; text-align: center; }
+  th { color: #8b949e; font-weight: 600; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: .78rem; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .check-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .check-row input[type=checkbox] { accent-color: #4dabf7; }
+  svg text { font-family: 'Segoe UI', Tahoma, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Consistent Hashing &mdash; Anneau de hachage interactif</h1>
+<div class="layout">
+  <div class="ring-panel"><svg id="ring" viewBox="0 0 500 500" width="100%"></svg></div>
+  <div class="side">
+    <div class="card">
+      <h3>Noeuds</h3>
+      <div class="row"><button id="btn-add-node">Ajouter noeud</button><button id="btn-rm-node" class="red">Retirer noeud</button></div>
+      <select id="sel-node"></select>
+    </div>
+    <div class="card">
+      <h3>Cles</h3>
+      <input type="text" id="inp-key" placeholder="Nom de la cle...">
+      <button id="btn-add-key" style="width:100%">Ajouter cle</button>
+    </div>
+    <div class="card">
+      <h3>Noeuds virtuels</h3>
+      <div class="check-row"><input type="checkbox" id="chk-vn"><label for="chk-vn" style="margin:0">Activer noeuds virtuels</label></div>
+      <label>Nombre : <strong id="v-vn">3</strong></label>
+      <input type="range" id="sl-vn" min="1" max="10" value="3">
+    </div>
+    <div class="card">
+      <h3>Distribution</h3>
+      <table><thead><tr><th>Noeud</th><th>Cles</th><th>%</th></tr></thead><tbody id="dist-body"></tbody></table>
+      <div id="std-dev" style="font-size:.78rem;color:#8b949e;margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <h3>Legende</h3>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const CX = 250, CY = 250, R = 200;
+const COLORS = ['#58a6ff','#f78166','#d2a8ff','#7ee787','#ffc107','#ff7eb6','#79c0ff','#56d4dd','#e3b341','#bc8cff'];
+let nodes = [], keys = [], vnEnabled = false, vnCount = 3, nodeIdCounter = 0;
+
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) { h = ((h << 5) - h + str.charCodeAt(i)) | 0; }
+  return ((h % 3600) + 3600) % 3600;
+}
+
+function angleForHash(h) { return (h / 3600) * Math.PI * 2 - Math.PI / 2; }
+function posOnRing(h, r) { const a = angleForHash(h); return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) }; }
+
+function getAllSlots() {
+  const slots = [];
+  nodes.forEach(n => {
+    slots.push({ hash: n.hash, nodeId: n.id, virtual: false });
+    if (vnEnabled) {
+      for (let v = 1; v <= vnCount; v++) {
+        slots.push({ hash: hash(n.name + '#v' + v), nodeId: n.id, virtual: true });
+      }
+    }
+  });
+  slots.sort((a, b) => a.hash - b.hash);
+  return slots;
+}
+
+function assignKey(kHash, slots) {
+  if (slots.length === 0) return null;
+  for (const s of slots) { if (s.hash >= kHash) return s.nodeId; }
+  return slots[0].nodeId;
+}
+
+function nodeById(id) { return nodes.find(n => n.id === id); }
+
+function draw() {
+  const svg = document.getElementById('ring');
+  svg.innerHTML = '';
+  // Ring circle
+  const ringCircle = document.createElementNS(SVG_NS, 'circle');
+  Object.entries({cx:CX,cy:CY,r:R,fill:'none',stroke:'#30363d','stroke-width':2}).forEach(([k,v])=>ringCircle.setAttribute(k,v));
+  svg.appendChild(ringCircle);
+  // Degree ticks
+  for (let d = 0; d < 360; d += 30) {
+    const a = (d / 360) * Math.PI * 2 - Math.PI / 2;
+    const x1 = CX + (R - 6) * Math.cos(a), y1 = CY + (R - 6) * Math.sin(a);
+    const x2 = CX + (R + 6) * Math.cos(a), y2 = CY + (R + 6) * Math.sin(a);
+    const tick = document.createElementNS(SVG_NS, 'line');
+    Object.entries({x1,y1,x2,y2,stroke:'#484f58','stroke-width':1}).forEach(([k,v])=>tick.setAttribute(k,v));
+    svg.appendChild(tick);
+    const lbl = document.createElementNS(SVG_NS, 'text');
+    const lx = CX + (R + 18) * Math.cos(a), ly = CY + (R + 18) * Math.sin(a);
+    Object.entries({x:lx,y:ly,fill:'#484f58','font-size':'9','text-anchor':'middle','dominant-baseline':'middle'}).forEach(([k,v])=>lbl.setAttribute(k,v));
+    lbl.textContent = d + '\u00b0';
+    svg.appendChild(lbl);
+  }
+  const slots = getAllSlots();
+  // Virtual node markers
+  if (vnEnabled) {
+    slots.filter(s => s.virtual).forEach(s => {
+      const n = nodeById(s.nodeId); if (!n) return;
+      const p = posOnRing(s.hash, R);
+      const c = document.createElementNS(SVG_NS, 'circle');
+      Object.entries({cx:p.x,cy:p.y,r:5,fill:n.color,opacity:.4,stroke:n.color,'stroke-width':1}).forEach(([k,v])=>c.setAttribute(k,v));
+      svg.appendChild(c);
+    });
+  }
+  // Assign keys
+  keys.forEach(k => { k.owner = assignKey(k.hash, slots); });
+  // Keys on ring
+  keys.forEach(k => {
+    const p = posOnRing(k.hash, R);
+    const owner = nodeById(k.owner);
+    const col = owner ? owner.color : '#6c757d';
+    const diamond = document.createElementNS(SVG_NS, 'polygon');
+    const sz = 7;
+    diamond.setAttribute('points', `${p.x},${p.y-sz} ${p.x+sz},${p.y} ${p.x},${p.y+sz} ${p.x-sz},${p.y}`);
+    diamond.setAttribute('fill', col); diamond.setAttribute('stroke', '#fff'); diamond.setAttribute('stroke-width', '.5');
+    svg.appendChild(diamond);
+    const lbl = document.createElementNS(SVG_NS, 'text');
+    const inner = posOnRing(k.hash, R - 22);
+    Object.entries({x:inner.x,y:inner.y,fill:'#c9d1d9','font-size':'9','text-anchor':'middle','dominant-baseline':'middle'}).forEach(([kk,v])=>lbl.setAttribute(kk,v));
+    lbl.textContent = k.name;
+    svg.appendChild(lbl);
+  });
+  // Nodes on ring
+  nodes.forEach(n => {
+    const p = posOnRing(n.hash, R);
+    const g = document.createElementNS(SVG_NS, 'g');
+    const c = document.createElementNS(SVG_NS, 'circle');
+    Object.entries({cx:p.x,cy:p.y,r:14,fill:n.color,stroke:'#fff','stroke-width':2}).forEach(([k,v])=>c.setAttribute(k,v));
+    g.appendChild(c);
+    const t = document.createElementNS(SVG_NS, 'text');
+    const outer = posOnRing(n.hash, R + 32);
+    Object.entries({x:outer.x,y:outer.y,fill:n.color,'font-size':'11','font-weight':'600','text-anchor':'middle','dominant-baseline':'middle'}).forEach(([k,v])=>t.setAttribute(k,v));
+    t.textContent = n.name;
+    g.appendChild(t);
+    const ht = document.createElementNS(SVG_NS, 'text');
+    Object.entries({x:p.x,y:p.y+2,fill:'#fff','font-size':'8','font-weight':'700','text-anchor':'middle','dominant-baseline':'middle'}).forEach(([k,v])=>ht.setAttribute(k,v));
+    ht.textContent = Math.round(n.hash / 10);
+    g.appendChild(ht);
+    svg.appendChild(g);
+  });
+  updateDist();
+  updateLegend();
+  updateSelect();
+}
+
+function updateDist() {
+  const body = document.getElementById('dist-body');
+  body.innerHTML = '';
+  const counts = {};
+  nodes.forEach(n => counts[n.id] = 0);
+  keys.forEach(k => { if (k.owner !== null && counts[k.owner] !== undefined) counts[k.owner]++; });
+  const total = keys.length || 1;
+  nodes.forEach(n => {
+    const c = counts[n.id] || 0;
+    const pct = ((c / total) * 100).toFixed(1);
+    body.innerHTML += `<tr><td style="color:${n.color}">${n.name}</td><td>${c}</td><td>${pct}%</td></tr>`;
+  });
+  if (nodes.length > 0) {
+    const vals = nodes.map(n => counts[n.id] || 0);
+    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const variance = vals.reduce((a, b) => a + (b - mean) ** 2, 0) / vals.length;
+    document.getElementById('std-dev').textContent = `Ecart-type : ${Math.sqrt(variance).toFixed(2)}`;
+  } else {
+    document.getElementById('std-dev').textContent = '';
+  }
+}
+
+function updateLegend() {
+  const leg = document.getElementById('legend');
+  leg.innerHTML = '';
+  nodes.forEach(n => {
+    leg.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${n.color}"></div>${n.name}</div>`;
+  });
+}
+
+function updateSelect() {
+  const sel = document.getElementById('sel-node');
+  sel.innerHTML = '';
+  nodes.forEach(n => { sel.innerHTML += `<option value="${n.id}">${n.name}</option>`; });
+}
+
+function addNode() {
+  const id = ++nodeIdCounter;
+  const name = 'N' + id;
+  const h = hash(name);
+  const color = COLORS[(id - 1) % COLORS.length];
+  nodes.push({ id, name, hash: h, color });
+  draw();
+}
+
+function removeNode() {
+  const sel = document.getElementById('sel-node');
+  const id = +sel.value;
+  if (!id) return;
+  nodes = nodes.filter(n => n.id !== id);
+  draw();
+}
+
+function addKey() {
+  const inp = document.getElementById('inp-key');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (keys.find(k => k.name === name)) return;
+  const h = hash(name);
+  keys.push({ name, hash: h, owner: null });
+  inp.value = '';
+  draw();
+}
+
+document.getElementById('btn-add-node').addEventListener('click', addNode);
+document.getElementById('btn-rm-node').addEventListener('click', removeNode);
+document.getElementById('btn-add-key').addEventListener('click', addKey);
+document.getElementById('inp-key').addEventListener('keydown', e => { if (e.key === 'Enter') addKey(); });
+document.getElementById('chk-vn').addEventListener('change', e => { vnEnabled = e.target.checked; draw(); });
+document.getElementById('sl-vn').addEventListener('input', e => { vnCount = +e.target.value; document.getElementById('v-vn').textContent = vnCount; if (vnEnabled) draw(); });
+
+// Initial nodes
+addNode(); addNode(); addNode();
+['utilisateur:1','commande:42','session:abc','panier:7','produit:99'].forEach(k => {
+  keys.push({ name: k, hash: hash(k), owner: null });
+});
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz 17 — Rate Limiting</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem; color: #ffffff; }
+    .subtitle { text-align: center; color: #8892b0; margin-bottom: 2rem; font-size: 1rem; }
+    .progress-bar-container { background: #0d1117; border-radius: 10px; height: 14px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-bar { background: linear-gradient(90deg, #0d6efd, #4dabf7); height: 100%; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+    .progress-text { text-align: center; color: #8892b0; margin-bottom: 1rem; font-size: 0.9rem; }
+    .card { background: #16213e; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .question-label { font-size: 0.85rem; color: #4dabf7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .question-text { font-size: 1.15rem; margin-bottom: 1.2rem; line-height: 1.5; color: #ffffff; }
+    pre { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem; overflow-x: auto; font-size: 0.95rem; }
+    code { font-family: 'Consolas', 'Fira Code', 'Courier New', monospace; color: #c9d1d9; }
+    .options { list-style: none; }
+    .options li { margin-bottom: 0.5rem; }
+    .options label { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: #0d1117; border: 2px solid #30363d; border-radius: 8px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 1rem; }
+    .options label:hover { border-color: #4dabf7; background: #1c2a4a; }
+    .options input[type="radio"] { accent-color: #0d6efd; width: 18px; height: 18px; flex-shrink: 0; }
+    .btn { display: inline-block; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-primary:hover { background: #3b82f6; }
+    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
+    .btn-restart { background: #238636; color: #fff; margin-top: 1rem; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-restart:hover { background: #2ea043; }
+    .feedback { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; display: none; }
+    .feedback.correct { background: #0f5132; border: 1px solid #198754; color: #d1fae5; display: block; }
+    .feedback.wrong { background: #842029; border: 1px solid #dc3545; color: #fdd; display: block; }
+    .score-card { text-align: center; padding: 3rem 2rem; }
+    .score-card .score { font-size: 3rem; font-weight: 700; color: #4dabf7; margin-bottom: 0.5rem; }
+    .score-card .score-label { font-size: 1.2rem; color: #8892b0; margin-bottom: 1.5rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz 17 — Rate Limiting</h1>
+    <p class="subtitle">Token bucket, sliding window, load shedding et rate limit headers</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <p class="progress-text" id="progressText">Question 1 / 5</p>
+    <div id="quizContainer"></div>
+    <div id="scoreContainer" class="card score-card hidden"></div>
+  </div>
+  <script>
+    const questions = [
+      {
+        label: "Question 1 — Token Bucket",
+        text: "Un token bucket est configure avec une capacite de 10 tokens et un taux de remplissage de 2 tokens/seconde. Le bucket est plein. Un client envoie 12 requetes d'un coup. Que se passe-t-il ?",
+        code: "const limiter = new TokenBucket({\n  capacity: 10,\n  refillRate: 2,    // tokens par seconde\n  refillInterval: 1000\n});",
+        options: [
+          "Les 12 requetes sont acceptees car le taux de remplissage compense",
+          "Les 10 premieres requetes sont acceptees (consommant tous les tokens), les 2 dernieres sont rejetees avec HTTP 429",
+          "Toutes les requetes sont rejetees car 12 depasse la capacite",
+          "Les requetes sont mises en file d'attente et traitees a 2/seconde"
+        ],
+        answer: 1,
+        explanation: "Le token bucket permet des bursts jusqu'a sa capacite (10). Les 10 premiers tokens sont consommes immediatement. Les 2 requetes restantes sont rejetees. Apres 1 seconde, 2 nouveaux tokens seront disponibles."
+      },
+      {
+        label: "Question 2 — Sliding Window Log",
+        text: "Quel est l'avantage du sliding window log par rapport au fixed window counter ?",
+        code: "// Fixed window: fenetre de 1 min, limite 100 req\n// 10:00:00 - 10:00:59 → compteur = 0..100\n// 10:01:00 - 10:01:59 → compteur reset a 0\n\n// Probleme: 90 req a 10:00:55 + 90 req a 10:01:05\n// = 180 req en 10 secondes!",
+        options: [
+          "Le sliding window log utilise moins de memoire",
+          "Le sliding window log est plus rapide a calculer",
+          "Le sliding window log elimine le probleme de frontiere de fenetre : un client ne peut pas exploiter le reset du compteur pour depasser la limite reelle",
+          "Le sliding window log fonctionne sans horloge synchronisee"
+        ],
+        answer: 2,
+        explanation: "Le fixed window a un probleme de frontiere : un client peut envoyer le maximum juste avant et juste apres le reset, doublant le debit sur une courte periode. Le sliding window log garde un historique des timestamps et calcule une fenetre glissante, eliminant ce probleme."
+      },
+      {
+        label: "Question 3 — Rate Limit Headers",
+        text: "Que signifient ces headers dans la reponse HTTP ?",
+        code: "HTTP/1.1 200 OK\nX-RateLimit-Limit: 1000\nX-RateLimit-Remaining: 42\nX-RateLimit-Reset: 1709913600\nRetry-After: 30",
+        options: [
+          "Le client a 42 requetes restantes sur un quota de 1000, le quota se reinitialise au timestamp Unix 1709913600, et en cas de rejet il devrait reessayer apres 30 secondes",
+          "Le client a fait 42 requetes et il lui en reste 1000",
+          "Le serveur va redemarrer dans 30 secondes",
+          "Le client doit attendre 42 secondes avant la prochaine requete"
+        ],
+        answer: 0,
+        explanation: "X-RateLimit-Limit est le quota total, X-RateLimit-Remaining est le nombre de requetes restantes, X-RateLimit-Reset est le timestamp Unix de reinitialisation, et Retry-After indique combien de secondes attendre en cas de HTTP 429."
+      },
+      {
+        label: "Question 4 — Load Shedding",
+        text: "Quelle strategie de load shedding est la plus intelligente pour un service qui gere a la fois des requetes de paiement et des requetes d'analytics ?",
+        code: null,
+        options: [
+          "Rejeter toutes les requetes aleatoirement quand le serveur est surcharge",
+          "Rejeter les requetes les plus anciennes en premier (LIFO)",
+          "Utiliser un load shedding base sur la priorite : proteger les requetes critiques (paiement) et delester les requetes secondaires (analytics) en premier",
+          "Augmenter le timeout pour absorber le pic"
+        ],
+        answer: 2,
+        explanation: "Le priority-based load shedding categorise les requetes. En cas de surcharge, les requetes basse priorite (analytics, recommendations) sont rejetees en premier pour preserver la capacite des requetes haute priorite (paiement, authentification). C'est plus intelligent qu'un rejet aveugle."
+      },
+      {
+        label: "Question 5 — Distributed Rate Limiting",
+        text: "Un API Gateway avec 4 instances doit limiter un client a 100 req/min au total. Chaque instance a un rate limiter local configure a 25 req/min. Quel probleme cela pose-t-il ?",
+        code: "// Instance 1: local limit = 25 req/min\n// Instance 2: local limit = 25 req/min\n// Instance 3: local limit = 25 req/min\n// Instance 4: local limit = 25 req/min\n// Total theorique: 100 req/min",
+        options: [
+          "Aucun probleme, 4 x 25 = 100 comme souhaite",
+          "Si le load balancer n'est pas parfaitement round-robin, un client peut etre limite a seulement 25 req/min (tout le trafic vers une instance) ou obtenir jusqu'a 100 req/min selon la distribution",
+          "Les 4 instances vont se synchroniser automatiquement",
+          "Le client sera toujours limite a 25 req/min"
+        ],
+        answer: 1,
+        explanation: "Le rate limiting local ne connait pas l'etat des autres instances. Avec un sticky session, le client n'a que 25 req/min. Avec un round-robin parfait, il a 100 req/min. La solution est un rate limiter centralise (ex: Redis + Lua script) partage entre toutes les instances."
+      }
+    ];
+    let currentQuestion = 0, score = 0, answered = false;
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const total = questions.length;
+      document.getElementById('progressBar').style.width = ((currentQuestion / total) * 100) + '%';
+      document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} / ${total}`;
+      let html = `<div class="card"><p class="question-label">${q.label}</p><p class="question-text">${q.text}</p>`;
+      if (q.code) html += `<pre><code>${q.code}</code></pre>`;
+      html += `<ul class="options">`;
+      q.options.forEach((opt, i) => { html += `<li><label><input type="radio" name="q" value="${i}"> ${opt}</label></li>`; });
+      html += `</ul><button class="btn btn-primary" id="validateBtn" onclick="validate()" disabled>Valider</button><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizContainer').innerHTML = html;
+      document.querySelectorAll('input[name="q"]').forEach(r => { r.addEventListener('change', () => { document.getElementById('validateBtn').disabled = false; }); });
+      answered = false;
+    }
+    function validate() {
+      if (answered) { currentQuestion++; if (currentQuestion < questions.length) renderQuestion(); else showScore(); return; }
+      answered = true;
+      const selected = document.querySelector('input[name="q"]:checked');
+      if (!selected) return;
+      const val = parseInt(selected.value);
+      const q = questions[currentQuestion];
+      const fb = document.getElementById('feedback');
+      const btn = document.getElementById('validateBtn');
+      document.querySelectorAll('input[name="q"]').forEach(r => r.disabled = true);
+      if (val === q.answer) { score++; fb.className = 'feedback correct'; fb.innerHTML = `<strong>Correct !</strong> ${q.explanation}`; }
+      else { fb.className = 'feedback wrong'; fb.innerHTML = `<strong>Incorrect.</strong> ${q.explanation}`; }
+      btn.textContent = currentQuestion < questions.length - 1 ? 'Suivant' : 'Voir le score';
+    }
+    function showScore() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = 'Termine !';
+      const sc = document.getElementById('scoreContainer');
+      sc.classList.remove('hidden');
+      const pct = Math.round((score / questions.length) * 100);
+      let msg = pct === 100 ? 'Parfait !' : pct >= 60 ? 'Bien joue !' : 'Continuez a reviser !';
+      sc.innerHTML = `<div class="score">${score} / ${questions.length}</div><div class="score-label">${msg} (${pct}%)</div><button class="btn-restart" onclick="restart()">Recommencer</button>`;
+    }
+    function restart() { currentQuestion = 0; score = 0; answered = false; document.getElementById('scoreContainer').classList.add('hidden'); document.getElementById('quizContainer').classList.remove('hidden'); renderQuestion(); }
+    renderQuestion();
+  </script>
+</body>
+</html>

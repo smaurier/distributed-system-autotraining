@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raft Consensus - Election et replication</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, sans-serif; min-height: 100vh; }
+  h1 { text-align: center; padding: 14px 0 4px; font-size: 1.4rem; color: #c9d1d9; }
+  .layout { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px 16px; max-width: 1280px; margin: 0 auto; }
+  .main-panel { flex: 1 1 580px; display: flex; flex-direction: column; gap: 10px; }
+  .side-panel { flex: 0 0 320px; display: flex; flex-direction: column; gap: 10px; }
+  .card { background: #16213e; border-radius: 10px; padding: 12px; }
+  .card h3 { font-size: .88rem; margin-bottom: 8px; color: #8b949e; text-transform: uppercase; letter-spacing: .5px; }
+  button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 7px 13px; cursor: pointer; font-size: .83rem; transition: background .2s; }
+  button:hover { filter: brightness(1.15); }
+  button.red { background: #dc3545; }
+  button.yellow { background: #ffc107; color: #000; }
+  button.blue { background: #4dabf7; color: #000; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .btn-row button { flex: 1 1 auto; }
+  input[type=text] { background: #0d1117; color: #e0e0e0; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; font-size: .84rem; width: 120px; }
+  .term-display { text-align: center; font-size: 1.6rem; font-weight: 700; color: #58a6ff; margin: 4px 0; }
+  .term-label { text-align: center; font-size: .78rem; color: #8b949e; }
+  svg text { font-family: 'Segoe UI', Tahoma, sans-serif; }
+  .log-panel { max-height: 180px; overflow-y: auto; }
+  .log-entry { font-size: .76rem; padding: 3px 6px; border-bottom: 1px solid #21262d; }
+  .log-entry .ts { color: #8b949e; margin-right: 6px; }
+  .node-logs { display: flex; flex-direction: column; gap: 4px; }
+  .node-log-row { display: flex; align-items: center; gap: 6px; font-size: .78rem; }
+  .node-log-row .nlabel { min-width: 28px; font-weight: 600; }
+  .log-block { width: 22px; height: 18px; border-radius: 3px; display: inline-block; border: 1px solid #30363d; }
+  .log-block.committed { background: #238636; }
+  .log-block.uncommitted { background: #ffc107; }
+  .log-block.empty { background: #21262d; }
+  .commit-line { border-left: 2px dashed #58a6ff; height: 100%; position: absolute; }
+  .state-legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: .76rem; }
+  .state-legend span { display: flex; align-items: center; gap: 4px; }
+  .state-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+  @keyframes msgMove { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+</style>
+</head>
+<body>
+<h1>Raft Consensus &mdash; Election et replication</h1>
+<div class="layout">
+  <div class="main-panel">
+    <div class="card" style="min-height:340px">
+      <svg id="raft-svg" viewBox="0 0 560 380" width="100%"></svg>
+    </div>
+    <div class="card">
+      <h3>Journal de replication</h3>
+      <div class="node-logs" id="node-logs"></div>
+    </div>
+  </div>
+  <div class="side-panel">
+    <div class="card">
+      <div class="term-label">Terme actuel</div>
+      <div class="term-display" id="term-val">0</div>
+    </div>
+    <div class="card">
+      <h3>Controles</h3>
+      <div class="btn-row">
+        <button id="btn-election">Demarrer election</button>
+        <button id="btn-kill" class="red">Tuer le leader</button>
+      </div>
+      <div class="btn-row">
+        <input type="text" id="inp-val" placeholder="Valeur...">
+        <button id="btn-propose">Proposer valeur</button>
+      </div>
+      <div class="btn-row">
+        <button id="btn-step" class="yellow">Etape suivante</button>
+        <button id="btn-reset" class="blue">Reset</button>
+      </div>
+      <div class="state-legend">
+        <span><div class="dot" style="background:#4dabf7"></div>Follower</span>
+        <span><div class="dot" style="background:#ffc107"></div>Candidate</span>
+        <span><div class="dot" style="background:#238636"></div>Leader</span>
+        <span><div class="dot" style="background:#6c757d"></div>Mort</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Evenements</h3>
+      <div class="log-panel" id="event-log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('raft-svg');
+const COLORS = { follower: '#4dabf7', candidate: '#ffc107', leader: '#238636', dead: '#6c757d' };
+const STATE_LABEL = { follower: 'Follower', candidate: 'Candidate', leader: 'Leader', dead: 'Mort' };
+const N = 5, CX = 280, CY = 195, RAD = 140;
+let term = 0, stepQueue = [], animating = false;
+let nodesData = [];
+let msgAnimations = [];
+
+function initNodes() {
+  nodesData = [];
+  for (let i = 0; i < N; i++) {
+    const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
+    nodesData.push({
+      id: i + 1, state: 'follower', term: 0, votedFor: null, votes: 0,
+      x: CX + RAD * Math.cos(angle), y: CY + RAD * Math.sin(angle),
+      log: []
+    });
+  }
+  term = 0;
+}
+
+function draw() {
+  svg.querySelectorAll('.node-g, .msg-g').forEach(e => e.remove());
+  nodesData.forEach(n => {
+    const g = document.createElementNS(SVG_NS, 'g'); g.classList.add('node-g');
+    const c = document.createElementNS(SVG_NS, 'circle');
+    const col = COLORS[n.state];
+    const strokeW = n.state === 'leader' ? 4 : 2;
+    Object.entries({cx:n.x, cy:n.y, r:32, fill: n.state === 'dead' ? '#2d333b' : '#0d1117', stroke: col, 'stroke-width': strokeW}).forEach(([k,v])=>c.setAttribute(k,v));
+    if (n.state === 'leader') c.setAttribute('filter', 'drop-shadow(0 0 8px #238636)');
+    g.appendChild(c);
+    const idText = document.createElementNS(SVG_NS, 'text');
+    Object.entries({x:n.x, y:n.y-10, fill:'#fff', 'font-size':'14', 'font-weight':'700', 'text-anchor':'middle', 'dominant-baseline':'middle'}).forEach(([k,v])=>idText.setAttribute(k,v));
+    idText.textContent = 'S' + n.id;
+    g.appendChild(idText);
+    const stText = document.createElementNS(SVG_NS, 'text');
+    Object.entries({x:n.x, y:n.y+6, fill: col, 'font-size':'9', 'text-anchor':'middle', 'dominant-baseline':'middle'}).forEach(([k,v])=>stText.setAttribute(k,v));
+    stText.textContent = STATE_LABEL[n.state];
+    g.appendChild(stText);
+    const tText = document.createElementNS(SVG_NS, 'text');
+    Object.entries({x:n.x, y:n.y+18, fill:'#8b949e', 'font-size':'9', 'text-anchor':'middle', 'dominant-baseline':'middle'}).forEach(([k,v])=>tText.setAttribute(k,v));
+    tText.textContent = 'T=' + n.term;
+    g.appendChild(tText);
+    svg.appendChild(g);
+  });
+  document.getElementById('term-val').textContent = term;
+  drawLogs();
+}
+
+function drawLogs() {
+  const container = document.getElementById('node-logs');
+  container.innerHTML = '';
+  const maxLen = Math.max(6, ...nodesData.map(n => n.log.length));
+  const commitIdx = getCommitIndex();
+  nodesData.forEach(n => {
+    const row = document.createElement('div'); row.className = 'node-log-row';
+    row.innerHTML = `<span class="nlabel" style="color:${COLORS[n.state]}">S${n.id}</span>`;
+    for (let i = 0; i < maxLen; i++) {
+      const block = document.createElement('span'); block.className = 'log-block';
+      if (i < n.log.length) {
+        block.classList.add(i < commitIdx ? 'committed' : 'uncommitted');
+        block.title = `[${i}] ${n.log[i].val} (T${n.log[i].term})`;
+        block.textContent = '';
+        block.style.fontSize = '8px'; block.style.textAlign = 'center'; block.style.lineHeight = '18px'; block.style.color = '#000';
+        block.textContent = n.log[i].val.substring(0, 2);
+      } else {
+        block.classList.add('empty');
+      }
+      row.appendChild(block);
+    }
+    container.appendChild(row);
+  });
+}
+
+function getCommitIndex() {
+  const leader = nodesData.find(n => n.state === 'leader');
+  if (!leader) return 0;
+  const alive = nodesData.filter(n => n.state !== 'dead');
+  const lengths = alive.map(n => n.log.length).sort((a,b) => a - b);
+  return lengths[Math.floor(lengths.length / 2)] || 0;
+}
+
+function addEvent(msg) {
+  const log = document.getElementById('event-log');
+  const ts = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const el = document.createElement('div'); el.className = 'log-entry';
+  el.innerHTML = `<span class="ts">${ts}</span>${msg}`;
+  log.prepend(el);
+  if (log.children.length > 60) log.removeChild(log.lastChild);
+}
+
+function animateMsg(fromNode, toNode, label, color, callback) {
+  const g = document.createElementNS(SVG_NS, 'g'); g.classList.add('msg-g');
+  const circle = document.createElementNS(SVG_NS, 'circle');
+  circle.setAttribute('r', '6'); circle.setAttribute('fill', color);
+  g.appendChild(circle);
+  const text = document.createElementNS(SVG_NS, 'text');
+  Object.entries({fill:'#fff','font-size':'8','text-anchor':'middle',dy:'-10'}).forEach(([k,v])=>text.setAttribute(k,v));
+  text.textContent = label;
+  g.appendChild(text);
+  svg.appendChild(g);
+  const dx = toNode.x - fromNode.x, dy = toNode.y - fromNode.y;
+  const dur = 600;
+  let start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / dur, 1);
+    const cx = fromNode.x + dx * p, cy = fromNode.y + dy * p;
+    circle.setAttribute('cx', cx); circle.setAttribute('cy', cy);
+    text.setAttribute('x', cx); text.setAttribute('y', cy);
+    if (p < 1) requestAnimationFrame(step);
+    else { g.remove(); if (callback) callback(); }
+  }
+  requestAnimationFrame(step);
+}
+
+function aliveFollowers() { return nodesData.filter(n => n.state === 'follower' && n.state !== 'dead'); }
+function getLeader() { return nodesData.find(n => n.state === 'leader'); }
+
+function startElection() {
+  const followers = nodesData.filter(n => n.state === 'follower');
+  if (followers.length === 0) { addEvent('Aucun follower disponible pour lancer une election.'); return; }
+  const candidate = followers[Math.floor(Math.random() * followers.length)];
+  term++;
+  candidate.state = 'candidate';
+  candidate.term = term;
+  candidate.votedFor = candidate.id;
+  candidate.votes = 1;
+  addEvent(`<b>S${candidate.id}</b> devient Candidate (terme ${term})`);
+  draw();
+  const targets = nodesData.filter(n => n.id !== candidate.id && n.state !== 'dead');
+  let responded = 0;
+  targets.forEach((t, idx) => {
+    setTimeout(() => {
+      animateMsg(candidate, t, 'ReqVote', '#ffc107', () => {
+        const grant = t.votedFor === null || t.votedFor === candidate.id;
+        if (grant) { t.votedFor = candidate.id; t.term = term; }
+        setTimeout(() => {
+          animateMsg(t, candidate, grant ? 'Oui' : 'Non', grant ? '#238636' : '#dc3545', () => {
+            if (grant) candidate.votes++;
+            responded++;
+            addEvent(`S${t.id} vote ${grant ? 'OUI' : 'NON'} pour S${candidate.id} (${candidate.votes}/${N})`);
+            if (responded === targets.length) {
+              const majority = Math.floor(N / 2) + 1;
+              if (candidate.votes >= majority && candidate.state === 'candidate') {
+                candidate.state = 'leader';
+                addEvent(`<b>S${candidate.id}</b> elu Leader avec ${candidate.votes} votes (terme ${term})`);
+                nodesData.filter(n => n.state === 'candidate' && n.id !== candidate.id).forEach(n => { n.state = 'follower'; });
+              } else {
+                candidate.state = 'follower';
+                addEvent(`Election echouee pour S${candidate.id}`);
+              }
+              nodesData.forEach(n => n.votedFor = null);
+              draw();
+            }
+          });
+        }, 200);
+      });
+    }, idx * 300);
+  });
+}
+
+function killLeader() {
+  const leader = getLeader();
+  if (!leader) { addEvent('Aucun leader actif a tuer.'); return; }
+  leader.state = 'dead';
+  addEvent(`<b>S${leader.id}</b> est mort!`);
+  draw();
+  setTimeout(() => {
+    addEvent('Timeout detecte, nouvelle election...');
+    startElection();
+  }, 1500);
+}
+
+function proposeValue() {
+  const inp = document.getElementById('inp-val');
+  const val = inp.value.trim();
+  if (!val) return;
+  inp.value = '';
+  const leader = getLeader();
+  if (!leader) { addEvent('Pas de leader! Impossible de proposer.'); return; }
+  leader.log.push({ val, term });
+  addEvent(`Leader S${leader.id} ajoute "${val}" a son journal`);
+  draw();
+  const targets = nodesData.filter(n => n.id !== leader.id && n.state !== 'dead');
+  let acked = 0;
+  targets.forEach((t, idx) => {
+    setTimeout(() => {
+      animateMsg(leader, t, 'Append', '#58a6ff', () => {
+        t.log.push({ val, term });
+        t.term = term;
+        setTimeout(() => {
+          animateMsg(t, leader, 'ACK', '#238636', () => {
+            acked++;
+            addEvent(`S${t.id} replique "${val}" (${acked + 1}/${N} copies)`);
+            draw();
+            if (acked === targets.length) {
+              addEvent(`"${val}" replique et commite (majorite atteinte)`);
+            }
+          });
+        }, 150);
+      });
+    }, idx * 350);
+  });
+}
+
+function resetAll() {
+  initNodes();
+  document.getElementById('event-log').innerHTML = '';
+  addEvent('Systeme reinitialise. Tous les noeuds sont Follower.');
+  draw();
+}
+
+document.getElementById('btn-election').addEventListener('click', startElection);
+document.getElementById('btn-kill').addEventListener('click', killLeader);
+document.getElementById('btn-propose').addEventListener('click', proposeValue);
+document.getElementById('inp-val').addEventListener('keydown', e => { if (e.key === 'Enter') proposeValue(); });
+document.getElementById('btn-step').addEventListener('click', () => {
+  addEvent('Mode etape par etape : cliquez sur les autres boutons pour avancer.');
+});
+document.getElementById('btn-reset').addEventListener('click', resetAll);
+
+initNodes();
+addEvent('Systeme pret. 5 noeuds initialises en Follower.');
+draw();
+</script>
+</body>
+</html>

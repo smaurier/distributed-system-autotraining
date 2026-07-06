@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz 25 — Docker en profondeur</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem; color: #ffffff; }
+    .subtitle { text-align: center; color: #8892b0; margin-bottom: 2rem; font-size: 1rem; }
+    .progress-bar-container { background: #0d1117; border-radius: 10px; height: 14px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-bar { background: linear-gradient(90deg, #0d6efd, #4dabf7); height: 100%; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+    .progress-text { text-align: center; color: #8892b0; margin-bottom: 1rem; font-size: 0.9rem; }
+    .card { background: #16213e; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .question-label { font-size: 0.85rem; color: #4dabf7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .question-text { font-size: 1.15rem; margin-bottom: 1.2rem; line-height: 1.5; color: #ffffff; }
+    pre { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem; overflow-x: auto; font-size: 0.95rem; }
+    code { font-family: 'Consolas', 'Fira Code', 'Courier New', monospace; color: #c9d1d9; }
+    .options { list-style: none; }
+    .options li { margin-bottom: 0.5rem; }
+    .options label { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: #0d1117; border: 2px solid #30363d; border-radius: 8px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 1rem; }
+    .options label:hover { border-color: #4dabf7; background: #1c2a4a; }
+    .options input[type="radio"] { accent-color: #0d6efd; width: 18px; height: 18px; flex-shrink: 0; }
+    .btn { display: inline-block; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-primary:hover { background: #3b82f6; }
+    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
+    .btn-restart { background: #238636; color: #fff; margin-top: 1rem; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-restart:hover { background: #2ea043; }
+    .feedback { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; display: none; }
+    .feedback.correct { background: #0f5132; border: 1px solid #198754; color: #d1fae5; display: block; }
+    .feedback.wrong { background: #842029; border: 1px solid #dc3545; color: #fdd; display: block; }
+    .score-card { text-align: center; padding: 3rem 2rem; }
+    .score-card .score { font-size: 3rem; font-weight: 700; color: #4dabf7; margin-bottom: 0.5rem; }
+    .score-card .score-label { font-size: 1.2rem; color: #8892b0; margin-bottom: 1.5rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz 25 — Docker en profondeur</h1>
+    <p class="subtitle">Layers, multi-stage builds, networking, securite et Docker Compose avance</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <p class="progress-text" id="progressText">Question 1 / 5</p>
+    <div id="quizContainer"></div>
+    <div id="scoreContainer" class="card score-card hidden"></div>
+  </div>
+  <script>
+    const questions = [
+      {
+        label: "Question 1 — Layers et cache",
+        text: "Pourquoi est-il recommande de copier package.json AVANT le code source dans un Dockerfile ?",
+        code: "# Mauvaise pratique\nCOPY . .\nRUN npm ci\n\n# Bonne pratique\nCOPY package*.json ./\nRUN npm ci\nCOPY src/ ./src/",
+        options: [
+          "Pour reduire la taille de l'image finale",
+          "Parce que npm necessite que package.json soit copie en premier",
+          "Pour que la layer npm ci soit cachee tant que package.json ne change pas, meme si le code source change. Cela evite de reinstaller les dependances a chaque build",
+          "Pour des raisons de securite, le code source doit toujours etre copie en dernier"
+        ],
+        answer: 2,
+        explanation: "Docker cache chaque layer. Si une layer change, toutes les layers suivantes sont invalidees. En copiant package.json separement, la layer 'npm ci' reste en cache tant que les dependances ne changent pas, meme si le code source est modifie. Cela accelere considerablement les builds."
+      },
+      {
+        label: "Question 2 — Multi-stage builds",
+        text: "Quel est l'avantage principal d'un build multi-stage dans Docker ?",
+        code: "# Stage 1: Build\nFROM node:20-alpine AS builder\nWORKDIR /app\nCOPY . .\nRUN npm ci && npm run build\n\n# Stage 2: Production\nFROM node:20-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nCMD [\"node\", \"dist/main.js\"]",
+        options: [
+          "Permettre d'utiliser plusieurs langages de programmation dans le meme container",
+          "L'image finale ne contient que les artefacts necessaires a l'execution, sans les outils de build (typescript, webpack, etc.). Cela reduit la taille de l'image et la surface d'attaque",
+          "Accelerer le temps de build en parallelisant les etapes",
+          "Permettre de deployer automatiquement sur Kubernetes"
+        ],
+        answer: 1,
+        explanation: "Le multi-stage build permet de separer l'environnement de build de l'environnement de production. Le stage final ne copie que les fichiers necessaires (dist, node_modules de production), eliminant TypeScript, les devDependencies, les fichiers sources, etc. L'image peut passer de 1GB a 200MB."
+      },
+      {
+        label: "Question 3 — Networking Docker",
+        text: "Dans Docker Compose, comment deux services sur des reseaux differents peuvent-ils communiquer ?",
+        code: "services:\n  api:\n    networks: [backend]\n  db:\n    networks: [backend]\n  frontend:\n    networks: [frontend]\n  gateway:\n    networks: [backend, frontend]",
+        options: [
+          "Ils communiquent automatiquement via localhost",
+          "Ils ne peuvent pas communiquer directement. Il faut un service connecte aux deux reseaux (comme le gateway ci-dessus) pour faire office de pont",
+          "Il suffit d'exposer les ports avec 'ports:' pour que tous les services se voient",
+          "Docker cree automatiquement des routes entre tous les reseaux"
+        ],
+        answer: 1,
+        explanation: "L'isolation reseau de Docker garantit que les services sur des reseaux differents ne peuvent pas se joindre par DNS. Un service attache a plusieurs reseaux (bridge) fait le pont. C'est un pattern courant pour les API gateways qui doivent acceder au frontend et au backend."
+      },
+      {
+        label: "Question 4 — Securite des containers",
+        text: "Pourquoi ne faut-il JAMAIS executer un container Docker en mode privileged en production ?",
+        code: "# DANGEREUX !\ndocker run --privileged my-app\n\n# Donne au container:\n# - Acces a TOUS les devices du host\n# - Capacite de modifier le kernel\n# - Possibilite de monter le filesystem du host\n# - Desactive toutes les protections seccomp/AppArmor",
+        options: [
+          "Le mode privileged rend le container plus lent",
+          "Le mode privileged desactive toutes les protections d'isolation (namespaces, seccomp, AppArmor). Le container a un acces complet au host, ce qui equivaut a executer en root directement sur la machine",
+          "Le mode privileged n'est pas supporte par Kubernetes",
+          "Le mode privileged consomme plus de memoire RAM"
+        ],
+        answer: 1,
+        explanation: "Le mode --privileged supprime toute l'isolation qui fait l'interet des containers. Le processus peut acceder aux devices du host, charger des modules kernel, et potentiellement s'echapper du container (container escape). En production, utilisez des capabilities specifiques avec --cap-add si necessaire."
+      },
+      {
+        label: "Question 5 — Docker Compose avance",
+        text: "Quelle est la bonne maniere de gerer des secrets (mots de passe, cles API) dans Docker Compose ?",
+        code: "# MAUVAIS: secrets en clair dans le fichier\nservices:\n  api:\n    environment:\n      DB_PASSWORD: 'super_secret_123'\n\n# BON: utilisation de Docker secrets\nservices:\n  api:\n    secrets:\n      - db_password\nsecrets:\n  db_password:\n    file: ./secrets/db_password.txt",
+        options: [
+          "Mettre les secrets en dur dans le Dockerfile avec ENV",
+          "Utiliser Docker secrets ou des references a des fichiers externes. Les secrets ne doivent jamais apparaitre dans les variables d'environnement en clair ni dans le docker-compose.yml commite en VCS",
+          "Encoder les secrets en base64 dans les variables d'environnement",
+          "Stocker les secrets dans les labels du container"
+        ],
+        answer: 1,
+        explanation: "Les Docker secrets sont montes en fichiers dans /run/secrets/ et ne sont jamais visibles dans docker inspect, les logs, ou le filesystem de l'image. Les variables d'environnement sont visibles partout. En production, utilisez un vault (HashiCorp Vault, AWS Secrets Manager) pour la rotation automatique."
+      }
+    ];
+    let currentQuestion = 0, score = 0, answered = false;
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const total = questions.length;
+      document.getElementById('progressBar').style.width = ((currentQuestion / total) * 100) + '%';
+      document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} / ${total}`;
+      let html = `<div class="card"><p class="question-label">${q.label}</p><p class="question-text">${q.text}</p>`;
+      if (q.code) html += `<pre><code>${q.code}</code></pre>`;
+      html += `<ul class="options">`;
+      q.options.forEach((opt, i) => { html += `<li><label><input type="radio" name="q" value="${i}"> ${opt}</label></li>`; });
+      html += `</ul><button class="btn btn-primary" id="validateBtn" onclick="validate()" disabled>Valider</button><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizContainer').innerHTML = html;
+      document.querySelectorAll('input[name="q"]').forEach(r => { r.addEventListener('change', () => { document.getElementById('validateBtn').disabled = false; }); });
+      answered = false;
+    }
+    function validate() {
+      if (answered) { currentQuestion++; if (currentQuestion < questions.length) renderQuestion(); else showScore(); return; }
+      answered = true;
+      const selected = document.querySelector('input[name="q"]:checked');
+      if (!selected) return;
+      const val = parseInt(selected.value);
+      const q = questions[currentQuestion];
+      const fb = document.getElementById('feedback');
+      const btn = document.getElementById('validateBtn');
+      document.querySelectorAll('input[name="q"]').forEach(r => r.disabled = true);
+      if (val === q.answer) { score++; fb.className = 'feedback correct'; fb.innerHTML = `<strong>Correct !</strong> ${q.explanation}`; }
+      else { fb.className = 'feedback wrong'; fb.innerHTML = `<strong>Incorrect.</strong> ${q.explanation}`; }
+      btn.textContent = currentQuestion < questions.length - 1 ? 'Suivant' : 'Voir le score';
+    }
+    function showScore() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = 'Termine !';
+      const sc = document.getElementById('scoreContainer');
+      sc.classList.remove('hidden');
+      const pct = Math.round((score / questions.length) * 100);
+      let msg = pct === 100 ? 'Parfait !' : pct >= 60 ? 'Bien joue !' : 'Continuez a reviser !';
+      sc.innerHTML = `<div class="score">${score} / ${questions.length}</div><div class="score-label">${msg} (${pct}%)</div><button class="btn-restart" onclick="restart()">Recommencer</button>`;
+    }
+    function restart() { currentQuestion = 0; score = 0; answered = false; document.getElementById('scoreContainer').classList.add('hidden'); document.getElementById('quizContainer').classList.remove('hidden'); renderQuestion(); }
+    renderQuestion();
+  </script>
+</body>
+</html>

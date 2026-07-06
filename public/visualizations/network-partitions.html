@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8 Fallacies &amp; Network Partitions</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+  h1{text-align:center;padding:20px;color:#00d4ff;font-size:1.6rem;text-shadow:0 0 12px rgba(0,212,255,.3)}
+  .container{display:flex;flex-wrap:wrap;gap:16px;padding:0 20px 20px;max-width:1400px;margin:0 auto}
+  .panel{background:#16213e;border-radius:12px;padding:16px;border:1px solid #0f3460}
+  .network-panel{flex:1 1 520px;min-height:480px;position:relative}
+  .sidebar{flex:1 1 340px;display:flex;flex-direction:column;gap:12px}
+  svg#netSvg{width:100%;height:420px}
+  .node-circle{cursor:pointer;transition:opacity .4s}
+  .node-label{fill:#e0e0e0;font-size:13px;text-anchor:middle;pointer-events:none}
+  .edge-line{stroke:#0f3460;stroke-width:2;transition:stroke .3s}
+  .edge-line.active{stroke:#00d4ff}
+  .edge-line.partitioned{stroke:#ff4444;stroke-dasharray:8 4}
+  .message-dot{fill:#00d4ff;filter:drop-shadow(0 0 4px #00d4ff)}
+  .message-dot.lost{fill:#ff4444;filter:drop-shadow(0 0 4px #ff4444)}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{background:#0f3460;color:#00d4ff;border:1px solid #00d4ff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .2s}
+  .btn:hover{background:#00d4ff;color:#1a1a2e}
+  .btn.danger{border-color:#ff4444;color:#ff4444}
+  .btn.danger:hover{background:#ff4444;color:#fff}
+  .btn.reset{border-color:#ffa500;color:#ffa500}
+  .btn.reset:hover{background:#ffa500;color:#1a1a2e}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .stat-card{background:#1a1a2e;border-radius:8px;padding:12px;text-align:center}
+  .stat-card .val{font-size:1.5rem;color:#00d4ff;font-weight:bold}
+  .stat-card .lbl{font-size:.75rem;color:#888;margin-top:4px}
+  .fallacies{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:340px;overflow-y:auto}
+  .fallacy-card{background:#1a1a2e;border:1px solid #0f3460;border-radius:8px;padding:10px;cursor:pointer;transition:all .25s;font-size:.8rem}
+  .fallacy-card:hover{border-color:#00d4ff;transform:translateY(-2px)}
+  .fallacy-card.selected{border-color:#ffa500;background:#1e2a4a}
+  .fallacy-card .num{color:#ffa500;font-weight:bold;font-size:.7rem}
+  .fallacy-card .title{color:#00d4ff;margin:4px 0 2px;font-size:.85rem}
+  .fallacy-card .desc{color:#888;font-size:.72rem}
+  .partition-wall{stroke:#ff4444;stroke-width:3;stroke-dasharray:10 5;opacity:0;transition:opacity .5s}
+  .partition-wall.visible{opacity:1}
+  .fail-x{font-size:28px;fill:#ff4444;text-anchor:middle;opacity:0;pointer-events:none}
+  @keyframes pulse{0%,100%{r:8}50%{r:11}}
+  .node-circle.leader{animation:pulse 1.5s infinite}
+  .latency-label{fill:#ffa500;font-size:11px;text-anchor:middle;opacity:0;transition:opacity .3s}
+  .latency-label.visible{opacity:1}
+</style>
+</head>
+<body>
+<h1>8 Fallacies of Distributed Computing &amp; Partitions Reseau</h1>
+<div class="container">
+  <div class="panel network-panel">
+    <svg id="netSvg"></svg>
+    <div class="controls">
+      <button class="btn" onclick="simulatePartition()">Simuler Partition</button>
+      <button class="btn" onclick="simulateLatency()">Simuler Latence</button>
+      <button class="btn danger" onclick="simulateFailure()">Simuler Panne</button>
+      <button class="btn" onclick="sendBurst()">Envoyer Messages</button>
+      <button class="btn reset" onclick="resetNetwork()">Reinitialiser</button>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="panel">
+      <h3 style="color:#ffa500;margin-bottom:8px;font-size:.95rem">Statistiques</h3>
+      <div class="stats">
+        <div class="stat-card"><div class="val" id="statSent">0</div><div class="lbl">Envoyes</div></div>
+        <div class="stat-card"><div class="val" id="statLost">0</div><div class="lbl">Perdus</div></div>
+        <div class="stat-card"><div class="val" id="statLatency">0</div><div class="lbl">Latence moy. (ms)</div></div>
+      </div>
+    </div>
+    <div class="panel" style="flex:1">
+      <h3 style="color:#ffa500;margin-bottom:8px;font-size:.95rem">Les 8 Fallacies</h3>
+      <div class="fallacies" id="fallacyList"></div>
+    </div>
+  </div>
+</div>
+<script>
+const SVG_NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('netSvg');
+const W=svg.clientWidth||560,H=420;
+svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+const fallacies=[
+  {title:"Le reseau est fiable",desc:"Les paquets se perdent, les connexions se coupent.",action:"partition"},
+  {title:"La latence est nulle",desc:"Chaque appel reseau a un cout temporel.",action:"latency"},
+  {title:"La bande passante est infinie",desc:"Les donnees saturent les liens.",action:"bandwidth"},
+  {title:"Le reseau est securise",desc:"Chaque noeud peut etre compromis.",action:"security"},
+  {title:"La topologie ne change pas",desc:"Les noeuds entrent et sortent.",action:"topology"},
+  {title:"Il y a un seul admin",desc:"Plusieurs equipes gerent le reseau.",action:"admin"},
+  {title:"Le cout de transport est nul",desc:"Serialisation, routage, etc. coutent cher.",action:"cost"},
+  {title:"Le reseau est homogene",desc:"Protocoles et OS differents coexistent.",action:"homogene"}
+];
+
+const CX=W/2, CY=H/2, R=140;
+const nodes=[];
+for(let i=0;i<5;i++){
+  const a=-Math.PI/2+i*2*Math.PI/5;
+  nodes.push({id:i, x:CX+R*Math.cos(a), y:CY+R*Math.sin(a), alive:true, group:i<3?0:1});
+}
+
+const edges=[];
+for(let i=0;i<5;i++) for(let j=i+1;j<5;j++) edges.push({a:i,b:j});
+
+let partitioned=false, latencyMode=false, extraLatency=0;
+let stats={sent:0,lost:0,totalLat:0,count:0};
+
+function drawNetwork(){
+  svg.innerHTML='';
+  // edges
+  edges.forEach((e,idx)=>{
+    const n1=nodes[e.a],n2=nodes[e.b];
+    const line=document.createElementNS(SVG_NS,'line');
+    line.setAttribute('x1',n1.x);line.setAttribute('y1',n1.y);
+    line.setAttribute('x2',n2.x);line.setAttribute('y2',n2.y);
+    line.classList.add('edge-line');
+    if(n1.alive&&n2.alive) line.classList.add('active');
+    if(partitioned && n1.group!==n2.group) line.classList.add('partitioned');
+    line.id=`edge-${e.a}-${e.b}`;
+    svg.appendChild(line);
+    // latency label
+    const lbl=document.createElementNS(SVG_NS,'text');
+    lbl.setAttribute('x',(n1.x+n2.x)/2);lbl.setAttribute('y',(n1.y+n2.y)/2-8);
+    lbl.classList.add('latency-label');
+    if(latencyMode && n1.alive && n2.alive){
+      lbl.classList.add('visible');
+      const lat=partitioned&&n1.group!==n2.group?'TIMEOUT':Math.round(5+extraLatency+Math.random()*extraLatency)+'ms';
+      lbl.textContent=lat;
+    }
+    svg.appendChild(lbl);
+  });
+  // partition wall
+  if(partitioned){
+    const wall=document.createElementNS(SVG_NS,'line');
+    wall.setAttribute('x1',CX);wall.setAttribute('y1',20);
+    wall.setAttribute('x2',CX);wall.setAttribute('y2',H-20);
+    wall.classList.add('partition-wall','visible');
+    svg.appendChild(wall);
+  }
+  // nodes
+  nodes.forEach(n=>{
+    const c=document.createElementNS(SVG_NS,'circle');
+    c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r',18);
+    c.setAttribute('fill',n.alive?'#00d4ff':'#ff4444');
+    c.setAttribute('opacity',n.alive?1:0.3);
+    c.classList.add('node-circle');
+    c.id=`node-${n.id}`;
+    svg.appendChild(c);
+    const lbl=document.createElementNS(SVG_NS,'text');
+    lbl.setAttribute('x',n.x);lbl.setAttribute('y',n.y+5);
+    lbl.classList.add('node-label');
+    lbl.textContent=`N${n.id+1}`;
+    svg.appendChild(lbl);
+    if(!n.alive){
+      const x=document.createElementNS(SVG_NS,'text');
+      x.setAttribute('x',n.x);x.setAttribute('y',n.y+8);
+      x.classList.add('fail-x');x.style.opacity=1;x.textContent='X';
+      svg.appendChild(x);
+    }
+  });
+}
+
+function sendMessage(fromId,toId){
+  const n1=nodes[fromId],n2=nodes[toId];
+  if(!n1.alive||!n2.alive) return;
+  const blocked=partitioned&&n1.group!==n2.group;
+  stats.sent++;
+  const dot=document.createElementNS(SVG_NS,'circle');
+  dot.setAttribute('cx',n1.x);dot.setAttribute('cy',n1.y);dot.setAttribute('r',5);
+  dot.classList.add('message-dot');
+  if(blocked) dot.classList.add('lost');
+  svg.appendChild(dot);
+  const dur=latencyMode?800+extraLatency*8:400;
+  const midX=(n1.x+n2.x)/2,midY=(n1.y+n2.y)/2;
+  const endX=blocked?midX:n2.x, endY=blocked?midY:n2.y;
+  let start=null;
+  function anim(ts){
+    if(!start)start=ts;
+    const p=Math.min((ts-start)/dur,1);
+    const cx=n1.x+(endX-n1.x)*p, cy=n1.y+(endY-n1.y)*p;
+    dot.setAttribute('cx',cx);dot.setAttribute('cy',cy);
+    if(p<1){requestAnimationFrame(anim);}
+    else{
+      if(blocked){
+        stats.lost++;
+        dot.setAttribute('r',8);
+        setTimeout(()=>dot.remove(),300);
+      } else {
+        stats.totalLat+=dur; stats.count++;
+        dot.remove();
+      }
+      updateStats();
+    }
+  }
+  requestAnimationFrame(anim);
+}
+
+function sendBurst(){
+  for(let k=0;k<6;k++){
+    setTimeout(()=>{
+      const i=Math.floor(Math.random()*5), j=(i+1+Math.floor(Math.random()*4))%5;
+      sendMessage(i,j);
+    },k*200);
+  }
+}
+
+function simulatePartition(){
+  partitioned=true;
+  nodes.forEach(n=>n.group=n.x<CX?0:1);
+  drawNetwork();
+  sendBurst();
+}
+
+function simulateLatency(){
+  latencyMode=true;
+  extraLatency=50+Math.random()*150;
+  drawNetwork();
+  sendBurst();
+}
+
+function simulateFailure(){
+  const alive=nodes.filter(n=>n.alive);
+  if(alive.length<=1) return;
+  const victim=alive[Math.floor(Math.random()*alive.length)];
+  victim.alive=false;
+  drawNetwork();
+}
+
+function resetNetwork(){
+  partitioned=false;latencyMode=false;extraLatency=0;
+  nodes.forEach(n=>{n.alive=true;});
+  stats={sent:0,lost:0,totalLat:0,count:0};
+  updateStats();drawNetwork();
+}
+
+function updateStats(){
+  document.getElementById('statSent').textContent=stats.sent;
+  document.getElementById('statLost').textContent=stats.lost;
+  document.getElementById('statLatency').textContent=stats.count?Math.round(stats.totalLat/stats.count):0;
+}
+
+// fallacy cards
+const list=document.getElementById('fallacyList');
+fallacies.forEach((f,i)=>{
+  const card=document.createElement('div');
+  card.className='fallacy-card';
+  card.innerHTML=`<div class="num">#${i+1}</div><div class="title">${f.title}</div><div class="desc">${f.desc}</div>`;
+  card.onclick=()=>{
+    document.querySelectorAll('.fallacy-card').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
+    if(f.action==='partition') simulatePartition();
+    else if(f.action==='latency') simulateLatency();
+    else if(f.action==='topology') simulateFailure();
+    else { sendBurst(); }
+  };
+  list.appendChild(card);
+});
+
+drawNetwork();
+</script>
+</body>
+</html>

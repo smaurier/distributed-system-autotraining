@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz 19 — Testing Distribue</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem; color: #ffffff; }
+    .subtitle { text-align: center; color: #8892b0; margin-bottom: 2rem; font-size: 1rem; }
+    .progress-bar-container { background: #0d1117; border-radius: 10px; height: 14px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-bar { background: linear-gradient(90deg, #0d6efd, #4dabf7); height: 100%; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+    .progress-text { text-align: center; color: #8892b0; margin-bottom: 1rem; font-size: 0.9rem; }
+    .card { background: #16213e; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .question-label { font-size: 0.85rem; color: #4dabf7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .question-text { font-size: 1.15rem; margin-bottom: 1.2rem; line-height: 1.5; color: #ffffff; }
+    pre { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem; overflow-x: auto; font-size: 0.95rem; }
+    code { font-family: 'Consolas', 'Fira Code', 'Courier New', monospace; color: #c9d1d9; }
+    .options { list-style: none; }
+    .options li { margin-bottom: 0.5rem; }
+    .options label { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: #0d1117; border: 2px solid #30363d; border-radius: 8px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 1rem; }
+    .options label:hover { border-color: #4dabf7; background: #1c2a4a; }
+    .options input[type="radio"] { accent-color: #0d6efd; width: 18px; height: 18px; flex-shrink: 0; }
+    .btn { display: inline-block; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-primary:hover { background: #3b82f6; }
+    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
+    .btn-restart { background: #238636; color: #fff; margin-top: 1rem; padding: 0.7rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-restart:hover { background: #2ea043; }
+    .feedback { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; display: none; }
+    .feedback.correct { background: #0f5132; border: 1px solid #198754; color: #d1fae5; display: block; }
+    .feedback.wrong { background: #842029; border: 1px solid #dc3545; color: #fdd; display: block; }
+    .score-card { text-align: center; padding: 3rem 2rem; }
+    .score-card .score { font-size: 3rem; font-weight: 700; color: #4dabf7; margin-bottom: 0.5rem; }
+    .score-card .score-label { font-size: 1.2rem; color: #8892b0; margin-bottom: 1.5rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz 19 — Testing Distribue</h1>
+    <p class="subtitle">Contract testing, chaos engineering, property-based testing et Jepsen</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <p class="progress-text" id="progressText">Question 1 / 5</p>
+    <div id="quizContainer"></div>
+    <div id="scoreContainer" class="card score-card hidden"></div>
+  </div>
+  <script>
+    const questions = [
+      {
+        label: "Question 1 — Contract Testing",
+        text: "Un service Orders (consumer) depend du service Inventory (provider). Pourquoi le contract testing est-il preferable aux tests d'integration end-to-end ?",
+        code: "// Pact contract test (consumer side)\nconst interaction = {\n  state: 'product A1 has 10 units in stock',\n  uponReceiving: 'a request for stock level',\n  withRequest: {\n    method: 'GET',\n    path: '/api/inventory/A1'\n  },\n  willRespondWith: {\n    status: 200,\n    body: { productId: 'A1', quantity: 10 }\n  }\n};",
+        options: [
+          "Le contract testing est plus lent mais plus complet que les tests E2E",
+          "Le contract testing verifie le contrat d'interface entre services de maniere independante, sans deployer tous les services ensemble, ce qui le rend rapide, fiable et decuple l'autonomie des equipes",
+          "Le contract testing remplace les tests unitaires",
+          "Le contract testing necessite un environnement de production"
+        ],
+        answer: 1,
+        explanation: "Le contract testing (ex: Pact) permet au consumer de definir ses attentes et au provider de verifier qu'il les respecte, chacun de son cote. Pas besoin de deployer toute la plateforme. C'est rapide, deterministe, et chaque equipe peut travailler independamment."
+      },
+      {
+        label: "Question 2 — Chaos Engineering",
+        text: "Quelle est la bonne methodologie pour mener une experience de chaos engineering en production ?",
+        code: null,
+        options: [
+          "Couper aleatoirement des serveurs en production sans prevenir personne pour tester la resilience",
+          "Definir une hypothese sur le comportement attendu, limiter le blast radius avec un groupe de controle, executer l'experience, observer les metriques, puis arreter si l'impact depasse un seuil",
+          "Executer uniquement en environnement de test car la production est trop risquee",
+          "Tester tous les modes de panne simultanement pour gagner du temps"
+        ],
+        answer: 1,
+        explanation: "Le chaos engineering suit une methode scientifique : hypothese (ex: 'si un noeud tombe, le SLO de latence p99 reste sous 500ms'), experience controlee avec blast radius limite, observation via metriques, et arret automatique (abort conditions) si l'impact est trop important."
+      },
+      {
+        label: "Question 3 — Property-Based Testing",
+        text: "Quel avantage le property-based testing apporte-t-il pour tester un serializer/deserializer distribue ?",
+        code: "// Property-based test avec fast-check\nimport fc from 'fast-check';\n\ntest('serialize then deserialize = identity', () => {\n  fc.assert(\n    fc.property(\n      fc.record({\n        id: fc.uuid(),\n        amount: fc.float({ min: 0, max: 1e6 }),\n        currency: fc.constantFrom('EUR','USD','GBP'),\n        items: fc.array(fc.string(), { maxLength: 50 })\n      }),\n      (order) => {\n        const result = deserialize(serialize(order));\n        expect(result).toEqual(order);\n      }\n    )\n  );\n});",
+        options: [
+          "Il genere automatiquement des centaines de cas de test aleatoires qui verifient des invariants (ici: roundtrip fidelity), trouvant des edge cases qu'un humain n'aurait pas imagines",
+          "Il est plus rapide que les tests unitaires classiques",
+          "Il garantit l'absence totale de bugs",
+          "Il teste uniquement les cas nominaux de maniere exhaustive"
+        ],
+        answer: 0,
+        explanation: "Le property-based testing genere des entrees aleatoires et verifie que des proprietes/invariants tiennent toujours. Ici, la propriete 'deserialize(serialize(x)) === x' est testee avec des centaines de combinaisons, detectant des bugs sur les floats, caracteres speciaux, listes vides, etc."
+      },
+      {
+        label: "Question 4 — Jepsen",
+        text: "Qu'est-ce que Jepsen teste principalement dans un systeme distribue ?",
+        code: null,
+        options: [
+          "La performance et le debit maximal du systeme",
+          "La coherence et la correction des garanties annoncees (linearizability, serializability, etc.) sous des conditions de pannes reseau, partitions et crashes",
+          "La qualite du code source et les conventions de nommage",
+          "La compatibilite avec differents systemes d'exploitation"
+        ],
+        answer: 1,
+        explanation: "Jepsen (cree par Kyle Kingsbury) est un framework qui injecte des pannes (partitions reseau, crashes, horloges decalees) dans des bases de donnees distribuees et verifie si les garanties de coherence annoncees sont reellement respectees. Il a revele des bugs dans de nombreuses bases de donnees celebres."
+      },
+      {
+        label: "Question 5 — Fault Injection",
+        text: "Quel type de fault injection ce middleware implemente-t-il ?",
+        code: "// Express middleware\nfunction chaosMiddleware(req, res, next) {\n  const random = Math.random();\n\n  if (random < 0.05) {\n    // 5% des requetes\n    return res.status(500).json({ error: 'Injected fault' });\n  }\n\n  if (random < 0.10) {\n    // 5% supplementaires\n    const delay = 3000 + Math.random() * 7000;\n    return setTimeout(() => next(), delay);\n  }\n\n  next(); // 90% normales\n}",
+        options: [
+          "Network partition testing uniquement",
+          "Injection de fautes applicatives : erreurs HTTP 500 aleatoires (5%) et latence artificielle (5%) pour tester la resilience des clients appelants",
+          "Test de charge avec montee progressive",
+          "Test de securite avec injection SQL"
+        ],
+        answer: 1,
+        explanation: "Ce middleware injecte deux types de fautes : des erreurs 500 (5% des requetes) et de la latence artificielle de 3-10 secondes (5%). Cela simule un service instable pour verifier que les clients gerent correctement les erreurs et les timeouts (retries, circuit breaker, fallbacks)."
+      }
+    ];
+    let currentQuestion = 0, score = 0, answered = false;
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const total = questions.length;
+      document.getElementById('progressBar').style.width = ((currentQuestion / total) * 100) + '%';
+      document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} / ${total}`;
+      let html = `<div class="card"><p class="question-label">${q.label}</p><p class="question-text">${q.text}</p>`;
+      if (q.code) html += `<pre><code>${q.code}</code></pre>`;
+      html += `<ul class="options">`;
+      q.options.forEach((opt, i) => { html += `<li><label><input type="radio" name="q" value="${i}"> ${opt}</label></li>`; });
+      html += `</ul><button class="btn btn-primary" id="validateBtn" onclick="validate()" disabled>Valider</button><div class="feedback" id="feedback"></div></div>`;
+      document.getElementById('quizContainer').innerHTML = html;
+      document.querySelectorAll('input[name="q"]').forEach(r => { r.addEventListener('change', () => { document.getElementById('validateBtn').disabled = false; }); });
+      answered = false;
+    }
+    function validate() {
+      if (answered) { currentQuestion++; if (currentQuestion < questions.length) renderQuestion(); else showScore(); return; }
+      answered = true;
+      const selected = document.querySelector('input[name="q"]:checked');
+      if (!selected) return;
+      const val = parseInt(selected.value);
+      const q = questions[currentQuestion];
+      const fb = document.getElementById('feedback');
+      const btn = document.getElementById('validateBtn');
+      document.querySelectorAll('input[name="q"]').forEach(r => r.disabled = true);
+      if (val === q.answer) { score++; fb.className = 'feedback correct'; fb.innerHTML = `<strong>Correct !</strong> ${q.explanation}`; }
+      else { fb.className = 'feedback wrong'; fb.innerHTML = `<strong>Incorrect.</strong> ${q.explanation}`; }
+      btn.textContent = currentQuestion < questions.length - 1 ? 'Suivant' : 'Voir le score';
+    }
+    function showScore() {
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = 'Termine !';
+      const sc = document.getElementById('scoreContainer');
+      sc.classList.remove('hidden');
+      const pct = Math.round((score / questions.length) * 100);
+      let msg = pct === 100 ? 'Parfait !' : pct >= 60 ? 'Bien joue !' : 'Continuez a reviser !';
+      sc.innerHTML = `<div class="score">${score} / ${questions.length}</div><div class="score-label">${msg} (${pct}%)</div><button class="btn-restart" onclick="restart()">Recommencer</button>`;
+    }
+    function restart() { currentQuestion = 0; score = 0; answered = false; document.getElementById('scoreContainer').classList.add('hidden'); document.getElementById('quizContainer').classList.remove('hidden'); renderQuestion(); }
+    renderQuestion();
+  </script>
+</body>
+</html>
