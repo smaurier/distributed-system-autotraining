@@ -8,7 +8,9 @@
     "lab:01": "vitest run --root lab-01-appel-externe-resilient",
     "solution:01": "vitest run --root lab-01-appel-externe-resilient --config vitest.solution.config.ts",
     "lab:02": "vitest run --root lab-02-saga-outbox-sur-un-flux",
-    "solution:02": "vitest run --root lab-02-saga-outbox-sur-un-flux --config vitest.solution.config.ts"
+    "solution:02": "vitest run --root lab-02-saga-outbox-sur-un-flux --config vitest.solution.config.ts",
+    "lab:03": "vitest run --root lab-03-panne-en-cascade",
+    "solution:03": "vitest run --root lab-03-panne-en-cascade --config vitest.solution.config.ts"
   },
   "engines": {
     "node": ">=20.0.0"
