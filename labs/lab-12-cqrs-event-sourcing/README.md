@@ -2,6 +2,10 @@
 
 > **Outcome :** à la fin, tu sais implémenter un **event store append-only** sur PostgreSQL pour le budget TribuZen, reconstruire un solde par **replay** (`état = fold(événements)`), protéger les écritures concurrentes par **concurrence optimiste** (`expectedVersion`), matérialiser une **projection** de solde et la **reconstruire from scratch**, ajouter un **snapshot** sans en faire une vérité, puis provoquer et assumer le **read-your-writes**.
 > **Vrai outil :** Node.js + TypeScript + PostgreSQL 16 (lancé via le **docker-compose fourni dans ce README**), driver `pg`. Pas de framework d'event sourcing : tu écris le store, l'agrégat, la projection et le replay toi-même.
+> **Prérequis :** fais d'abord [`13-architecture/labs/lab-07-cqrs-event-sourcing-de-zero`](../../../13-architecture/labs/lab-07-cqrs-event-sourcing-de-zero/README.md),
+> qui couvre le même geste en TypeScript pur avec un oracle exécutable (42 tests). Ce lab-ci
+> ajoute ce qu'une base réelle seule peut apprendre : la persistance append-only, le snapshot et
+> le read-your-writes.
 > **Feedback :** le coach valide en session à partir de la grille ci-dessous — **pas de test-runner auto-correcteur**. Tu écris du vrai code qui tape une vraie base.
 
 ---
